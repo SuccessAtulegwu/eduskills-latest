@@ -1,0 +1,81 @@
+<div class="profile-section">
+    <div class="row">
+        <!-- Profile Summary Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100 d-flex flex-column align-items-center justify-content-center p-4 border border-1">
+                <div class="avatar-container">
+                    <div class="avatar-img">{{initials}}</div>
+                    <div class="verified-badge">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                </div>
+
+                <h5 class="profile-name">{{fullname}}</h5>
+                <p class="profile-email">{{currentUser?.email}}</p>
+
+                <div class="password-btn-container w-100 px-3">
+                    <app-button label="Change Password" variant="primary" [outline]="true" icon="bi bi-key"
+                        [fullWidth]="true" class="mb-3" (clicked)="changePassword()">
+                    </app-button>
+                </div>
+
+                <p class="member-since mt-auto">Member since December 2025</p>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100 p-4 border border-1">
+                <h4 class="section-title">Edit Profile</h4>
+
+                <form [formGroup]="profileForm" (ngSubmit)="saveChanges()">
+                    <!-- Profile Photo Upload -->
+                    <div class="file-upload-wrapper">
+                        <label class="file-label">Profile Photo</label>
+                        <div class="file-controls">
+                            <label class="choose-file-btn">
+                                Choose File
+                                <input type="file" (change)="onFileSelected($event)">
+                            </label>
+                            <span class="file-name">{{ selectedFileName }}</span>
+                        </div>
+                        <span class="file-help">Accepted formats: JPG, PNG, GIF, WEBP (Max 5MB)</span>
+                    </div>
+
+                    <!-- Name Fields -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <app-input label="First Name" formControlName="firstName" placeholder="Enter first name">
+                            </app-input>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input label="Last Name" formControlName="lastName" placeholder="Enter last name">
+                            </app-input>
+                        </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        <app-input label="Email" type="email" formControlName="email"
+                            helpText="Email address cannot be changed. Contact support for assistance."
+                            [readonly]="true">
+                        </app-input>
+                    </div>
+
+                    <!-- Bio Field -->
+                    <div class="mb-4">
+                        <app-textarea label="Bio" formControlName="bio" placeholder="Tell us about yourself..."
+                            [rows]="4">
+                        </app-textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-end">
+                        <app-button type="submit" label="Save Changes" icon="bi bi-download" class="btn-save-changes">
+                        </app-button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

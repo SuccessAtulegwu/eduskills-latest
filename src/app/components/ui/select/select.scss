@@ -1,0 +1,119 @@
+.form-group {
+  margin-bottom: 1rem;
+
+  &.has-error {
+    .form-select {
+      border-color: var(--danger-color);
+      
+      &:focus {
+        border-color: var(--danger-color);
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+      }
+    }
+  }
+}
+
+.form-label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: block;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.form-select {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  padding-right: 2.5rem;
+
+  &:focus {
+    background-color: var(--bg-primary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  &:disabled {
+    background-color: var(--bg-secondary);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.is-focused {
+    border-color: var(--primary-color);
+  }
+
+  option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 0.5rem;
+
+    &:disabled {
+      color: var(--text-muted);
+    }
+  }
+}
+
+.input-group {
+  .input-group-text {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+  }
+
+  .form-select:focus ~ .input-group-text,
+  &:focus-within .input-group-text {
+    border-color: var(--primary-color);
+  }
+}
+
+.form-text {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.invalid-feedback {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+// Size variants
+.form-select-sm {
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.form-select-lg {
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  font-size: 1.125rem;
+}
+
+// Multiple select
+.form-select[multiple] {
+  background-image: none;
+  padding-right: 0.75rem;
+  height: auto;
+  
+  option {
+    padding: 0.5rem 0.75rem;
+    
+    &:checked {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  }
+}
+

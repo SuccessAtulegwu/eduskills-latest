@@ -1,0 +1,51 @@
+<div class="search-container" [ngClass]="[sizeClass, variantClass, positionClass, fullWidth ? 'full-width' : '']">
+  <!-- Label (optional) -->
+  <label *ngIf="label" class="search-label">{{ label }}</label>
+
+  <!-- Search Input Wrapper -->
+  <div class="search-wrapper" [class.focused]="isFocused" [class.has-value]="value">
+    <!-- Search Icon -->
+    <i *ngIf="showIcon" class="bi bi-search search-icon"></i>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="search-loading">
+      <span class="spinner-border spinner-border-sm"></span>
+    </div>
+
+    <!-- Input Field -->
+    <input
+      type="text"
+      class="search-input"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [value]="value"
+      [autofocus]="autofocus"
+      (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    />
+
+    <!-- Clear Button -->
+    <button
+      *ngIf="showClearButton && value && !loading"
+      type="button"
+      class="search-clear"
+      (click)="clear()"
+      [disabled]="disabled"
+    >
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- Search/Submit Button (for certain variants) -->
+    <button
+      *ngIf="variant === 'default' && position === 'standalone'"
+      type="button"
+      class="search-submit"
+      (click)="onSubmit()"
+      [disabled]="disabled || !value"
+    >
+      <i class="bi bi-search"></i>
+    </button>
+  </div>
+</div>

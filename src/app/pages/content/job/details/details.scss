@@ -1,0 +1,74 @@
+.job-details-container {
+    color: var(--text-primary);
+
+    .card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        background-color: var(--bg-primary);
+
+        &.header-danger {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+    }
+
+    .job-title {
+        color: var(--text-primary);
+    }
+
+    .company-logo {
+        box-shadow: var(--shadow-sm);
+
+        &.logo-default {
+            background-color: var(--secondary-color);
+        }
+    }
+
+    .metadata-box {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-light);
+
+        .label {
+            color: var(--text-muted);
+        }
+
+        .value {
+            color: var(--text-primary);
+        }
+    }
+
+    .job-description {
+        color: var(--text-secondary);
+    }
+
+    .divider {
+        border-top: 1px solid var(--border-color);
+        opacity: 0.5;
+    }
+
+    // Badge overrides or utilities if needed, but bootstrap utils often suffice if theme vars are mapped correctly.
+    // However, for strict adherence:
+    .badge-fulltime {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--primary-color);
+    }
+
+    .badge-parttime {
+        background-color: rgba(var(--bs-warning-rgb), 0.1);
+        color: var(--warning-color);
+    }
+
+    .badge-contract {
+        background-color: rgba(var(--bs-info-rgb), 0.1);
+        color: var(--info-color);
+    }
+
+    .badge-internship {
+        background-color: rgba(var(--bs-success-rgb), 0.1);
+        color: var(--success-color);
+    }
+}

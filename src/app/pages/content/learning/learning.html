@@ -1,0 +1,37 @@
+<div class="academics-container">
+    <!-- Header Section -->
+    <app-page-header title="Learning Paths" description="Structured learning paths for academic excellence">
+    </app-page-header>
+
+    <!-- Filter Bar -->
+    <div class="card border-1 shadow-sm rounded-4 p-4 mb-4">
+        <div class="row g-3">
+            <!-- Class Level -->
+            <div class="col-md-3">
+                <app-account-type-selector [accountTypes]="levelOptions" [(ngModel)]="selectedLevel"
+                    placeholder="All Levels" label="Class Level"></app-account-type-selector>
+            </div>
+            <!-- Exam Type -->
+            <div class="col-md-3">
+                <app-account-type-selector [accountTypes]="examTypeOptions" [(ngModel)]="selectedExamType"
+                    placeholder="All Exams" label="Exam Type"></app-account-type-selector>
+            </div>
+            <!-- Subject -->
+            <div class="col-md-4">
+                <label class="fw-bold small mb-1" style="color: var(--text-secondary)">Subject</label>
+                <app-input placeholder="e.g., Mathematics, English" [(ngModel)]="selectedSubject"></app-input>
+            </div>
+            <!-- Filter Button -->
+            <div class="col-md-2">
+                <label class="fw-bold small mb-0 mb-md-3 d-block opacity-0">&nbsp;</label>
+                <app-button label="Filter" icon="bi-search" variant="primary" customClass="custom-gradient-btn w-100"
+                    (clicked)="loadEduVideos()"></app-button>
+            </div>
+        </div>
+    </div>
+
+    <div class="video-grid mt-4">
+        <app-video-card *ngFor="let video of eduVideos; let i = index" [data]="video" [allVideos]="eduVideos"
+            [videoIndex]="i"></app-video-card>
+    </div>
+</div>

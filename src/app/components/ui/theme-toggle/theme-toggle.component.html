@@ -1,0 +1,6 @@
+<div class="theme-toggle-wrapper">
+    <button class="btn btn-icon theme-toggle" (click)="toggleTheme()"
+        [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+        <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+    </button>
+</div>

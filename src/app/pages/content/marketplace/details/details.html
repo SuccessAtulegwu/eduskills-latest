@@ -1,0 +1,67 @@
+<div class="container py-5">
+    <div class="mb-4">
+        <app-button variant="link" icon="arrow-left" label="Back to Marketplace" routerLink="/content/market-place"
+            class="ps-0 text-decoration-none fw-bold text-secondary"></app-button>
+    </div>
+
+    <div *ngIf="item; else notFound">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="position-relative" style="height: 400px;">
+                <img [src]="item.image" class="w-100 h-100 object-fit-cover" [alt]="item.title">
+                <div class="position-absolute top-0 start-0 w-100 h-100"
+                    style="background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));"></div>
+                <div class="position-absolute bottom-0 start-0 p-4 text-white">
+                    <span class="badge bg-primary px-3 py-2 rounded-pill mb-2">{{item.category}}</span>
+                    <h1 class="fw-bold mb-0">{{item.title}}</h1>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-lg-5">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <h5 class="fw-bold text-dark mb-3">Description</h5>
+                        <p class="text-secondary lh-lg mb-4">
+                            {{item.description}}
+                        </p>
+
+                        <h5 class="fw-bold text-dark mb-3">Service Details</h5>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li
+                                class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-secondary"><i class="bi bi-clock me-2"></i> Posted Date</span>
+                                <span class="fw-bold">{{item.date}}</span>
+                            </li>
+                            <li
+                                class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-secondary"><i class="bi bi-geo-alt me-2"></i> Location</span>
+                                <span class="fw-bold">{{item.location}}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card bg-light border-0 rounded-4 p-4">
+                            <h6 class="text-uppercase text-secondary fw-bold small mb-2">Price Estimate</h6>
+                            <h3 class="text-success fw-bold mb-4">{{item.priceRange}}</h3>
+
+                            <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold mb-3">
+                                Contact Provider
+                            </button>
+                            <button class="btn btn-outline-dark w-100 py-3 rounded-pill fw-bold">
+                                Save Listing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #notFound>
+        <div class="container py-5 text-center">
+            <h2 class="fw-bold text-secondary">Listing Not Found</h2>
+            <p class="text-muted">The listing you are looking for does not exist.</p>
+            <a routerLink="/marketplace" class="btn btn-primary rounded-pill px-4">Back to Marketplace</a>
+        </div>
+    </ng-template>
+</div>

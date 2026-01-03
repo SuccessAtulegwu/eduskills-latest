@@ -1,0 +1,167 @@
+.upload-container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; // Prevent full centering if content is long
+    background-color: var(--bg-secondary);
+
+    .upload-card {
+        background: var(--bg-primary);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .upload-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .upload-title {
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .info-banner {
+        background-color: rgba(var(--bs-info-rgb), 0.1);
+        border: 1px solid rgba(var(--bs-info-rgb), 0.2);
+        color: var(--text-primary); // Using primary text or dark blue
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+
+        i {
+            color: var(--info-color); // Or primary depending on theme
+            font-size: 1.2rem;
+        }
+    }
+
+    .form-control,
+    .form-select {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+
+        &:focus {
+            box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.15);
+            border-color: var(--primary-color);
+        }
+    }
+
+    .file-drop-zone {
+        border: 2px dashed var(--primary-color); // Default to primary color for visibility
+        border-radius: 20px;
+        background: linear-gradient(145deg, rgba(var(--bs-primary-rgb), 0.03) 0%, rgba(var(--bs-info-rgb), 0.03) 100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+
+        // Animated border effect
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px dashed transparent;
+            border-radius: 20px;
+            background-image: linear-gradient(var(--bg-primary), var(--bg-primary)),
+                linear-gradient(135deg, var(--primary-color), var(--info-color));
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -5px rgba(var(--bs-primary-rgb), 0.15);
+            border-color: transparent; // Hide base border to show gradient border if used, or just enhance color
+
+            &::after {
+                opacity: 0.5; // subtle gradient border overlay
+            }
+
+            .display-6 {
+                transform: scale(1.1) rotate(-5deg);
+                color: var(--primary-color) !important;
+                filter: drop-shadow(0 4px 6px rgba(var(--bs-primary-rgb), 0.2));
+            }
+
+            .btn-outline-secondary {
+                background: var(--primary-color);
+                color: white;
+                border-color: var(--primary-color);
+                box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+            }
+        }
+
+        .display-6 {
+            // The icon
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: var(--text-muted);
+            display: inline-block;
+        }
+
+        .btn-outline-secondary {
+            transition: all 0.3s ease;
+            // Make the button rounded pill for consistency
+            border-radius: 50px;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+        }
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--info-color) 100%);
+        border: none;
+        box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(var(--bs-primary-rgb), 0.4);
+        }
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+
+        &:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+    }
+}
+
+// Mobile responsiveness tweaks
+@media (max-width: 576px) {
+    .upload-container {
+        padding: 1rem;
+
+        .upload-card {
+            padding: 1.5rem;
+        }
+    }
+}

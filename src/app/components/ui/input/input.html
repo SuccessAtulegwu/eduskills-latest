@@ -1,0 +1,46 @@
+<div class="form-group">
+  <!-- Label -->
+  <label *ngIf="label" [for]="id" class="form-label">
+    {{ label }}
+    <span *ngIf="required" class="text-danger">*</span>
+  </label>
+
+  <!-- Input Wrapper -->
+  <div class="input-wrapper">
+    <div class="input-group" [class.has-error]="isInvalid" [class.disabled]="disabled">
+
+      <!-- Left Icon -->
+      <span *ngIf="icon && iconPosition === 'left'" class="input-group-text">
+        <i class="bi bi-{{ icon }}"></i>
+      </span>
+
+      <!-- Input Field -->
+      <input [type]="inputType" [id]="id" [name]="name" [placeholder]="placeholder" [required]="required"
+        [disabled]="disabled" [readonly]="readonly" [min]="min" [max]="max" [step]="step" [pattern]="pattern"
+        [attr.maxlength]="maxlength" [autocomplete]="autocomplete" [value]="value" (input)="onInput($event)"
+        (blur)="onBlur()" (focus)="onFocus()" [class]="'form-control ' + (size !== 'md' ? sizeClass : '')" />
+
+      <!-- Right Icon -->
+      <span *ngIf="icon && iconPosition === 'right'" class="input-group-text">
+        <i class="bi bi-{{ icon }}"></i>
+      </span>
+
+      <!-- Password Toggle -->
+      <button *ngIf="type === 'password'" type="button" class="btn-toggle-password" (click)="togglePasswordVisibility()"
+        [disabled]="disabled" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Help Text -->
+  <small *ngIf="helpText && !isInvalid" class="help-text">
+    {{ helpText }}
+  </small>
+
+  <!-- Error Message -->
+  <div *ngIf="isInvalid && errorMessage" class="invalid-feedback">
+    <i class="bi bi-exclamation-circle-fill me-1"></i>
+    {{ errorMessage }}
+  </div>
+</div>

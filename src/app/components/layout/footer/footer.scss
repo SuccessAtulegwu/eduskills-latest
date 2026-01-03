@@ -1,0 +1,43 @@
+
+.footer-bottom {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+
+  .copyright,
+  .powered-by {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .powered-by {
+    i {
+      font-size: 0.875rem;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.1);
+  }
+  20%, 40% {
+    transform: scale(1);
+  }
+}
+
+
+
+@media (max-width: 767px) {
+  .footer-bottom {
+    .copyright,
+    .powered-by {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+

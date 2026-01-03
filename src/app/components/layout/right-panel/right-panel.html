@@ -1,0 +1,77 @@
+<div class="right-panel" [class.right-panel-mobile-open]="isOpen">
+
+  <div class="right-panel-content mt-3">
+
+    <!-- Trending Topics -->
+    <div class="card mb-4 panel-card">
+      <div class="card-body p-4">
+        <h6 class="section-title mb-3">TRENDING TOPICS</h6>
+        <div class="d-flex flex-wrap gap-2">
+          <span *ngFor="let topic of trendingTopics" class="topic-badge">
+            #{{topic}}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggested Creators -->
+    <div class="card panel-card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h6 class="section-title mb-0">SUGGESTED CREATORS</h6>
+          <a href="javascript:void(0)" class="see-all-link">See All</a>
+        </div>
+
+        <div class="creators-list">
+          <div *ngFor="let creator of suggestedCreators" class="creator-item d-flex align-items-center mb-3">
+
+            <div class="creator-avatar me-3" [style.background-color]="creator.bgColor || '#e9ecef'"
+              [class.has-image]="!!creator.avatar">
+              <img *ngIf="creator.avatar" [src]="creator.avatar" [alt]="creator.name">
+              <span *ngIf="!creator.avatar" [style.color]="'#000'">{{creator.initials}}</span>
+            </div>
+
+            <div class="creator-info flex-grow-1 overflow-hidden">
+              <div class="creator-name text-truncate">{{creator.name}}</div>
+              <div class="creator-handle text-truncate" [title]="creator.handle">{{creator.handle}}</div>
+            </div>
+
+            <button class="btn btn-sm btn-follow ms-2">Follow</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card panel-card mt-3">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h6 class="section-title mb-0">TRENDING CREATORS</h6>
+          <a href="javascript:void(0)" class="see-all-link">See All</a>
+        </div>
+
+        <div class="creators-list">
+          <div *ngFor="let creator of trendingCreators" class="creator-item d-flex align-items-center mb-3">
+
+            <div class="creator-avatar me-3" [style.background-color]="creator.bgColor || '#e9ecef'"
+              [class.has-image]="!!creator.avatar">
+              <img *ngIf="creator.avatar" [src]="creator.avatar" [alt]="creator.name">
+              <span *ngIf="!creator.avatar" [style.color]="'#000'">{{creator.initials}}</span>
+            </div>
+
+            <div class="creator-info flex-grow-1 overflow-hidden">
+              <div class="creator-name text-truncate">{{creator.name}}</div>
+              <div class="creator-handle text-truncate" [title]="creator.handle">{{creator.handle}}</div>
+            </div>
+
+            <button class="btn btn-sm btn-follow ms-2">Follow</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Mobile overlay -->
+<div class="right-panel-overlay" [class.show]="isOpen" (click)="closePanel()"></div>

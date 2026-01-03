@@ -1,0 +1,135 @@
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="logo">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <h2 class="login-title">EduSkill</h2>
+
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+
+            <!-- Name Row -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" formControlName="firstName"
+                        placeholder="Enter your first name" [class.is-invalid]="submitted && f['firstName'].errors">
+                    <div class="invalid-feedback" *ngIf="submitted && f['firstName'].errors">
+                        <div *ngIf="f['firstName'].errors['required']">First Name is required</div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" formControlName="lastName"
+                        placeholder="Enter your last name" [class.is-invalid]="submitted && f['lastName'].errors">
+                    <div class="invalid-feedback" *ngIf="submitted && f['lastName'].errors">
+                        <div *ngIf="f['lastName'].errors['required']">Last Name is required</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" formControlName="email"
+                    placeholder="Enter your email" [class.is-invalid]="submitted && f['email'].errors">
+                <div class="invalid-feedback" *ngIf="submitted && f['email'].errors">
+                    <div *ngIf="f['email'].errors['required']">Email is required</div>
+                    <div *ngIf="f['email'].errors['email']">Email must be a valid email address</div>
+                </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                    placeholder="Enter your phone number" [class.is-invalid]="submitted && f['phoneNumber'].errors">
+                <div class="invalid-feedback" *ngIf="submitted && f['phoneNumber'].errors">
+                    <div *ngIf="f['phoneNumber'].errors['required']">Phone Number is required</div>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+                        formControlName="password" placeholder="--------"
+                        [class.is-invalid]="submitted && f['password'].errors">
+                    <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+                        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                    <div class="invalid-feedback" *ngIf="submitted && f['password'].errors">
+                        <div *ngIf="f['password'].errors['required']">Password is required</div>
+                        <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <div class="input-group">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control" id="confirmPassword"
+                        formControlName="confirmPassword" placeholder="--------"
+                        [class.is-invalid]="submitted && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])">
+                    <button class="btn btn-outline-secondary" type="button" (click)="toggleConfirmPasswordVisibility()">
+                        <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                    <div class="invalid-feedback"
+                        *ngIf="submitted && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])">
+                        <div *ngIf="f['confirmPassword'].errors?.['required']">Confirm Password is required</div>
+                        <div *ngIf="registerForm.errors?.['passwordMismatch']">Passwords do not match</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Type -->
+            <div class="mb-3">
+                <app-account-type-selector formControlName="accountType"
+                    [errorMessage]="submitted && f['accountType'].errors?.['required'] ? 'Account Type is required' : ''"
+                    [isTouched]="submitted" [accountTypes]="accountTypes"></app-account-type-selector>
+                <div class="bt-div-text ms-2" *ngIf="!submitted">You can change this later in your profile settings
+                </div>
+            </div>
+
+
+            <!-- Content Creator Checkbox -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isContentCreator"
+                    formControlName="isContentCreator">
+                <label class="form-check-label content-creator-label" for="isContentCreator">
+                    I want to create content <br>
+                    <span class="bt-div-text small">(Videos, Courses)</span>
+                </label>
+            </div>
+
+            <div class="mb-4">
+                <small class="bt-div-text ms-2">Check this if you want to create and upload educational content</small>
+            </div>
+
+            <div class="alert alert-danger" *ngIf="errorMessage">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ errorMessage }}
+                <a href="javascript:void(0);" (click)="clearErrorMessage()" class="error-close">
+                    <i class="bi bi-x"></i>
+                </a>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 btn-signup" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                Sign up
+            </button>
+
+            <!-- Sign In Link -->
+            <div class="text-center mt-3 bt-div-text">
+                <span>Already have an account? </span>
+                <a href="javascript:void(0)" (click)="navigateToLogin()" class="sign-in-link">Sign in instead</a>
+            </div>
+
+        </form>
+    </div>
+     <app-theme-toggle></app-theme-toggle>
+</div>

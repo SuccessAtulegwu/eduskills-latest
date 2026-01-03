@@ -1,0 +1,30 @@
+<div class="form-group">
+    <!-- Label -->
+    <label *ngIf="label" [for]="id" class="form-label">
+        {{ label }}
+        <span *ngIf="required" class="text-danger">*</span>
+    </label>
+
+    <!-- Input Wrapper -->
+    <div class="input-wrapper">
+        <div class="input-group" [class.has-error]="isInvalid" [class.disabled]="disabled">
+
+            <!-- Textarea Field -->
+            <textarea [id]="id" [name]="name" [placeholder]="placeholder" [required]="required" [disabled]="disabled"
+                [readonly]="readonly" [rows]="rows" [attr.maxlength]="maxlength" [value]="value"
+                (input)="onInput($event)" (blur)="onBlur()" (focus)="onFocus()" class="form-control"></textarea>
+
+        </div>
+    </div>
+
+    <!-- Help Text -->
+    <small *ngIf="helpText && !isInvalid" class="help-text">
+        {{ helpText }}
+    </small>
+
+    <!-- Error Message -->
+    <div *ngIf="isInvalid && errorMessage" class="invalid-feedback">
+        <i class="bi bi-exclamation-circle-fill me-1"></i>
+        {{ errorMessage }}
+    </div>
+</div>

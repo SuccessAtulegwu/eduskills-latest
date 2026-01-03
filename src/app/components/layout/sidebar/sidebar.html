@@ -1,0 +1,89 @@
+<div class="sidebar" [class.sidebar-mobile-open]="isOpen" [class.sidebar-collapsed]="isCollapsed">
+  <!-- Site Branding - Desktop Only -->
+  <div class="sidebar-brand d-none d-lg-flex" [ngClass]="{'sidebar-brand-collapsed': isCollapsed}">
+    <i class="bi bi-mortarboard me-2"></i>
+    <span class="sidebar-text">EduSkill</span>
+  </div>
+  
+  <!-- Mobile Header -->
+  <div class="sidebar-header d-lg-none mt-3">
+    <h5 class="sidebar-title">
+      <i class="bi bi-mortarboard me-2"></i>
+      <span class="sidebar-text">EduSkill</span>
+    </h5>
+    <button class="btn btn-sm btn-outline-primary" (click)="closeSidebar()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav" [ngClass]="{'border rounded-4 mt-2': !isCollapsed}">
+    <ul class="nav flex-column">
+      <!-- Show filtered items with icons when collapsed -->
+      <ng-container *ngIf="isCollapsed; else fullMenu">
+        <li class="nav-item" *ngFor="let item of collapsedMenuItems">
+          <a class="nav-link collapsed-link" 
+             [routerLink]="item.route" 
+             routerLinkActive="active" 
+             [title]="item.tooltip || item.label"
+             (click)="onMenuItemClick(item.id)">
+            <lucide-icon [img]="item.icon" [size]="18" class="menu-icon"></lucide-icon>
+          </a>
+        </li>
+      </ng-container>
+
+      <!-- Show full menu when expanded -->
+      <ng-template #fullMenu>
+        <ng-container *ngFor="let item of menuItems">
+          <li class="nav-item">
+          <!-- Menu item with children (submenu) -->
+          <ng-container *ngIf="hasChildren(item); else simpleLink">
+            <a class="nav-link submenu-toggle" href="#" (click)="toggleSubmenu($event, item.id)" [title]="isCollapsed ? item.tooltip || item.label : ''">
+              <lucide-icon *ngIf="item.icon" [img]="item.icon" [size]="18" class="menu-icon"></lucide-icon>
+              @if(hasChildren(item)){
+                  <span class="sidebar-text fw-bold" style="color: rgb(173, 179, 179);">{{ item.label }}</span>
+              }@else{
+                  <span class="sidebar-text fw-bold">{{ item.label }}</span>
+              }
+              
+              <i class="bi bi-chevron-down submenu-arrow text-muted" [class.rotated]="isSubmenuOpen(item.id)"></i>
+            </a>
+            <div class="submenu" [class.show]="isSubmenuOpen(item.id) && !isCollapsed">
+              <ul class="nav flex-column">
+                <li class="nav-item" *ngFor="let child of item.children">
+                  <a class="nav-link" style="cursor: pointer !important;"
+                     [routerLink]="child.id !== 'logout' ? child.route : null" 
+                     routerLinkActive="active"
+                     (click)="onMenuItemClick(child.id)">
+                    <lucide-icon *ngIf="child.icon" [img]="child.icon" [size]="16" class="menu-icon"></lucide-icon>
+                    <span class="sidebar-text">{{ child.label }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </ng-container>
+
+          <!-- Simple menu item without children -->
+          <ng-template #simpleLink>
+            <a class="nav-link" 
+               [routerLink]="item.route" 
+               routerLinkActive="active" 
+               [title]="isCollapsed ? item.tooltip || item.label : ''"
+               (click)="onMenuItemClick(item.id)">
+              <lucide-icon *ngIf="item.icon" [img]="item.icon" [size]="18" class="menu-icon"></lucide-icon>
+              <span class="sidebar-text">{{ item.label }}</span>
+              <span *ngIf="item.badge" 
+                    class="badge ms-auto sidebar-badge" 
+                    [ngClass]="item.badge.class">
+                {{ item.badge.value }}
+              </span>
+            </a>
+          </ng-template>
+        </li>
+      </ng-container>
+      </ng-template>
+    </ul>
+  </nav>
+</div>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" [class.show]="isOpen" (click)="closeSidebar()"></div>

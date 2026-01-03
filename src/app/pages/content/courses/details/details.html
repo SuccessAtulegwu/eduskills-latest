@@ -1,0 +1,118 @@
+<div class="details-container container-fluid py-4">
+    <div class="row g-4 justify-content-center" *ngIf="course; else noCourse">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <app-button variant="link" icon="arrow-left" label="Back to Courses" routerLink="/content/courses"
+                    class="ps-0 text-decoration-none fw-bold text-secondary"></app-button>
+            </div>
+
+            <div class="card border shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="course-banner position-relative">
+                    <img [src]="course.image" class="w-100 object-fit-cover" [alt]="course.title"
+                        style="height: 400px;">
+                    <div class="overlay position-absolute top-0 start-0 w-100 h-100"></div>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="fw-bold mb-2 text-dark">{{ course.title }}</h1>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="bi bi-person-circle fs-5 text-muted me-2"></i>
+                        <span class="text-muted">Created by <span class="fw-semibold text-dark">{{ course.creator
+                                }}</span></span>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-5">
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-2">{{ course.level }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-2">{{ course.category
+                            }}</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 text-dark">Course Description</h5>
+                    <p class="text-secondary leading-relaxed mb-0" style="line-height: 1.8;">
+                        {{ course.description }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border shadow-sm rounded-4 p-3 sticky-top" style="top: 2rem;">
+                <h5 class="fw-bold mb-4 text-dark">Course Details</h5>
+
+                <div class="d-flex flex-column gap-3 mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-cash-coin text-success"></i>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted d-block me-1">Price:</small>
+                            <span class="fw-bold text-success fs-5">₦{{ course.price | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-clock text-secondary"></i>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted d-block me-1">Duration:</small>
+                            <span class="fw-semibold text-dark">{{ course.duration }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-calendar-event text-secondary"></i>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted d-block me-1">Created:</small>
+                            <span class="fw-semibold text-dark">{{ course.createdDate }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-eye text-secondary"></i>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted d-block me-1">Views:</small>
+                            <span class="fw-semibold text-dark">{{ course.views }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-people text-secondary"></i>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted d-block me-1">Enrollments:</small>
+                            <span class="fw-semibold text-dark">{{ course.enrolled }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <!-- To make app-button full width, wrapper needs display grid/flex or pass class -->
+                    <!-- Assuming app-button handles class or width, or wrapper -->
+                    <button
+                        class="btn btn-primary btn-lg w-100 fw-medium d-flex align-items-center justify-content-center gap-2 custom-gradient-btn"
+                        (click)="enroll()">
+                        <i class="bi bi-credit-card"></i>
+                        Enroll Now - ₦{{ course.price | number:'1.2-2' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #noCourse>
+        <div class="text-center py-5">
+            <h3 class="text-muted">Course not found</h3>
+            <app-button label="Back to Courses" variant="primary" (clicked)="goBack()"></app-button>
+        </div>
+    </ng-template>
+</div>

@@ -1,0 +1,50 @@
+<div class="dashboard">
+  <!-- Centered Search Section -->
+  <div class="search-section mb-0 mb-md-4">
+    <div class="custom-search-container">
+      <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="custom-search-input" placeholder="Search for courses, skills, professionals, jobs..."
+          [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" />
+        <button class="search-btn" (click)="onSearch()">
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="mb-4" *ngIf="!isAuth">
+    <app-landing-banner></app-landing-banner>
+  </div>
+  <div class="mb-4" *ngIf="isAuth">
+    <app-story-circles></app-story-circles>
+  </div>
+  <!-- Following Section -->
+  <div class="video-section" *ngIf="isAuth">
+    <div class="section-header">
+      <h2 class="section-title">Following</h2>
+      <a [routerLink]="['/all-videos']" [queryParams]="{section: 'following'}"
+        class="view-all d-flex align-items-center gap-1">View All
+        <lucide-icon [img]="MoveRight" [size]="16"></lucide-icon>
+      </a>
+    </div>
+    <div class="video-grid">
+      <app-video-card *ngFor="let video of followingVideos; let i = index" [data]="video" [allVideos]="followingVideos"
+        [videoIndex]="i"></app-video-card>
+    </div>
+  </div>
+
+  <!-- Recommended Section -->
+  <div class="video-section">
+    <div class="section-header">
+      <h2 class="section-title">{{ isAuth ? 'Recommended for You' : 'Trending Now' }}</h2>
+      <a [routerLink]="['/all-videos']" [queryParams]="{section: sectionTitle}" class="view-all">View All
+        <lucide-icon [img]="MoveRight" [size]="16"></lucide-icon>
+      </a>
+    </div>
+    <div class="video-grid">
+      <app-video-card *ngFor="let video of recommendedVideos; let i = index" [data]="video"
+        [allVideos]="recommendedVideos" [videoIndex]="i"></app-video-card>
+    </div>
+  </div>
+
+</div>

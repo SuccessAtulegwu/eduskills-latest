@@ -1,0 +1,54 @@
+<div class="calendar-container">
+  <!-- Label -->
+  <label *ngIf="label" class="form-label">{{ label }}</label>
+
+  <!-- Calendar Input (if not inline) -->
+  <div *ngIf="!inline" class="calendar-input" (click)="toggleCalendar()">
+    <i class="bi bi-calendar-event calendar-input-icon"></i>
+    <span>{{ formattedDate }}</span>
+    <i class="bi bi-chevron-down calendar-input-arrow"></i>
+  </div>
+
+  <!-- Calendar Widget -->
+  <div class="calendar-widget" [class.show]="showCalendar || inline" [class.inline]="inline">
+    <!-- Calendar Header -->
+    <div class="calendar-header">
+      <button type="button" class="btn btn-sm btn-link" (click)="previousMonth()">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="calendar-title">{{ currentMonthYear }}</span>
+      <button type="button" class="btn btn-sm btn-link" (click)="nextMonth()">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Today Button -->
+    <div class="calendar-today">
+      <button type="button" class="btn btn-sm btn-outline-primary" (click)="goToToday()">
+        Today
+      </button>
+    </div>
+
+    <!-- Weekdays -->
+    <div class="calendar-weekdays">
+      <div *ngFor="let day of weekDays" class="calendar-weekday">{{ day }}</div>
+    </div>
+
+    <!-- Calendar Days -->
+    <div class="calendar-days">
+      <button
+        *ngFor="let day of calendarDays"
+        type="button"
+        class="calendar-day"
+        [class.other-month]="!day.isCurrentMonth"
+        [class.today]="day.isToday"
+        [class.selected]="day.isSelected"
+        [class.disabled]="day.isDisabled"
+        [disabled]="day.isDisabled"
+        (click)="selectDate(day)"
+      >
+        {{ day.day }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="explore-container">
+    <app-page-header title="Explore" description="Discover new skills and opportunities"></app-page-header>
+
+    <div class="mb-4">
+        <div class="card d-flex flex-row flex-wrap gap-3 rounded-4 p-3 align-items-center">
+            <div style="min-width: 200px; max-width: 300px;" class="flex-grow-1 flex-md-grow-0">
+                <app-account-type-selector [accountTypes]="categoryOptions" [(ngModel)]="selectedCategory"
+                    label="Category" placeholder="Select Category"></app-account-type-selector>
+            </div>
+            <div style="min-width: 200px; max-width: 300px;" class="flex-grow-1 flex-md-grow-0">
+                <app-account-type-selector [accountTypes]="sortOptions" [(ngModel)]="selectedSort" label="Sort"
+                    placeholder="Sort By"></app-account-type-selector>
+            </div>
+        </div>
+    </div>
+
+    <div class="video-grid mt-4">
+        <app-video-card *ngFor="let video of exploreVideos; let i = index" [data]="video" [allVideos]="exploreVideos"
+            [videoIndex]="i"></app-video-card>
+    </div>
+</div>

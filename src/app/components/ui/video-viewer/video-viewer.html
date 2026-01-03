@@ -1,0 +1,120 @@
+<div 
+  class="video-viewer"
+  #container
+  (touchstart)="onTouchStart($event)"
+  (touchmove)="onTouchMove($event)"
+  (touchend)="onTouchEnd()"
+>
+  <!-- Close Button -->
+  <button class="close-btn" (click)="closeViewer()">
+    <i class="bi bi-x-lg"></i>
+  </button>
+
+  <!-- Video Player -->
+  <div class="video-container" (click)="onVideoClick()">
+    <video
+      #videoElement
+      class="video-player"
+      [src]="currentVideo.videoUrl"
+      loop
+      autoplay
+      [muted]="isMuted"
+    ></video>
+
+    <!-- Loading Spinner -->
+    <div class="video-loading-spinner" *ngIf="isLoading || isBuffering">
+      <div class="spinner-container">
+        <div class="spinner"></div>
+        <p class="loading-text">{{ isLoading ? 'Loading video...' : 'Buffering...' }}</p>
+      </div>
+    </div>
+
+    <!-- Play/Pause Overlay -->
+    <div class="play-pause-overlay" *ngIf="showControls && !isPlaying && !isLoading">
+      <i class="bi bi-play-circle"></i>
+    </div>
+  </div>
+
+  <!-- Video Info Overlay -->
+  <div class="video-info">
+    <div class="author-section">
+      <div class="author-info">
+        <img [src]="currentVideo.authorAvatar" [alt]="currentVideo.author" class="author-avatar">
+        <div class="author-details">
+          <h3 class="author-name">{{ currentVideo.author }}</h3>
+          <p class="video-stats">{{ currentVideo.views }} views • {{ currentVideo.timeAgo }}</p>
+        </div>
+      </div>
+      <button class="follow-btn" (click)="followAuthor()">
+        <i class="bi bi-plus"></i> Follow
+      </button>
+    </div>
+
+    <div class="video-description">
+      <h2 class="video-title">{{ currentVideo.title }}</h2>
+    </div>
+
+    <!-- Controls -->
+    <div class="video-controls" *ngIf="showControls">
+      <button class="control-btn mute-btn" (click)="toggleMute(); $event.stopPropagation()">
+        <i [class]="isMuted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill'"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Reaction Sidebar -->
+  <div class="reaction-sidebar">
+    <!-- Like -->
+    <div class="reaction-item" (click)="toggleLike()">
+      <div class="reaction-icon" [class.active]="isLiked">
+        <i [class]="isLiked ? 'bi bi-hand-thumbs-up-fill' : 'bi bi-hand-thumbs-up'"></i>
+      </div>
+      <span class="reaction-count">{{ formatCount(likes) }}</span>
+    </div>
+
+    <!-- Dislike -->
+    <div class="reaction-item" (click)="toggleDislike()">
+      <div class="reaction-icon" [class.active]="isDisliked">
+        <i [class]="isDisliked ? 'bi bi-hand-thumbs-down-fill' : 'bi bi-hand-thumbs-down'"></i>
+      </div>
+      <span class="reaction-count">{{ formatCount(dislikes) }}</span>
+    </div>
+
+    <!-- Comments -->
+    <div class="reaction-item" (click)="openComments()">
+      <div class="reaction-icon">
+        <i class="bi bi-chat-dots"></i>
+      </div>
+      <span class="reaction-count">{{ formatCount(comments) }}</span>
+    </div>
+
+    <!-- Share -->
+    <div class="reaction-item" (click)="shareVideo()">
+      <div class="reaction-icon">
+        <i class="bi bi-share"></i>
+      </div>
+      <span class="reaction-count">{{ formatCount(shares) }}</span>
+    </div>
+
+    <!-- Save -->
+    <div class="reaction-item" (click)="toggleSave()">
+      <div class="reaction-icon" [class.active]="isSaved">
+        <i [class]="isSaved ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
+      </div>
+      <span class="reaction-count">Save</span>
+    </div>
+  </div>
+
+  <!-- Navigation Hints -->
+  <div class="navigation-hints" *ngIf="showControls">
+    <div class="hint hint-up" *ngIf="currentVideoIndex > 0">
+      <i class="bi bi-chevron-up"></i>
+      <span>Previous</span>
+    </div>
+    <div class="hint hint-down" *ngIf="currentVideoIndex < videos.length - 1">
+      <i class="bi bi-chevron-down"></i>
+      <span>Next</span>
+    </div>
+  </div>
+</div>
+

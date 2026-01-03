@@ -1,0 +1,80 @@
+<div class="file-upload-container">
+  <!-- Label -->
+  <label *ngIf="label" class="form-label">
+    {{ label }}
+    <span *ngIf="required" class="text-danger">*</span>
+  </label>
+
+  <!-- Upload Area -->
+  <div
+    class="upload-area"
+    [class.drag-over]="isDragOver"
+    [class.disabled]="disabled"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+  >
+    <input
+      type="file"
+      [accept]="acceptText"
+      [multiple]="multiple"
+      [disabled]="disabled"
+      (change)="onFileSelect($event)"
+      class="file-input"
+      #fileInput
+    />
+
+    <div class="upload-content">
+      <i class="bi {{ iconClass }} upload-icon"></i>
+      <p class="upload-text">
+        <strong>Click to upload</strong> or drag and drop
+      </p>
+      <p class="upload-hint">
+        {{ uploadType === 'image' ? 'PNG, JPG, GIF' : uploadType === 'video' ? 'MP4, AVI, MOV' : 'Any file type' }}
+        (Max {{ maxSize }}MB)
+      </p>
+    </div>
+  </div>
+
+  <!-- Help Text -->
+  <small *ngIf="helpText && !errorMessage" class="form-text text-muted">
+    {{ helpText }}
+  </small>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="invalid-feedback d-block">
+    <i class="bi bi-exclamation-circle me-1"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- File List -->
+  <div *ngIf="files.length > 0" class="file-list">
+    <div *ngFor="let file of files; let i = index" class="file-item">
+      <!-- Preview -->
+      <div class="file-preview">
+        <img *ngIf="previews[i] && previews[i] !== 'video-placeholder' && previews[i] !== 'file-placeholder'" 
+             [src]="previews[i]" 
+             alt="Preview"
+             class="preview-image">
+        <i *ngIf="previews[i] === 'video-placeholder'" class="bi bi-camera-video file-icon"></i>
+        <i *ngIf="previews[i] === 'file-placeholder'" class="bi bi-file-earmark file-icon"></i>
+      </div>
+
+      <!-- File Info -->
+      <div class="file-info">
+        <div class="file-name">{{ file.name }}</div>
+        <div class="file-size">{{ formatFileSize(file.size) }}</div>
+      </div>
+
+      <!-- Remove Button -->
+      <button
+        type="button"
+        class="btn btn-sm btn-danger"
+        (click)="removeFile(i)"
+        [disabled]="disabled"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+</div>

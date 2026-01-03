@@ -1,0 +1,109 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-0 shadow-sm">
+  <div class="container-fluid py-2 pe-md-5 ">
+    <!-- Brand - Mobile Only -->
+    <!-- <a class="navbar-brand fw-bold d-sm-none d-lg-none" href="#">
+      <i class="bi bi-mortarboard-fill me-2"></i>
+      EduSkill
+    </a> -->
+
+    <!-- Desktop sidebar toggle -->
+    <button class="btn btn-outline-secondary me-2 d-none d-lg-block border-0" type="button"
+      (click)="toggleSidebarCollapse()">
+      <lucide-icon [img]="Menu" [size]="20"></lucide-icon>
+    </button>
+
+    <!-- Mobile menu toggle -->
+    <button class="btn btn-outline-secondary d-lg-none me-2 border-0" type="button" (click)="toggleSidebar()">
+      <lucide-icon [img]="Menu" [size]="20"></lucide-icon>
+    </button>
+
+
+    <!-- Right side items -->
+    <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+      <!-- Right Panel Toggle (Desktop only) -->
+      <button *ngIf="isAuthenticated" class="btn btn-outline-secondary me-2 d-none d-lg-block border-0"
+        (click)="toggleRightPanel()" title="Toggle Right Panel">
+        <i class="bi bi-layout-sidebar-inset-reverse"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn btn-outline-secondary me-2 border-0" (click)="toggleTheme()"
+        [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+      </button>
+
+      <button *ngIf="!isAuthenticated" (click)="navigateToRegister()"
+        class="btn btn-outline-secondary me-2 d-none d-lg-block border-0 fw-semibold" title="register">
+        <span>Register</span>
+      </button>
+      <button *ngIf="!isAuthenticated" (click)="navigateToLogin()"
+        class="btn btn-outline-secondary me-2 d-none d-lg-block border-0 fw-semibold" title="login">
+        <span>Login</span>
+      </button>
+
+      <!-- Notifications -->
+      <div *ngIf="isAuthenticated" class="dropdown me-4" [class.show]="showNotificationDropdown">
+        <button class="btn btn-outline-secondary position-relative py-1 px-2" type="button"
+          (click)="toggleNotificationDropdown($event)">
+          <i class="bi bi-bell-fill"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            3
+          </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-3 border-0" [class.show]="showNotificationDropdown">
+          <li>
+            <h6 class="dropdown-header">Notifications</h6>
+          </li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-book me-2"></i>New course available</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-clipboard-check me-2"></i>Assignment due tomorrow</a>
+          </li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-tools me-2"></i>System maintenance</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-right me-2"></i>View all notifications</a></li>
+        </ul>
+      </div>
+
+      <!-- User profile -->
+      <div *ngIf="isAuthenticated" class="dropdown" [class.show]="showUserDropdown">
+        <a class="d-flex align-items-center border-0" type="button" (click)="toggleUserDropdown($event)">
+          <!-- <i class="bi bi-person-circle me-1"></i>
+          {{ currentUser?.username || 'User' }} -->
+          <div class="position-relative">
+            <div
+              class="avatar-initial bg-light text-dark rounded-circle me-1 d-flex align-items-center justify-content-center fw-semibold"
+              style="width: 30px; height: 30px; min-width: 30px;">
+              <img src="{{placeholdername()}}" alt="">
+            </div>
+            <span class="position-absolute bottom-1 end-0 translate-middle-y badge rounded-pill bg-success p-1" 
+                  style="width: 10px; height: 10px; border: 2px solid white;">
+              <span class="visually-hidden">Online</span>
+            </span>
+          </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-3 border-0" [class.show]="showUserDropdown">
+          <div class="d-flex flex-row gap-2 align-items-center p-2 pe-3">
+            <div class="d-flex" style="width: 30px; height: 30px; min-width: 30px;">
+              <img src="{{placeholdername()}}" alt="">
+            </div>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <h6 class="m-0 p-0 text-truncate">{{fullname}}</h6>
+              <p class="p-0 m-0 text-primary small text-truncate" style="text-transform: capitalize !important;">{{accountType}}</p>
+            </div>
+            
+          </div>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" routerLink="/account/profile" routerLinkActive="active" (click)="closeDropdowns()"><i class="bi bi-person-fill me-2"></i>Profile</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

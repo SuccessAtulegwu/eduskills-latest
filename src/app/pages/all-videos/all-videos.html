@@ -1,0 +1,45 @@
+<div class="all-videos-page">
+  <!-- Header -->
+  <div class="page-header">
+   <!--  <button class="back-btn" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i>
+      <span>Back</span>
+    </button> -->
+     <a href="JavaScript(0);"  (click)="goBack()" class="view-all text-decoration-none border rounded-4 py-1 px-3">
+         <lucide-icon [img]="MoveLeft" [size]="16"></lucide-icon>
+         Back
+      </a>
+    <h1 class="page-title">{{ sectionTitle }}</h1>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading videos...</p>
+  </div>
+
+  <!-- Videos Grid -->
+  <div class="videos-container" *ngIf="!isLoading">
+    <div class="videos-count">
+      <p>{{ videos.length }} videos</p>
+    </div>
+
+    <div class="videos-grid">
+      <app-video-card 
+        *ngFor="let video of videos; let i = index" 
+        [data]="video"
+        [allVideos]="videos"
+        [videoIndex]="i"
+      ></app-video-card>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="videos.length === 0">
+      <i class="bi bi-camera-video"></i>
+      <h3>No videos found</h3>
+      <p>Check back later for new content!</p>
+    </div>
+  </div>
+</div>
+

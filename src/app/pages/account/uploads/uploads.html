@@ -1,0 +1,89 @@
+<div class="upload-container">
+    <div class="upload-card">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div class="upload-icon-wrapper mb-3 mx-auto">
+                <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+            <h2 class="upload-title">Upload Your Short Lesson</h2>
+            <p class="upload-subtitle">Share bite-sized knowledge with the world</p>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="info-banner mb-4 d-flex align-items-start gap-3">
+            <i class="bi bi-info-circle-fill mt-1"></i>
+            <div>
+                <span class="fw-bold">Duration Requirements:</span> Videos must be between <span class="fw-bold">15-90
+                    seconds</span> (1.5 minutes max) for optimal mobile learning experience.
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form>
+            <!-- Title -->
+            <app-input label="Video Title" placeholder="Enter a catchy title for your video" [(ngModel)]="videoTitle"
+                name="title" [required]="true">
+            </app-input>
+
+            <!-- Description -->
+            <app-textarea label="Description" placeholder="Describe what your video is about..."
+                [(ngModel)]="description" name="description" [rows]="3" [required]="true">
+            </app-textarea>
+
+            <div class="row mb-4">
+                <!-- Category -->
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label class="form-label fw-bold">Category</label>
+                    <div style="margin-top: -0.5rem;">
+                        <app-account-type-selector [accountTypes]="categoryOptions" [(ngModel)]="category" [label]="''"
+                            name="category" placeholder="Select Category">
+                        </app-account-type-selector>
+                    </div>
+                </div>
+                <!-- Sub-Category -->
+                <div class="col-md-6">
+                    <app-input label="Sub-Category (Optional)" placeholder="e.g., Algebra, React.js"
+                        [(ngModel)]="subCategory" name="subCategory">
+                    </app-input>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Video File</label>
+                <div class="file-drop-zone text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-file-earmark-play display-6 text-muted"></i>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center gap-3 bg-white p-2 border rounded"
+                        style="max-width: 400px; margin: 0 auto;">
+                        <label class="btn btn-outline-secondary btn-sm m-0">
+                            Choose File
+                            <input type="file" hidden (change)="onFileSelected($event)" accept="video/*">
+                        </label>
+                        <span class="text-muted text-truncate" style="max-width: 200px;">{{ selectedFileName }}</span>
+                    </div>
+                    <div class="mt-3 text-muted small">
+                        <div>Supported formats: MP4, WebM, Ogg, MOV, AVI (Max 100MB)</div>
+                        <div>Duration: 15-90 seconds</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-3 mt-5">
+                <button type="button" class="btn btn-outline-secondary px-4 py-2" (click)="onCancel()">Cancel</button>
+                <button type="button" class="btn btn-primary px-4 py-2 d-flex align-items-center gap-2"
+                    (click)="onUpload()" [disabled]="isUploading">
+                    <ng-container *ngIf="!isUploading">
+                        <i class="bi bi-upload"></i> Upload Video
+                    </ng-container>
+                    <ng-container *ngIf="isUploading">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Uploading...
+                    </ng-container>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+<div class="backdrop" *ngIf="confirmationService.isOpen()" @backdropAnimation (click)="onBackdropClick($event)">
+    <div class="modal-container" @modalAnimation>
+
+        <div class="modal-header">
+            <div class="icon-wrapper" [ngClass]="confirmationService.options().type || 'warning'">
+                <i class="bi" [ngClass]="{
+                    'bi-exclamation-triangle-fill': confirmationService.options().type === 'warning' || !confirmationService.options().type,
+                    'bi-exclamation-circle-fill': confirmationService.options().type === 'danger',
+                    'bi-info-circle-fill': confirmationService.options().type === 'info'
+                }"></i>
+            </div>
+            <h3 class="modal-title">{{ confirmationService.options().title }}</h3>
+        </div>
+
+        <div class="modal-body">
+            <p>{{ confirmationService.options().message }}</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="onCancel()">
+                {{ confirmationService.options().cancelText }}
+            </button>
+            <button class="btn-confirm" [ngClass]="confirmationService.options().type || 'warning'"
+                (click)="onConfirm()">
+                {{ confirmationService.options().confirmText }}
+            </button>
+        </div>
+    </div>
+</div>

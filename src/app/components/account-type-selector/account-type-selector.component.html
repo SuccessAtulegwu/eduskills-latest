@@ -1,0 +1,45 @@
+<div class="account-selector-container" [class.is-invalid]="errorMessage && (isTouched || internalTouched)">
+    <!-- Label -->
+    <label *ngIf="label" [for]="id" class="form-label">
+        {{ label }}
+        <span *ngIf="required" class="text-danger">*</span>
+    </label>
+
+    <!-- Custom Select Trigger -->
+    <div class="custom-select-trigger" [class.is-open]="isOpen" [class.disabled]="disabled"
+        [class.has-error]="errorMessage && (isTouched || internalTouched)" (click)="toggleDropdown($event)" tabindex="0"
+        (blur)="onBlur()">
+        <div class="selected-value" *ngIf="selectedOption; else placeholderTpl">
+            <i class="bi {{ selectedOption.icon }} me-2 text-primary"></i>
+            <div class="d-flex flex-column">
+                <span class="fw-medium">{{ selectedOption.title }}</span>
+            </div>
+        </div>
+        <ng-template #placeholderTpl>
+            <span class="placeholder-text">{{ placeholder }}</span>
+        </ng-template>
+
+        <i class="bi bi-chevron-down chevron" [class.rotate]="isOpen"></i>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div class="custom-dropdown-menu" [class.show]="isOpen">
+        <div *ngFor="let type of accountTypes" class="dropdown-item-custom" [class.selected]="value === type.value"
+            (click)="selectOption(type, $event)">
+            <div class="icon-wrapper" *ngIf="type.icon">
+                <i class="bi {{ type.icon }}"></i>
+            </div>
+            <div class="text-content">
+                <div class="item-title">{{ type.title }}</div>
+                <div class="item-description">{{ type.description }}</div>
+            </div>
+            <i class="bi bi-check-circle-fill check-icon" *ngIf="value === type.value"></i>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && (isTouched || internalTouched)" class="invalid-feedback d-block mt-1">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {{ errorMessage }}
+    </div>
+</div>

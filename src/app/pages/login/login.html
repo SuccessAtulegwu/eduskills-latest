@@ -1,0 +1,96 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo">
+        <i class="bi bi-mortarboard-fill"></i>
+      </div>
+      <h2 class="login-title">EduSkill</h2>
+    </div>
+
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group mb-3">
+        <label for="email" class="form-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-envelope"></i>
+          </span>
+          <input type="email" class="form-control" id="email" formControlName="email" required
+            placeholder="Enter your email" [class.is-invalid]="submitted && f['email'].errors">
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="submitted && f['email'].errors">
+          <div *ngIf="f['email']?.errors?.['required']">Email is required</div>
+          <div *ngIf="f['email']?.errors?.['email']">Email must be a valid email address</div>
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-lock-fill"></i>
+          </span>
+          <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+            formControlName="password" required placeholder="Enter your password"
+            [class.is-invalid]="submitted && f['password'].errors">
+          <button type="button" class="btn border-0" (click)="togglePasswordVisibility()">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="submitted && f['password'].errors">
+          <div *ngIf="f['password']?.errors?.['required']">Password is required</div>
+          <div *ngIf="f['password']?.errors?.['minlength']">
+            Password must be at least 6 characters
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-6">
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" formControlName="rememberMe" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+              Remember me
+            </label>
+          </div>
+        </div>
+
+        <div class="col-6 text-end">
+          <div>
+            <a href="javascript:void(0);" (click)="forgotPassword()"  class="text-decoration-none">Forgot password?</a>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ errorMessage }}
+        <a href="javascript:void(0);" (click)="clearErrorMessage()" class="error-close">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mb-3" [disabled]="isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!isLoading" class="bi bi-box-arrow-in-right me-2"></i>
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
+      </button>
+
+      <div class="text-center mt-3 bt-div-text">
+        <span>Don't have an account? </span>
+        <a href="javascript:void(0)" (click)="navigateToRegister()" class="create-account-link fw-medium">Create Account</a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Theme toggle for login page -->
+ <!--  <div class="theme-toggle">
+    <button class="btn btn-outline-secondary" (click)="toggleTheme()"
+      [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+      <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+    </button>
+  </div> -->
+  <app-theme-toggle></app-theme-toggle>
+</div>

@@ -1,0 +1,79 @@
+.create-container {
+    max-width: 100%;
+}
+
+.card {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+}
+
+// Custom Checkbox Styling
+.custom-checkbox {
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+
+    &:checked {
+        background-color: #7F56D9; // Specific purple from design
+        border-color: #7F56D9;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 0.25rem rgba(127, 86, 217, 0.25);
+    }
+}
+
+// File Input Styling
+.file-input-wrapper {
+    overflow: hidden;
+
+    input[type=file] {
+        cursor: pointer;
+    }
+
+    .btn {
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+
+        &:hover {
+            background-color: var(--bg-secondary);
+        }
+    }
+}
+
+// Gradient Button (Reusing the mixin concept or just explicit style if mixin not available)
+.custom-gradient-btn {
+    ::ng-deep button {
+        // Target the inner button of app-button if it encapsulates
+        background: linear-gradient(135deg, #7F56D9 0%, #D946EF 100%) !important;
+        border: none !important;
+        color: white !important;
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(127, 86, 217, 0.4);
+            opacity: 0.95;
+        }
+    }
+}
+
+// Certification Section Indent Line
+.certification-fields {
+    border-left-color: var(--border-color) !important;
+}
+
+hr {
+    opacity: 0.15;
+}

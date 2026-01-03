@@ -1,0 +1,55 @@
+<div class="auth-container">
+    <app-theme-toggle></app-theme-toggle>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h2 class="auth-title">Verification Code</h2>
+            <p class="auth-subtitle">We have sent a 6-digit code to your email. Please enter it below.</p>
+        </div>
+
+        <div *ngIf="successMessage" class="alert alert-success animate-fade-in">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ successMessage }}
+        </div>
+
+        <div *ngIf="errorMessage" class="alert alert-danger animate-fade-in">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ errorMessage }}
+        </div>
+
+        <form [formGroup]="otpForm" class="auth-form" (paste)="onPaste($event)">
+            <div formArrayName="digits" class="otp-inputs-container">
+                <input *ngFor="let digit of digits.controls; let i = index" [formControlName]="i" type="text"
+                    class="form-control otp-input" maxlength="1" inputmode="numeric" (keydown)="onKeyDown($event, i)"
+                    (input)="onInput($event, i)" #otpInput [class.is-valid]="digit.valid && digit.touched"
+                    [class.is-invalid]="digit.invalid && digit.touched">
+            </div>
+
+            <!-- Loading Indicator for Auto-Submit -->
+            <div class="text-center mt-4" *ngIf="isLoading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted small">Verifying...</p>
+            </div>
+        </form>
+
+        <!-- Resend Link -->
+        <div class="text-center mt-4">
+            <p class="text-muted mb-0">
+                Didn't receive the code?
+                <button type="button" class="btn btn-link p-0 ms-1" (click)="resendCode()">Resend</button>
+            </p>
+        </div>
+
+        <!-- Back to Login -->
+        <div class="text-center mt-3 bt-div-text">
+            <a routerLink="/login" class="back-link">
+                <i class="bi bi-arrow-left me-1"></i> Back to Login
+            </a>
+        </div>
+    </div>
+</div>

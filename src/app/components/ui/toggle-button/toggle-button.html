@@ -1,0 +1,10 @@
+<div class="toggle-switch-container d-flex align-items-center gap-3 flex-wrap">
+    <label class="switch m-0 flex-shrink-0">
+        <input type="checkbox" [checked]="value" (change)="onToggleChange($event)" [disabled]="isDisabled">
+        <span class="slider round"></span>
+    </label>
+    <span class="toggle-label" *ngIf="value !== undefined">
+        <!-- Always show label wrapper if we want consistent styling -->
+        <ng-content></ng-content>
+    </span>
+</div>

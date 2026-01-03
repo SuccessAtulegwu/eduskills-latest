@@ -1,0 +1,119 @@
+@use 'sass:color';
+
+.main-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+
+  @media (min-width: 992px) {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  width: 100%; // Full width by default
+
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+    width: 0;
+    height: 0;
+  }
+
+
+  @media (min-width: 992px) {
+    // Right panel space
+    padding-right: var(--right-panel-width);
+    //box-sizing: border-box;
+    //width: calc(100% - var(--right-panel-width));
+
+    &.no-right-panel {
+      //width: 100%;
+      padding-right: 0;
+    }
+  }
+}
+
+.content-wrapper {
+  flex: 1 0 auto;
+  padding: 1.5rem;
+  background-color: var(--bg-primary);
+
+
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Sidebar positioning
+app-sidebar {
+  @media (min-width: 992px) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1001;
+  }
+}
+
+// Header positioning
+app-header {
+  @media (min-width: 992px) {
+    width: 100%;
+    position: relative;
+    z-index: 1100;
+  }
+}
+
+// Right panel positioning
+app-right-panel {
+  @media (min-width: 992px) {
+    position: fixed;
+    right: 0;
+    top: var(--header-height);
+    bottom: 0;
+    z-index: 100;
+  }
+
+  @media (max-width: 991px) {
+    display: none !important;
+  }
+}
+
+// Adjust content area when sidebar is collapsed
+@media (min-width: 992px) {
+  .main-layout:has(.sidebar-collapsed) .layout-container {
+    margin-left: 70px;
+  }
+}
+
+@media (max-width: 991px) {
+  .layout-container {
+    margin-left: 0 !important;
+  }
+
+  .main-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

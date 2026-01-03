@@ -1,0 +1,43 @@
+<!-- Router Link Button -->
+<a
+  *ngIf="routerLink && !disabled"
+  [routerLink]="routerLink"
+  [ngClass]="buttonClass"
+  role="button"
+>
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+  <i *ngIf="icon && iconPosition === 'left' && !loading" class="bi bi-{{ icon }} me-2"></i>
+  <ng-content></ng-content>
+  <span *ngIf="label">{{ label }}</span>
+  <i *ngIf="icon && iconPosition === 'right'" class="bi bi-{{ icon }} ms-2"></i>
+</a>
+
+<!-- External Link Button -->
+<a
+  *ngIf="href && !routerLink && !disabled"
+  [href]="href"
+  [target]="target"
+  [ngClass]="buttonClass"
+  role="button"
+>
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+  <i *ngIf="icon && iconPosition === 'left' && !loading" class="bi bi-{{ icon }} me-2"></i>
+  <ng-content></ng-content>
+  <span *ngIf="label">{{ label }}</span>
+  <i *ngIf="icon && iconPosition === 'right'" class="bi bi-{{ icon }} ms-2"></i>
+</a>
+
+<!-- Regular Button -->
+<button
+  *ngIf="!isLink"
+  [type]="type"
+  [disabled]="disabled || loading"
+  [ngClass]="buttonClass"
+  (click)="onClick($event)"
+>
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+  <i *ngIf="icon && iconPosition === 'left' && !loading" class="bi bi-{{ icon }} me-2"></i>
+  <ng-content></ng-content>
+  <span *ngIf="label">{{ label }}</span>
+  <i *ngIf="icon && iconPosition === 'right'" class="bi bi-{{ icon }} ms-2"></i>
+</button>

@@ -1,0 +1,154 @@
+<div class="job-container pt-4 pb-3">
+    <app-page-header title="Jobs & Internships" description="Find your next career opportunity">
+        <div *ngIf="isAuthenticated" class="info-alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <div>
+                Only Employers can post jobs.
+                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none">Update your profile</a>
+                to become an Employer.
+            </div>
+        </div>
+    </app-page-header>
+
+    <!-- Filter Section -->
+    <div class="card filter-card border shadow-sm rounded-3 p-4 mb-4 mt-2">
+        <div class="row g-3">
+            <!-- Job Type -->
+
+            <div class="col-lg-3 col-md-6">
+                <app-account-type-selector label="JobType" id="jobType" placeholder="All Types"
+                    [accountTypes]="jobTypes" [(ngModel)]="selectedJobType">
+                </app-account-type-selector>
+            </div>
+
+            <!-- Location -->
+
+            <div class="col-lg-3 col-md-6">
+                <app-input label="Location" id="location" placeholder="e.g., Lagos, Remote" [(ngModel)]="location">
+                </app-input>
+            </div>
+
+            <!-- Category -->
+
+            <div class="col-lg-3 col-md-6">
+                <app-account-type-selector label="Category" id="category" placeholder="All Categories"
+                    [accountTypes]="categories" [(ngModel)]="selectedCategory">
+                </app-account-type-selector>
+            </div>
+
+            <!-- Search -->
+
+            <div class="col-lg-3 col-md-6">
+                <app-input label="Search" id="search" placeholder="Search jobs..." [(ngModel)]="searchQuery">
+                </app-input>
+            </div>
+
+            <!-- Sort By -->
+
+            <div class="col-lg-3 col-md-6">
+                <app-account-type-selector label="Sort By" id="sortBy" placeholder="Most Recent"
+                    [accountTypes]="sortOptions" [(ngModel)]="selectedSort">
+                </app-account-type-selector>
+            </div>
+
+            <!-- Buttons -->
+
+            <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2 pb-1">
+                <app-button label="Filter" variant="primary" icon="bi-search" (clicked)="onFilter()">
+                </app-button>
+                <app-button label="Clear" variant="secondary" [outline]="true" icon="bi-x-circle" (clicked)="onClear()">
+                </app-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Job List -->
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" *ngFor="let job of jobs">
+            <div class="card job-card h-100 border rounded-4 shadow-sm overflow-hidden">
+                <!-- Status Overlay for Expired/Unavailable -->
+                <div class="status-overlay" *ngIf="job.isExpired || !job.isAvailable">
+                    <div class="status-content">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 mb-2"></i>
+                        <h6 class="fw-bold mb-0">Job {{ !job.isAvailable ? 'Unavailable' : 'Expired' }}</h6>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column position-relative">
+                    <!-- Top Row: Badge & Date -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="job-badge" [ngClass]="{
+                            'badge-fulltime': job.type === 'FullTime',
+                            'badge-parttime': job.type === 'PartTime',
+                            'badge-contract': job.type === 'Contract',
+                            'badge-internship': job.type === 'Internship'
+                        }">{{ job.type }}</span>
+
+                        <div class="date-badge" [class.text-danger]="job.isExpired">
+                            <i class="bi" [ngClass]="job.isExpired ? 'bi-calendar-x' : 'bi-clock'"></i>
+                            <span class="ms-1 small fw-medium">{{ job.expirationDate }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Job Title -->
+                    <h5 class="card-title fw-bold mb-3">{{ job.title }}</h5>
+
+                    <!-- Company Info -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="company-logo" [ngClass]="job.logoColor || 'bg-secondary'">
+                            {{ job.company.charAt(0) }}
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-0 fw-bold company-name">{{ job.company }}</h6>
+                            <small class="location-text d-flex align-items-center">
+                                <i class="bi bi-geo-alt-fill me-1 text-primary small"></i> {{ job.location }}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="card-text mb-4 flex-grow-1 small line-clamp-2">
+                        {{ job.description }}
+                    </p>
+
+                    <!-- Footer: Stats & Action -->
+                    <div class="d-flex flex-column justify-content-between align-items-center pt-3 border-top mt-auto">
+                        <div class="stats-group d-flex gap-3 small pb-3">
+                            <span class="d-flex align-items-center" title="Views">
+                                <i class="bi bi-eye-fill me-1 text-primary-soft"></i> {{ job.views }}
+                            </span>
+                            <span class="d-flex align-items-center" title="Applications">
+                                <i class="bi bi-people-fill me-1 text-primary-soft"></i> {{ job.applications }}
+                            </span>
+                        </div>
+                        <button class="btn btn-view-details rounded-pill fw-bold small" (click)="viewDetails(job.id)">
+                            View Details <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>

@@ -1,0 +1,38 @@
+<div class="dropdown-container" [class.show]="isOpen">
+  <button
+    [ngClass]="buttonClass"
+    type="button"
+    [disabled]="disabled"
+    (click)="toggle($event)"
+  >
+    <i *ngIf="icon" class="bi bi-{{ icon }} me-2"></i>
+    {{ label }}
+  </button>
+
+  <ul class="dropdown-menu" [class.show]="isOpen" [class.dropdown-menu-end]="align === 'right'">
+    <ng-container *ngFor="let item of items">
+      <!-- Header -->
+      <li *ngIf="item.header">
+        <h6 class="dropdown-header">{{ item.label }}</h6>
+      </li>
+
+      <!-- Divider -->
+      <li *ngIf="item.divider">
+        <hr class="dropdown-divider">
+      </li>
+
+      <!-- Regular Item -->
+      <li *ngIf="!item.header && !item.divider">
+        <a
+          class="dropdown-item"
+          [class.disabled]="item.disabled"
+          href="#"
+          (click)="selectItem($event, item)"
+        >
+          <i *ngIf="item.icon" class="bi bi-{{ item.icon }} me-2"></i>
+          {{ item.label }}
+        </a>
+      </li>
+    </ng-container>
+  </ul>
+</div>

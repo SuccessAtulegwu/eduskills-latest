@@ -1,0 +1,85 @@
+<div class="course-container pt-4">
+    <app-page-header title="Courses" description="Explore our collection of courses" actionButtonText="Create Course"
+        actionButtonIcon="bi bi-plus" (actionButtonClick)="createCourse()">
+    </app-page-header>
+
+    <!-- Filter Section -->
+    <div class="card border shadow-sm rounded-4 p-4 mb-5 bg-white mt-4">
+        <div class="row g-3">
+            <!-- First Row -->
+            <div class="col-lg-3 col-md-4">
+                <app-account-type-selector label="Category" placeholder="All Categories" [accountTypes]="categories"
+                    [(ngModel)]="selectedCategory">
+                </app-account-type-selector>
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <app-account-type-selector label="Level" placeholder="All Levels" [accountTypes]="levels"
+                    [(ngModel)]="selectedLevel">
+                </app-account-type-selector>
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <app-account-type-selector label="Exam Type" placeholder="All Exam Types" [accountTypes]="examTypes"
+                    [(ngModel)]="selectedExamType">
+                </app-account-type-selector>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <app-input label="Max Price" placeholder="N" [(ngModel)]="maxPrice"></app-input>
+            </div>
+
+            <!-- Second Row -->
+            <div class="col-lg-3 col-md-6">
+                <app-input label="Search" placeholder="Search courses..." [(ngModel)]="searchQuery"></app-input>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <app-account-type-selector label="Sort By" placeholder="Most Recent" [accountTypes]="sortOptions"
+                    [(ngModel)]="selectedSort">
+                </app-account-type-selector>
+            </div>
+
+            <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2" style="padding-bottom: 27px;">
+                <app-button label="Filter" variant="primary" icon="bi-search" (clicked)="onFilter()"></app-button>
+                <app-button label="Clear" variant="secondary" [outline]="true" icon="bi-x-circle"
+                    (clicked)="onClear()"></app-button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Grid -->
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" *ngFor="let course of filteredCourses">
+            <div class="card course-card h-100 border rounded-4 shadow-sm overflow-hidden">
+                <!-- Image Container -->
+                <div class="course-img-container position-relative">
+                    <img [src]="course.image" class="card-img-top" [alt]="course.title"
+                        (error)="handleImageError($event)"> <!-- Fallback image -->
+                    <div class="overlay"></div>
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge badge-level rounded-2 px-3 py-2">{{ course.level }}</span>
+                        <h4 class="fw-bold text-dark m-0 fs-5 course-price">₦{{ course.price | number:'1.2-2' }}</h4>
+                    </div>
+
+                    <h5 class="card-title fw-bold text-dark mb-3 line-clamp-2" style="min-height: 3rem;">{{ course.title
+                        }}</h5>
+
+                    <p class="text-muted small mb-4 line-clamp-2 flex-grow-1">
+                        Comprehensive guide to mastering {{ course.category }} concepts. Perfect for {{ course.level }}
+                        students.
+                    </p>
+
+                    <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
+                        <div class="d-flex gap-3 text-muted small">
+                            <span><i class="bi bi-eye me-1"></i> {{ course.views }} views</span>
+                            <span><i class="bi bi-people me-1"></i> {{ course.enrolled }} enrolled</span>
+                        </div>
+                        <app-button label="View Details" variant="primary" size="sm"
+                            (clicked)="viewCourse(course.id)"></app-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

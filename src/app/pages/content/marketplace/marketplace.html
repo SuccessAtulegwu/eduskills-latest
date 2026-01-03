@@ -1,0 +1,105 @@
+<div class="marketplace-container pt-4">
+    <app-page-header title="Marketplace" description="Find skilled artisans and service providers">
+        <div *ngIf="isAuthenticated" class="info-alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <div>
+                Only Artisans can create listings.
+                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none">Update your profile</a>
+                to become an Artisan.
+            </div>
+        </div>
+    </app-page-header>
+
+
+    <!-- Search/Filter Section -->
+    <div class="card filter-card rounded-4 mb-5 p-4 border">
+        <div class="row g-4">
+            <!-- Search -->
+            <div class="col-lg-3 col-md-6">
+                <!-- <label class="form-label text-uppercase fw-bold text-secondary small">SEARCH</label> -->
+                <app-input label="Search" icon="bi bi-search" placeholder="Search services..."
+                    [class.custom-input]="true">
+                </app-input>
+            </div>
+
+            <!-- Category -->
+            <div class="col-lg-3 col-md-6">
+                <!-- <label class="form-label text-uppercase fw-bold text-secondary small">CATEGORY</label> -->
+                <app-account-type-selector label="Category" id="category" placeholder="Select Category"
+                    [accountTypes]="categoryOptions">
+                </app-account-type-selector>
+            </div>
+
+            <!-- Location -->
+            <div class="col-lg-3 col-md-6">
+                <!-- <label class="form-label text-uppercase fw-bold text-secondary small">LOCATION</label> -->
+                <app-input label="Location" icon="bi bi-geo-alt" placeholder="City or State...">
+                </app-input>
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-lg-3 col-md-6">
+                <!-- <label class="form-label text-uppercase fw-bold text-secondary small">SORT BY</label> -->
+                <app-account-type-selector label="Sort By" id="sortBy" placeholder="Sort Order"
+                    [accountTypes]="sortOptions">
+                </app-account-type-selector>
+            </div>
+
+            <div class="col-12 d-flex justify-content-between align-items-center mt-4 pt-2">
+                <a href="javascript:void(0)"
+                    class="text-decoration-none advanced-filters-link d-flex align-items-center">
+                    <i class="bi bi-sliders me-2"></i> Advanced Filters
+                </a>
+                <div class="d-flex gap-2">
+                    <app-button variant="light" label="Clear" class="fw-bold"></app-button>
+                    <app-button variant="primary" label="Search" class="fw-bold"></app-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings Grid -->
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4" *ngFor="let item of listings">
+            <div class="card h-100 border shadow-sm rounded-4 hover-card overflow-hidden">
+                <!-- Card Image -->
+                <div class="card-img-wrapper position-relative" style="height: 200px;">
+                    <img [src]="item.image" class="w-100 h-100 object-fit-cover" [alt]="item.title">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-overlay"></div>
+
+                    <span class="badge glass-badge position-absolute top-0 start-0 m-3 px-3 py-2 fw-normal">
+                        {{item.category}}
+                    </span>
+
+                    <span
+                        class="badge bg-white text-dark shadow-sm position-absolute top-0 end-0 m-3 px-3 py-2 fw-bold small rounded-pill">
+                        {{item.date}}
+                    </span>
+                </div>
+
+                <div class="card-body p-4 ps-3 pe-2 d-flex flex-column">
+                    <h5 class="fw-bold mb-2 text-dark text-truncate">{{item.title}}</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-geo-alt-fill text-primary me-2 small"></i>
+                        <span class="text-secondary small text-truncate">{{item.location}}</span>
+                    </div>
+
+                    <p class="text-muted small mb-4 line-clamp-2 flex-grow-1">
+                        {{item.description}}
+                    </p>
+
+                    <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                        <div>
+                            <span class="d-block text-secondary small fw-bold text-uppercase"
+                                style="font-size: 0.7rem;">Starting at</span>
+                            <span class="text-success fw-bold fs-5">{{item.priceRange}}</span>
+                        </div>
+                        <app-button variant="primary" [rounded]="true" label="View" size="sm" class="px-3"
+                            (clicked)="viewDetails(item.id)"></app-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

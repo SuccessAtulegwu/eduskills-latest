@@ -1,0 +1,31 @@
+<div class="header-title-container" [ngClass]="'header-' + size">
+  <!-- Breadcrumbs -->
+  <nav *ngIf="breadcrumbs.length > 0" aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb">
+      <li *ngFor="let crumb of breadcrumbs; let last = last" class="breadcrumb-item" [class.active]="last">
+        <span *ngIf="last">{{ crumb }}</span>
+        <a *ngIf="!last" href="#">{{ crumb }}</a>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Header Content -->
+  <div class="header-content">
+    <div class="header-main">
+      <i *ngIf="icon" class="bi bi-{{ icon }} header-icon"></i>
+      <div class="header-text">
+        <h1 class="header-title">
+          {{ title }}
+          <ng-content select="[slot=badge]"></ng-content>
+        </h1>
+        <p *ngIf="subtitle" class="header-subtitle">{{ subtitle }}</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <ng-content select="[slot=actions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <hr *ngIf="showDivider" class="header-divider">
+</div>
