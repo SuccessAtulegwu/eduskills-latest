@@ -1,1 +1,303 @@
-<p>enrollments works!</p>
+<div class="container-fluid p-0 enrollments-container animate-fade-in pt-4">
+    <app-page-header title="My Enrollments" description="Manage your program enrollments and subscriptions"></app-page-header>
+  
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-lg-3" *ngFor="let stat of [
+        {label: 'Total Enrollments', val: totalEnrollments, icon: 'bi-collection', color: 'primary'},
+        {label: 'Active', val: activeEnrollments, icon: 'bi-check-circle-fill', color: 'success'},
+        {label: 'Expired', val: expiredEnrollments, icon: 'bi-x-circle-fill', color: 'danger'},
+        {label: 'Pending', val: pendingEnrollments, icon: 'bi-clock-fill', color: 'warning'}
+      ]">
+        <div class="card h-100 border rounded-4 shadow-sm transition-hover bg-body">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon-wrapper rounded-3" [ngClass]="'bg-' + stat.color + '-subtle text-' + stat.color">
+              <i class="bi" [ngClass]="stat.icon"></i>
+            </div>
+            <div>
+              <h4 class="fw-bold mb-0 text-body">{{ stat.val }}</h4>
+              <p class="text-body small fw-medium mb-0">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Filter Section -->
+    <div class="card border shadow-sm rounded-4 p-2 mb-4 bg-body">
+      <div class="row g-3 mx-2 pt-2">
+        <div class="col-lg-4 col-md-6">
+          <app-input 
+            label="Search" 
+            placeholder="Search enrollments..." 
+            [(ngModel)]="searchQuery" 
+            (ngModelChange)="onSearchChange()">
+          </app-input>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <app-account-type-selector 
+            label="Status" 
+            placeholder="All Enrollments" 
+            [accountTypes]="statusOptions" 
+            [(ngModel)]="selectedStatus" 
+            (ngModelChange)="onStatusChange()">
+          </app-account-type-selector>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Desktop Table -->
+    <div class="d-none d-lg-block">
+      <div class="card border rounded-4 shadow-sm overflow-hidden bg-body">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="bg-body-tertiary">
+              <tr class="text-body small fw-bold text-uppercase border-bottom">
+                <th class="text-body ps-4 py-3">Program</th>
+                <th class="text-body py-3">Type</th>
+                <th class="text-body py-3">Enrollment Date</th>
+                <th class="text-body py-3">Expiry Date</th>
+                <th class="text-body py-3">Payment</th>
+                <th class="text-body py-3">Status</th>
+                <th class="text-body pe-4 py-3 text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody class="border-top-0">
+              <tr *ngFor="let enrollment of filteredEnrollments" class="border-bottom border cursor-pointer" (click)="viewEnrollment(enrollment)">
+                <td class="text-body ps-4 py-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="enrollment-thumbnail rounded-3 overflow-hidden" style="width: 60px; height: 60px;">
+                      <img [src]="enrollment.thumbnail" [alt]="enrollment.programName" class="w-100 h-100 object-fit-cover">
+                    </div>
+                    <div>
+                      <div class="fw-semibold text-body">{{ enrollment.programName }}</div>
+                      <div class="text-body extra-small">{{ enrollment.duration }} • {{ enrollment.accessLevel }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="text-body small">{{ enrollment.programType }}</span></td>
+                <td><span class="text-body small">{{ enrollment.enrollmentDate | date:'MMM dd, yyyy' }}</span></td>
+                <td>
+                  <div>
+                    <span class="text-body small d-block">{{ enrollment.expiryDate | date:'MMM dd, yyyy' }}</span>
+                    <span class="extra-small" 
+                          [ngClass]="{
+                            'text-success': getDaysRemaining(enrollment.expiryDate) > 30,
+                            'text-warning': getDaysRemaining(enrollment.expiryDate) > 0 && getDaysRemaining(enrollment.expiryDate) <= 30,
+                            'text-danger': getDaysRemaining(enrollment.expiryDate) <= 0
+                          }">
+                      <ng-container *ngIf="getDaysRemaining(enrollment.expiryDate) > 0">
+                        {{ getDaysRemaining(enrollment.expiryDate) }} days left
+                      </ng-container>
+                      <ng-container *ngIf="getDaysRemaining(enrollment.expiryDate) <= 0">
+                        Expired
+                      </ng-container>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge rounded-pill px-2 py-1 fw-medium border shadow-none extra-small" [ngClass]="getPaymentStatusClass(enrollment.paymentStatus)">
+                    {{ getPaymentStatusText(enrollment.paymentStatus) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge rounded-pill px-3 py-2 fw-medium border shadow-none" [ngClass]="getStatusClass(enrollment.status)">
+                    {{ getStatusText(enrollment.status) }}
+                  </span>
+                </td>
+                <td class="pe-4 text-end" (click)="$event.stopPropagation()">
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-body p-1" type="button" data-bs-toggle="dropdown">
+                      <i class="bi bi-three-dots-vertical fs-5"></i>
+                    </button>
+                    <ul class="dropdown-menu cursor-pointer dropdown-menu-end shadow border">
+                      <li><a class="dropdown-item py-2" (click)="viewEnrollment(enrollment)"><i class="bi bi-eye me-2 text-primary"></i>View Details</a></li>
+                      <li *ngIf="enrollment.status === 'active'"><a class="dropdown-item py-2" (click)="accessProgram(enrollment)"><i class="bi bi-play-circle me-2 text-success"></i>Access Program</a></li>
+                      <li *ngIf="enrollment.status === 'expired'"><a class="dropdown-item py-2" (click)="renewEnrollment(enrollment)"><i class="bi bi-arrow-clockwise me-2 text-info"></i>Renew</a></li>
+                      <li *ngIf="enrollment.paymentStatus === 'paid'"><a class="dropdown-item py-2" (click)="downloadInvoice(enrollment)"><i class="bi bi-download me-2 text-primary"></i>Download Invoice</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item py-2 text-danger" (click)="cancelEnrollment(enrollment)"><i class="bi bi-x-circle me-2"></i>Cancel</a></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="filteredEnrollments.length === 0" class="py-5 text-center">
+          <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+          <h5 class="mt-3 fw-bold text-body">No Enrollments Found</h5>
+          <p class="text-body-secondary">Try adjusting your filters</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Mobile Cards -->
+    <div class="d-lg-none">
+      <div *ngFor="let enrollment of filteredEnrollments" class="card border rounded-4 shadow-sm mb-3 bg-body" (click)="viewEnrollment(enrollment)">
+        <div class="card-body p-3">
+          <div class="d-flex gap-3 mb-3">
+            <div class="enrollment-thumbnail rounded-3 overflow-hidden flex-shrink-0" style="width: 80px; height: 80px;">
+              <img [src]="enrollment.thumbnail" [alt]="enrollment.programName" class="w-100 h-100 object-fit-cover">
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-1 text-body">{{ enrollment.programName }}</h6>
+              <div class="text-body extra-small mb-2">{{ enrollment.programType }}</div>
+              <div class="d-flex gap-2">
+                <span class="badge rounded-pill border px-2 py-1 fw-medium extra-small" [ngClass]="getStatusClass(enrollment.status)">
+                  {{ getStatusText(enrollment.status) }}
+                </span>
+                <span class="badge rounded-pill border px-2 py-1 fw-medium extra-small" [ngClass]="getPaymentStatusClass(enrollment.paymentStatus)">
+                  {{ getPaymentStatusText(enrollment.paymentStatus) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center pt-2 border-top border">
+            <div>
+              <div class="text-body extra-small mb-1">Expires</div>
+              <div class="text-body small fw-semibold">{{ enrollment.expiryDate | date:'MMM dd, yyyy' }}</div>
+              <span class="extra-small" 
+                    [ngClass]="{
+                      'text-success': getDaysRemaining(enrollment.expiryDate) > 30,
+                      'text-warning': getDaysRemaining(enrollment.expiryDate) > 0 && getDaysRemaining(enrollment.expiryDate) <= 30,
+                      'text-danger': getDaysRemaining(enrollment.expiryDate) <= 0
+                    }">
+                <ng-container *ngIf="getDaysRemaining(enrollment.expiryDate) > 0">
+                  {{ getDaysRemaining(enrollment.expiryDate) }} days left
+                </ng-container>
+                <ng-container *ngIf="getDaysRemaining(enrollment.expiryDate) <= 0">
+                  Expired
+                </ng-container>
+              </span>
+            </div>
+            <div class="text-end">
+              <div class="text-body extra-small mb-1">Amount</div>
+              <div class="fw-bold text-body">${{ enrollment.amount.toFixed(2) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="filteredEnrollments.length === 0" class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+        <h5 class="mt-3 fw-bold text-body">No Enrollments Found</h5>
+        <p class="text-body-secondary">Try adjusting your filters</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Enrollment Details Modal -->
+  <div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" *ngIf="selectedEnrollment">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg bg-body">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-body">Enrollment Details</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-4">
+            <div class="col-md-5">
+              <div class="enrollment-thumbnail-large rounded-4 overflow-hidden mb-3">
+                <img [src]="selectedEnrollment.thumbnail" [alt]="selectedEnrollment.programName" class="w-100 h-100 object-fit-cover" style="height: 200px;">
+              </div>
+              <div class="d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between text-body small">
+                  <span class="text-body-secondary">Enrollment ID:</span>
+                  <span class="fw-semibold">{{ selectedEnrollment.id }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-body small">
+                  <span class="text-body-secondary">Duration:</span>
+                  <span class="fw-semibold">{{ selectedEnrollment.duration }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-body small">
+                  <span class="text-body-secondary">Access Level:</span>
+                  <span class="fw-semibold">{{ selectedEnrollment.accessLevel }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-body small">
+                  <span class="text-body-secondary">Instructor:</span>
+                  <span class="fw-semibold">{{ selectedEnrollment.instructor }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-body small">
+                  <span class="text-body-secondary">Amount:</span>
+                  <span class="fw-semibold">${{ selectedEnrollment.amount.toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-7">
+              <h4 class="fw-bold text-body mb-3">{{ selectedEnrollment.programName }}</h4>
+              <div class="mb-3">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 me-2">{{ selectedEnrollment.programType }}</span>
+                <span class="badge rounded-pill px-3 py-2 fw-medium border" [ngClass]="getStatusClass(selectedEnrollment.status)">
+                  {{ getStatusText(selectedEnrollment.status) }}
+                </span>
+              </div>
+              
+              <div class="row g-3 mb-3">
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-body-secondary">
+                    <div class="text-body-secondary extra-small mb-1">Enrollment Date</div>
+                    <div class="text-body fw-semibold small">{{ selectedEnrollment.enrollmentDate | date:'MMM dd, yyyy' }}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-body-secondary">
+                    <div class="text-body-secondary extra-small mb-1">Expiry Date</div>
+                    <div class="text-body fw-semibold small">{{ selectedEnrollment.expiryDate | date:'MMM dd, yyyy' }}</div>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="alert border rounded-3 mb-3" 
+                   [ngClass]="{
+                     'alert-success border-success': getDaysRemaining(selectedEnrollment.expiryDate) > 30,
+                     'alert-warning border-warning': getDaysRemaining(selectedEnrollment.expiryDate) > 0 && getDaysRemaining(selectedEnrollment.expiryDate) <= 30,
+                     'alert-danger border-danger': getDaysRemaining(selectedEnrollment.expiryDate) <= 0
+                   }">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi" [ngClass]="{
+                    'bi-check-circle-fill': getDaysRemaining(selectedEnrollment.expiryDate) > 30,
+                    'bi-exclamation-triangle-fill': getDaysRemaining(selectedEnrollment.expiryDate) > 0 && getDaysRemaining(selectedEnrollment.expiryDate) <= 30,
+                    'bi-x-circle-fill': getDaysRemaining(selectedEnrollment.expiryDate) <= 0
+                  }"></i>
+                  <span class="small fw-semibold">
+                    <ng-container *ngIf="getDaysRemaining(selectedEnrollment.expiryDate) > 30">
+                      Your enrollment is active for {{ getDaysRemaining(selectedEnrollment.expiryDate) }} more days
+                    </ng-container>
+                    <ng-container *ngIf="getDaysRemaining(selectedEnrollment.expiryDate) > 0 && getDaysRemaining(selectedEnrollment.expiryDate) <= 30">
+                      Expiring soon! Only {{ getDaysRemaining(selectedEnrollment.expiryDate) }} days remaining
+                    </ng-container>
+                    <ng-container *ngIf="getDaysRemaining(selectedEnrollment.expiryDate) <= 0">
+                      This enrollment has expired
+                    </ng-container>
+                  </span>
+                </div>
+            </div>
+  
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-body small fw-semibold">Payment Status</span>
+                  <span class="badge rounded-pill px-3 py-2 fw-medium border" [ngClass]="getPaymentStatusClass(selectedEnrollment.paymentStatus)">
+                    {{ getPaymentStatusText(selectedEnrollment.paymentStatus) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+          <button type="button" class="btn btn-primary" *ngIf="selectedEnrollment.status === 'active'" (click)="accessProgram(selectedEnrollment)">
+            <i class="bi bi-play-circle me-2"></i>Access Program
+          </button>
+          <button type="button" class="btn btn-info" *ngIf="selectedEnrollment.status === 'expired'" (click)="renewEnrollment(selectedEnrollment)">
+            <i class="bi bi-arrow-clockwise me-2"></i>Renew Enrollment
+          </button>
+          <button type="button" class="btn btn-success" *ngIf="selectedEnrollment.paymentStatus === 'paid'" (click)="downloadInvoice(selectedEnrollment)">
+            <i class="bi bi-download me-2"></i>Download Invoice
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
+  

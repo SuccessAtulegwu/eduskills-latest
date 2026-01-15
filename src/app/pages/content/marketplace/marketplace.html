@@ -60,42 +60,56 @@
 
     <!-- Listings Grid -->
     <div class="row g-3">
-        <div class="col-md-6 col-lg-4" *ngFor="let item of listings">
+        <div class="col-md-6 col-lg-4" *ngFor="let artisan of artisans">
             <div class="card h-100 border shadow-sm rounded-4 hover-card overflow-hidden">
                 <!-- Card Image -->
                 <div class="card-img-wrapper position-relative" style="height: 200px;">
-                    <img [src]="item.image" class="w-100 h-100 object-fit-cover" [alt]="item.title">
+                    <img [src]="artisan.image" class="w-100 h-100 object-fit-cover" [alt]="artisan.title">
                     <div class="position-absolute top-0 start-0 w-100 h-100 bg-overlay"></div>
 
                     <span class="badge glass-badge position-absolute top-0 start-0 m-3 px-3 py-2 fw-normal">
-                        {{item.category}}
+                        {{artisan.category}}
                     </span>
 
-                    <span
-                        class="badge bg-white text-dark shadow-sm position-absolute top-0 end-0 m-3 px-3 py-2 fw-bold small rounded-pill">
-                        {{item.date}}
-                    </span>
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-warning text-dark shadow-sm px-2 py-1 fw-bold small rounded-pill me-1">
+                            <i class="bi bi-star-fill"></i> {{artisan.rating}}
+                        </span>
+                    </div>
                 </div>
 
                 <div class="card-body p-4 ps-3 pe-2 d-flex flex-column">
-                    <h5 class="fw-bold mb-2 text-dark text-truncate">{{item.title}}</h5>
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img [src]="artisan.avatar" [alt]="artisan.name" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">{{artisan.name}}</h6>
+                            <p class="text-secondary small mb-0">{{artisan.title}}</p>
+                        </div>
+                    </div>
+
                     <div class="d-flex align-items-center mb-3">
                         <i class="bi bi-geo-alt-fill text-primary me-2 small"></i>
-                        <span class="text-secondary small text-truncate">{{item.location}}</span>
+                        <span class="text-secondary small text-truncate">{{artisan.location}}</span>
                     </div>
 
                     <p class="text-muted small mb-4 line-clamp-2 flex-grow-1">
-                        {{item.description}}
+                        {{artisan.description}}
                     </p>
 
                     <div class="d-flex align-items-center justify-content-between pt-3 border-top">
                         <div>
                             <span class="d-block text-secondary small fw-bold text-uppercase"
                                 style="font-size: 0.7rem;">Starting at</span>
-                            <span class="text-success fw-bold fs-5">{{item.priceRange}}</span>
+                            <span class="text-success fw-bold fs-5">{{artisan.priceRange.split(' - ')[0]}}</span>
                         </div>
-                        <app-button variant="primary" [rounded]="true" label="View" size="sm" class="px-3"
-                            (clicked)="viewDetails(item.id)"></app-button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" (click)="viewDetails(artisan.id)">
+                                View
+                            </button>
+                            <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="bookArtisan(artisan.id)">
+                                Book
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
