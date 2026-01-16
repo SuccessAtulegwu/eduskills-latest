@@ -1,0 +1,125 @@
+<!-- Notification Settings Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-height: calc(70vh - 80px);">
+    <div class="modal-content border-0 shadow-lg rounded-4 bg-body d-flex flex-column" style="max-height: 100%;">
+      <div class="modal-header border-bottom pb-3 px-4 pt-3 flex-shrink-0">
+        <div>
+          <h5 class="modal-title text-body fw-bold mb-1">Notification Settings</h5>
+          <p class="text-body-secondary small mb-0">Manage how you receive notifications</p>
+        </div>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body px-4 py-3 overflow-y-auto flex-grow-1" style="max-height: calc(70vh - 200px);">
+        <form>
+          <!-- General Settings -->
+          <div class="mb-4">
+            <h6 class="text-body fw-bold mb-3 small">General Settings</h6>
+            <div class="card border rounded-3 p-3 bg-body">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="emailNotifications" [(ngModel)]="settings.emailNotifications" name="emailNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="emailNotifications">
+                  Email Notifications
+                </label>
+                <div class="form-text">Receive notifications via email</div>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="pushNotifications" [(ngModel)]="settings.pushNotifications" name="pushNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="pushNotifications">
+                  Push Notifications
+                </label>
+                <div class="form-text">Receive browser push notifications</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification Types -->
+          <div class="mb-4">
+            <h6 class="text-body fw-bold mb-3 small">Notification Types</h6>
+            <div class="card border rounded-3 p-3 bg-body">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="courseNotifications" [(ngModel)]="settings.courseNotifications" name="courseNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="courseNotifications">
+                  <i class="bi bi-book me-2 text-primary"></i>Course Notifications
+                </label>
+                <div class="form-text">New courses, course updates, and completion alerts</div>
+              </div>
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="assignmentNotifications" [(ngModel)]="settings.assignmentNotifications" name="assignmentNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="assignmentNotifications">
+                  <i class="bi bi-clipboard-check me-2 text-warning"></i>Assignment Notifications
+                </label>
+                <div class="form-text">Assignment deadlines and updates</div>
+              </div>
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="jobAlerts" [(ngModel)]="settings.jobAlerts" name="jobAlerts">
+                <label class="form-check-label text-body fw-semibold small" for="jobAlerts">
+                  <i class="bi bi-briefcase me-2 text-success"></i>Job Alerts
+                </label>
+                <div class="form-text">New job opportunities matching your profile</div>
+              </div>
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="bookingNotifications" [(ngModel)]="settings.bookingNotifications" name="bookingNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="bookingNotifications">
+                  <i class="bi bi-calendar-check me-2 text-info"></i>Booking Notifications
+                </label>
+                <div class="form-text">Booking confirmations and reminders</div>
+              </div>
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="paymentNotifications" [(ngModel)]="settings.paymentNotifications" name="paymentNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="paymentNotifications">
+                  <i class="bi bi-credit-card me-2 text-success"></i>Payment Notifications
+                </label>
+                <div class="form-text">Payment confirmations and receipts</div>
+              </div>
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="supportNotifications" [(ngModel)]="settings.supportNotifications" name="supportNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="supportNotifications">
+                  <i class="bi bi-headset me-2 text-primary"></i>Support Notifications
+                </label>
+                <div class="form-text">Support ticket updates and responses</div>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="systemNotifications" [(ngModel)]="settings.systemNotifications" name="systemNotifications">
+                <label class="form-check-label text-body fw-semibold small" for="systemNotifications">
+                  <i class="bi bi-tools me-2 text-secondary"></i>System Notifications
+                </label>
+                <div class="form-text">System maintenance and important updates</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiet Hours -->
+          <div class="mb-3">
+            <h6 class="text-body fw-bold mb-3 small">Quiet Hours</h6>
+            <div class="card border rounded-3 p-3 bg-body">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="quietHoursEnabled" [(ngModel)]="settings.quietHours.enabled" name="quietHoursEnabled">
+                <label class="form-check-label text-body fw-semibold small" for="quietHoursEnabled">
+                  Enable Quiet Hours
+                </label>
+                <div class="form-text">Pause notifications during specified hours</div>
+              </div>
+              <div *ngIf="settings.quietHours.enabled" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label text-body fw-semibold small">Start Time</label>
+                  <input type="time" class="form-control" [(ngModel)]="settings.quietHours.start" name="quietHoursStart">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-body fw-semibold small">End Time</label>
+                  <input type="time" class="form-control" [(ngModel)]="settings.quietHours.end" name="quietHoursEnd">
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-top bg-body-tertiary py-2 px-4 d-flex justify-content-end gap-3 flex-shrink-0">
+        <button type="button" class="btn btn-secondary px-4" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary px-4" (click)="saveSettings()">
+          <i class="bi bi-check me-2"></i>Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>

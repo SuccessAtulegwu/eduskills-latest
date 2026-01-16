@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth';
 import { ThemeService } from '../../../services/theme';
+import { NotificationService, Notification } from '../../../services/notification.service';
 import { LucideAngularModule, Menu, Search } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
@@ -26,7 +27,10 @@ export class Header implements OnInit, OnDestroy {
   fullname: string = 'Musa Abdullahi';
   isAuthenticated = false;
   accountType: string = '';
+  notifications: Notification[] = [];
+  unreadCount: number = 0;
   private authSubscription?: Subscription;
+  private notificationSubscription?: Subscription;
 
   // Register Lucide icons
   readonly Menu = Menu;
@@ -34,6 +38,7 @@ export class Header implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private themeService: ThemeService,
+    private notificationService: NotificationService,
     private router: Router,
     private confirmationService: ConfirmationService
   ) { }
@@ -41,6 +46,7 @@ export class Header implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.authSubscription?.unsubscribe();
+    this.notificationSubscription?.unsubscribe();
   }
 
   ngOnInit(): void {
@@ -56,6 +62,12 @@ export class Header implements OnInit, OnDestroy {
 
     this.themeService.theme$.subscribe(theme => {
       this.isDarkMode = theme === 'dark';
+    });
+
+    // Load notifications
+    this.notificationSubscription = this.notificationService.notifications$.subscribe(notifications => {
+      this.notifications = notifications.slice(0, 5); // Show only latest 5
+      this.unreadCount = this.notificationService.getUnreadCount();
     });
 
     // Close dropdowns when clicking outside
@@ -125,5 +137,51 @@ export class Header implements OnInit, OnDestroy {
 
   navigateToRegister(): void {
     this.router.navigate(['/register']);
+  }
+
+  navigateToNotifications(): void {
+    this.router.navigate(['/account/notifications']);
+    this.showNotificationDropdown = false;
+  }
+
+  markAsRead(notification: Notification, event: Event): void {
+    event.stopPropagation();
+    if (!notification.read) {
+      this.notificationService.markAsRead(notification.id);
+    }
+    if (notification.link) {
+      this.router.navigate([notification.link]);
+      this.showNotificationDropdown = false;
+    }
+  }
+
+  getTypeIcon(type: string): string {
+    switch(type) {
+      case 'course': return 'bi-book';
+      case 'assignment': return 'bi-clipboard-check';
+      case 'job': return 'bi-briefcase';
+      case 'booking': return 'bi-calendar-check';
+      case 'payment': return 'bi-credit-card';
+      case 'support': return 'bi-headset';
+      case 'system': return 'bi-tools';
+      case 'general': return 'bi-star';
+      default: return 'bi-bell';
+    }
+  }
+
+  getTimeAgo(date: Date): string {
+    const now = new Date();
+    const notificationDate = new Date(date);
+    const diffTime = now.getTime() - notificationDate.getTime();
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return notificationDate.toLocaleDateString();
   }
 }

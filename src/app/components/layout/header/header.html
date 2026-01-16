@@ -46,22 +46,52 @@
         <button class="btn btn-outline-secondary position-relative py-1 px-2" type="button"
           (click)="toggleNotificationDropdown($event)">
           <i class="bi bi-bell-fill"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
+          <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ unreadCount }}
           </span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-3 border-0" [class.show]="showNotificationDropdown">
+        <ul class="dropdown-menu dropdown-menu-end rounded-4 mt-3 border-0 shadow-lg" style="min-width: 280px; max-width: 300px; max-height: 400px; overflow-y: auto; overflow-x: hidden;" [class.show]="showNotificationDropdown">
           <li>
-            <h6 class="dropdown-header">Notifications</h6>
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+              <h6 class="dropdown-header mb-0">Notifications</h6>
+              <span *ngIf="unreadCount > 0" class="badge bg-primary">{{ unreadCount }} new</span>
+            </div>
           </li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-book me-2"></i>New course available</a></li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-clipboard-check me-2"></i>Assignment due tomorrow</a>
+          <li *ngIf="notifications.length === 0">
+            <div class="dropdown-item text-center py-4">
+              <i class="bi bi-bell-slash fs-4 text-body-secondary opacity-50"></i>
+              <p class="text-body-secondary small mb-0 mt-2">No notifications</p>
+            </div>
           </li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-tools me-2"></i>System maintenance</a></li>
+          <li *ngFor="let notification of notifications">
+            <a class="dropdown-item py-3" 
+               [class.bg-body-tertiary]="!notification.read"
+               (click)="markAsRead(notification, $event)">
+              <div class="d-flex align-items-start gap-2">
+                <div class="flex-shrink-0">
+                  <i class="bi" [ngClass]="getTypeIcon(notification.type)" [class.text-primary]="notification.type === 'course'" [class.text-warning]="notification.type === 'assignment'" [class.text-success]="notification.type === 'job'" [class.text-info]="notification.type === 'booking'"></i>
+                </div>
+                <div class="flex-grow-1" style="min-width: 0;">
+                  <div class="d-flex justify-content-between align-items-start mb-1 gap-2">
+                    <h6 class="mb-0 small fw-semibold text-body" [class.fw-normal]="notification.read" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">{{ notification.title }}</h6>
+                    <span *ngIf="!notification.read" class="badge bg-primary rounded-circle flex-shrink-0" style="width: 6px; height: 6px; margin-top: 4px;"></span>
+                  </div>
+                  <p class="text-body-secondary extra-small mb-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                    {{ notification.message }}
+                  </p>
+                  <span class="text-body-secondary extra-small">{{ getTimeAgo(notification.createdAt) }}</span>
+                </div>
+              </div>
+            </a>
+          </li>
           <li>
             <hr class="dropdown-divider">
           </li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-right me-2"></i>View all notifications</a></li>
+          <li>
+            <a class="dropdown-item text-center fw-semibold" (click)="navigateToNotifications()">
+              <i class="bi bi-arrow-right me-2"></i>View all notifications
+            </a>
+          </li>
         </ul>
       </div>
 

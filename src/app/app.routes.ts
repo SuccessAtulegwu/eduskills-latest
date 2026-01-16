@@ -104,6 +104,14 @@ export const routes: Routes = [
             path: 'enrollments',
             loadComponent: () => import('./pages/account/enrollments/enrollments').then(m => m.Enrollments)
           },
+          {
+            path: 'support',
+            loadComponent: () => import('./pages/account/support/support').then(m => m.Support)
+          },
+          {
+            path: 'notifications',
+            loadComponent: () => import('./pages/account/notifications/notifications').then(m => m.Notifications)
+          },
         ]
       },
       {

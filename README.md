@@ -262,4 +262,4 @@ For support, email support@eduskill.com or join our community forum.
 
 ---
 
-**EduSkill** - Learn through video, connect with skilled professionals, and grow together!
+**EduSkill** - Learn through video, connect with skilled professionals, and grow together!# eduskills

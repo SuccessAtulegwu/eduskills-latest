@@ -1,0 +1,137 @@
+<!-- Booking Form Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" *ngIf="artisan">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 600px; max-height: calc(70vh - 80px);">
+    <div class="modal-content border-0 shadow-lg rounded-4 bg-body d-flex flex-column" style="max-height: 100%;">
+      <div class="modal-header border-bottom pb-3 px-4 pt-3 flex-shrink-0">
+        <div class="text-center w-100">
+          <h5 class="modal-title text-body fw-bold mb-1">Complete Your Booking</h5>
+          <p class="text-body-secondary small mb-0">{{ artisan.name }} - {{ artisan.title }}</p>
+        </div>
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body px-4 py-3 overflow-y-auto flex-grow-1" style="max-height: calc(70vh - 200px);">
+        <!-- Artisan Info Card - Centered -->
+        <div class="card bg-body-tertiary border-0 rounded-3 p-3 mb-3 text-center">
+          <div class="d-flex flex-column align-items-center mb-2">
+            <div class="rounded-circle overflow-hidden mb-2" style="width: 70px; height: 70px;">
+              <img [src]="artisan.avatar" [alt]="artisan.name" class="w-100 h-100" style="object-fit: cover;">
+            </div>
+            <h6 class="fw-bold mb-1 text-body">{{ artisan.name }}</h6>
+            <p class="text-body-secondary small mb-1">{{ artisan.title }}</p>
+            <div class="d-flex align-items-center gap-1 mb-2">
+              <i class="bi bi-star-fill text-warning"></i>
+              <span class="text-body fw-semibold">{{ artisan.rating }}</span>
+              <span class="text-body-secondary small">({{ artisan.reviews }} reviews)</span>
+            </div>
+          </div>
+          
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="d-flex align-items-center gap-2 justify-content-center">
+                <i class="bi bi-geo-alt-fill text-primary"></i>
+                <span class="text-body small">{{ artisan.location }}</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center gap-2 justify-content-center">
+                <i class="bi bi-telephone-fill text-success"></i>
+                <a [href]="'tel:' + artisan.phone" class="text-body small text-decoration-none">{{ artisan.phone }}</a>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="d-flex align-items-center gap-2 justify-content-center">
+                <i class="bi bi-clock-fill text-info"></i>
+                <span class="text-body small">Response time: {{ artisan.responseTime }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info border-info py-2 px-3 mt-2 mb-0">
+            <div class="d-flex align-items-start gap-2">
+              <i class="bi bi-info-circle-fill mt-1"></i>
+              <div class="small text-start">
+                <strong>Price Range:</strong> {{ artisan.priceRange }}<br>
+                Final price will be confirmed after assessment.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Form - Centered -->
+        <div class="mx-auto" style="max-width: 500px;">
+            <form>
+              <!-- Date Selection -->
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Select Date *</label>
+                <input type="date" class="form-control" [(ngModel)]="bookingForm.selectedDate" [min]="getMinDate()" name="date" required>
+              </div>
+
+              <!-- Time Selection -->
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Select Time *</label>
+                <select class="form-select" [(ngModel)]="bookingForm.selectedTime" name="time" required>
+                  <option value="">Choose a time slot</option>
+                  <option *ngFor="let time of timeSlots" [value]="time">{{ time }}</option>
+                </select>
+              </div>
+
+              <!-- Duration -->
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Duration</label>
+                <select class="form-select" [(ngModel)]="bookingForm.duration" name="duration">
+                  <option *ngFor="let option of durationOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+
+              <!-- Location Type -->
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Service Location *</label>
+                <div class="d-flex gap-3">
+                  <div class="form-check" *ngIf="canSelectInPerson()">
+                    <input class="form-check-input" type="radio" name="locationType" id="inPerson" value="in-person" [(ngModel)]="bookingForm.locationType">
+                    <label class="form-check-label" for="inPerson">
+                      <i class="bi bi-geo-alt-fill me-1"></i>In-Person
+                    </label>
+                  </div>
+                  <div class="form-check" *ngIf="canSelectOnline()">
+                    <input class="form-check-input" type="radio" name="locationType" id="online" value="online" [(ngModel)]="bookingForm.locationType">
+                    <label class="form-check-label" for="online">
+                      <i class="bi bi-camera-video-fill me-1"></i>Online
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Address (for in-person) -->
+              <div class="mb-3" *ngIf="bookingForm.locationType === 'in-person'">
+                <label class="form-label text-body fw-semibold small">Your Address *</label>
+                <textarea class="form-control" rows="2" [(ngModel)]="bookingForm.address" name="address" placeholder="Enter your full address" required></textarea>
+                <div class="form-text">Please provide detailed address for the artisan to locate you</div>
+              </div>
+
+              <!-- Meeting Link (for online) -->
+              <div class="mb-3" *ngIf="bookingForm.locationType === 'online'">
+                <label class="form-label text-body fw-semibold small">Meeting Link (Optional)</label>
+                <input type="url" class="form-control" [(ngModel)]="bookingForm.meetingLink" name="meetingLink" placeholder="https://zoom.us/j/... or https://meet.google.com/...">
+                <div class="form-text">Provide your preferred meeting link (Zoom, Google Meet, etc.). If left empty, a default link will be generated.</div>
+              </div>
+
+              <!-- Notes -->
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Additional Notes</label>
+                <textarea class="form-control" rows="3" [(ngModel)]="bookingForm.notes" name="notes" placeholder="Describe the work you need done..."></textarea>
+              </div>
+            </form>
+          </div>
+      </div>
+      <div class="modal-footer border-top bg-body-tertiary py-2 px-4 d-flex justify-content-center gap-3 flex-shrink-0">
+        <button type="button" class="btn btn-secondary px-4" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary px-4" (click)="submitBooking()">
+          <i class="bi bi-check-circle me-2"></i>Confirm Booking
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
+

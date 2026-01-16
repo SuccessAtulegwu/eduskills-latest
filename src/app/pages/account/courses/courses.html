@@ -1,1 +1,336 @@
-<p>courses works!</p>
+<div class="container-fluid p-0">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <app-page-header title="My Courses" description="Manage your uploaded courses and track performance"></app-page-header>
+    </div>
+    <app-button label="Create New Course" icon="bi-plus-circle" variant="primary" (clicked)="createNewCourse()"></app-button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-collection fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ totalCourses }}</h4>
+            <p class="text-body small fw-medium mb-0">Total Courses</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-check-circle-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ publishedCourses }}</h4>
+            <p class="text-body small fw-medium mb-0">Published</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-people-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ totalStudents.toLocaleString() }}</h4>
+            <p class="text-body small fw-medium mb-0">Total Students</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-currency-dollar fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">${{ (totalRevenue / 1000).toFixed(1) }}k</h4>
+            <p class="text-body small fw-medium mb-0">Total Revenue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="card border shadow-sm rounded-4 p-2 mb-4 bg-body">
+    <div class="row g-3 mx-2 pt-2">
+      <div class="col-lg-4 col-md-6">
+        <app-input
+          label="Search"
+          placeholder="Search courses..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()">
+        </app-input>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <app-account-type-selector
+          label="Status"
+          placeholder="All Courses"
+          [accountTypes]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onStatusChange()">
+        </app-account-type-selector>
+      </div>
+      <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2">
+        <app-button label="Clear" variant="secondary" [outline]="true" icon="bi-x-circle" (clicked)="onClear()"></app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Cards Grid -->
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let course of filteredCourses">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" (click)="viewCourse(course)">
+        <!-- Course Thumbnail -->
+        <div class="position-relative">
+          <img [src]="course.thumbnail" [alt]="course.title" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 1rem 1rem 0 0;">
+          <span class="position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2 fw-medium border" [ngClass]="getStatusClass(course.status)">
+            <i class="bi me-1" [ngClass]="getStatusIcon(course.status)"></i>
+            {{ getStatusText(course.status) }}
+          </span>
+        </div>
+
+        <!-- Course Content -->
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 small">{{ course.category }}</span>
+            <span class="text-body fw-bold fs-5">${{ course.price }}</span>
+          </div>
+
+          <h5 class="card-title text-body fw-bold mb-2">{{ course.title }}</h5>
+          <p class="card-text text-body-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ course.description }}
+          </p>
+
+          <!-- Course Stats -->
+          <div class="mt-auto">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-play-circle text-primary"></i>
+                <span class="text-body small">{{ course.lessons }} lessons</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock text-primary"></i>
+                <span class="text-body small">{{ course.duration }}</span>
+              </div>
+            </div>
+
+            <!-- Enrollment Stats (Only for published courses) -->
+            <div *ngIf="course.status === 'published'">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-people-fill text-info"></i>
+                  <span class="text-body small fw-semibold">{{ course.enrolledStudents.toLocaleString() }} students</span>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <i class="bi bi-star-fill text-warning"></i>
+                  <span class="text-body small fw-semibold">{{ course.rating }}</span>
+                  <span class="text-body-secondary small">({{ course.reviews }})</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-body-secondary small">Revenue</span>
+                <span class="text-success fw-bold">${{ course.totalRevenue.toLocaleString() }}</span>
+              </div>
+            </div>
+
+            <!-- Draft/Under Review Message -->
+            <div *ngIf="course.status === 'draft'" class="alert alert-secondary border-secondary mb-0 py-2 px-3 small">
+              <i class="bi bi-info-circle me-2"></i>Course is in draft mode
+            </div>
+            <div *ngIf="course.status === 'under-review'" class="alert alert-warning border-warning mb-0 py-2 px-3 small">
+              <i class="bi bi-hourglass-split me-2"></i>Pending approval
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer with Actions -->
+        <div class="card-footer bg-body-tertiary border-top d-flex gap-2 p-3">
+          <button class="btn btn-sm btn-primary flex-fill" (click)="editCourse(course); $event.stopPropagation()">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </button>
+         
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" (click)="$event.stopPropagation()">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li *ngIf="course.status === 'published'">
+                <a class="dropdown-item py-2 text-body" (click)="viewAnalytics(course); $event.stopPropagation()">
+                  <i class="bi bi-graph-up me-2 text-info"></i>Analytics
+                </a>
+              </li>
+              <li *ngIf="course.status === 'draft'">
+                <a class="dropdown-item py-2 text-body" (click)="publishCourse(course); $event.stopPropagation()">
+                  <i class="bi bi-send me-2 text-success"></i>Publish
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item py-2 text-danger" (click)="deleteCourse(course); $event.stopPropagation()">
+                  <i class="bi bi-trash me-2"></i>Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredCourses.length === 0" class="text-center py-5">
+    <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+    <h5 class="mt-3 fw-bold text-body">No Courses Found</h5>
+    <p class="text-body-secondary">Try adjusting your filters or create a new course</p>
+    <app-button label="Create New Course" icon="bi-plus-circle" variant="primary" (clicked)="createNewCourse()"></app-button>
+  </div>
+</div>
+
+<!-- Course Details Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" *ngIf="selectedCourse">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 bg-body">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title text-body fw-bold">{{ selectedCourse.title }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <!-- Left Column - Image and Basic Info -->
+          <div class="col-md-5">
+            <img [src]="selectedCourse.thumbnail" [alt]="selectedCourse.title" class="img-fluid rounded-3 mb-3" style="width: 100%; height: 200px; object-fit: cover;">
+            
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <span class="badge rounded-pill px-3 py-2 fw-medium border" [ngClass]="getStatusClass(selectedCourse.status)">
+                <i class="bi me-1" [ngClass]="getStatusIcon(selectedCourse.status)"></i>
+                {{ getStatusText(selectedCourse.status) }}
+              </span>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+                <i class="bi bi-tag me-1"></i>{{ selectedCourse.category }}
+              </span>
+            </div>
+
+            <ul class="list-group list-group-flush rounded-3 border">
+              <li class="list-group-item bg-body text-body d-flex justify-content-between">
+                <span class="fw-semibold">Price:</span>
+                <span class="text-success fw-bold">${{ selectedCourse.price }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between">
+                <span class="fw-semibold">Duration:</span>
+                <span>{{ selectedCourse.duration }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between">
+                <span class="fw-semibold">Lessons:</span>
+                <span>{{ selectedCourse.lessons }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between">
+                <span class="fw-semibold">Upload Date:</span>
+                <span>{{ selectedCourse.uploadDate | date:'mediumDate' }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between">
+                <span class="fw-semibold">Last Updated:</span>
+                <span>{{ selectedCourse.lastUpdated | date:'mediumDate' }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column - Details and Stats -->
+          <div class="col-md-7">
+            <h6 class="text-body fw-bold mb-2">Description</h6>
+            <p class="text-body-secondary mb-4">{{ selectedCourse.description }}</p>
+
+            <!-- Enrollment Statistics (Only for published courses) -->
+            <div *ngIf="selectedCourse.status === 'published'">
+              <h6 class="text-body fw-bold mb-3">Performance Metrics</h6>
+              
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-info-subtle border border-info-subtle">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-people-fill text-info"></i>
+                      <span class="text-body-secondary small">Enrolled Students</span>
+                    </div>
+                    <h4 class="text-body fw-bold mb-0">{{ selectedCourse.enrolledStudents.toLocaleString() }}</h4>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-currency-dollar text-success"></i>
+                      <span class="text-body-secondary small">Total Revenue</span>
+                    </div>
+                    <h4 class="text-body fw-bold mb-0">${{ selectedCourse.totalRevenue.toLocaleString() }}</h4>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-warning-subtle border border-warning-subtle">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-star-fill text-warning"></i>
+                      <span class="text-body-secondary small">Rating</span>
+                    </div>
+                    <h4 class="text-body fw-bold mb-0">{{ selectedCourse.rating }} <span class="fs-6 text-body-secondary">({{ selectedCourse.reviews }} reviews)</span></h4>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 rounded-3 bg-primary-subtle border border-primary-subtle">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-check-circle-fill text-primary"></i>
+                      <span class="text-body-secondary small">Completion Rate</span>
+                    </div>
+                    <h4 class="text-body fw-bold mb-0">{{ selectedCourse.completionRate }}%</h4>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-info border-info mb-0">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-info-circle-fill"></i>
+                  <div class="small">
+                    <strong>Average Revenue per Student:</strong> ${{ (selectedCourse.totalRevenue / selectedCourse.enrolledStudents).toFixed(2) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Draft/Under Review Info -->
+            <div *ngIf="selectedCourse.status === 'draft'" class="alert alert-secondary border-secondary">
+              <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Draft Course</h6>
+              <p class="mb-0 small">This course is currently in draft mode. Publish it to make it available to students.</p>
+            </div>
+            <div *ngIf="selectedCourse.status === 'under-review'" class="alert alert-warning border-warning">
+              <h6 class="alert-heading"><i class="bi bi-hourglass-split me-2"></i>Under Review</h6>
+              <p class="mb-0 small">This course is currently being reviewed by our team. You'll be notified once it's approved.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top bg-body-tertiary">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="editCourse(selectedCourse)">
+          <i class="bi bi-pencil me-2"></i>Edit Course
+        </button>
+        <button type="button" class="btn btn-success" *ngIf="selectedCourse.status === 'published'" (click)="viewAnalytics(selectedCourse)">
+          <i class="bi bi-graph-up me-2"></i>View Analytics
+        </button>
+        <button type="button" class="btn btn-success" *ngIf="selectedCourse.status === 'draft'" (click)="publishCourse(selectedCourse)">
+          <i class="bi bi-send me-2"></i>Publish
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
+

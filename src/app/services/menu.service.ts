@@ -184,6 +184,22 @@ export class MenuService {
           visible: true,
           requiresAuth: true
         },
+        {
+          id: 'support',
+          label: 'Support Tickets',
+          icon: HelpCircle,
+          route: '/account/support',
+          visible: true,
+          requiresAuth: true
+        },
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          icon: Bell,
+          route: '/account/notifications',
+          visible: true,
+          requiresAuth: true
+        },
          {
           id: 'profile',
           label: 'My Profile',
@@ -218,7 +234,7 @@ export class MenuService {
         },
         {
           id: 'progress',
-          label: 'My Progress',
+          label: 'My Applications',
           icon: BarChart,
           route: '/account/progress',
           visible: true,
@@ -261,14 +277,6 @@ export class MenuService {
           label: 'CV Templates',
           icon: FileText,
           route: '/account/cv-templates',
-          visible: true,
-          requiresAuth: true
-        },
-         {
-          id: 'support',
-          label: 'Support Tickets',
-          icon: HelpCircle,
-          route: '/account/support',
           visible: true,
           requiresAuth: true
         },

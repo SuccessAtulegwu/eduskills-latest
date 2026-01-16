@@ -1,0 +1,115 @@
+// Custom Variables & Helper Classes
+.extra-small { font-size: 0.75rem; }
+
+// Gradient Button (Bootstrap doesn't do this by default)
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+  color: white;
+  border: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+    color: white;
+  }
+}
+
+// Icon Styling
+.stat-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+// Hover Effects
+.stat-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+    border-color: var(--bs-primary-border-subtle) !important;
+  }
+}
+
+.cursor-pointer { cursor: pointer; }
+
+// Animations
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Ensure print hides UI elements
+@media print {
+  .btn, .input-group, select, .btn-group { display: none !important; }
+  .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+}
+
+/* Custom Utility for text smaller than "small" */
+.extra-small { 
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+  }
+  
+  /* Gradient Primary Button */
+  .btn-gradient-primary {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: #fff;
+    &:hover {
+      background: linear-gradient(135deg, #224abe 0%, #1a3a99 100%);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3) !important;
+    }
+  }
+  
+  /* Icon Box for Stats */
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+  
+  /* Modern Transition */
+  .transition-hover {
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--bs-primary-border-subtle) !important;
+    }
+  }
+  
+  /* Animation */
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Dropdown tweaks for Dark Mode neatness */
+  .dropdown-menu {
+    --bs-dropdown-link-hover-bg: var(--bs-body-tertiary);
+    font-size: 0.9rem;
+  }

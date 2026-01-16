@@ -1,0 +1,176 @@
+<!-- Booking Details Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" *ngIf="booking">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-height: calc(70vh - 80px);">
+    <div class="modal-content border-0 shadow-lg rounded-4 bg-body d-flex flex-column" style="max-height: 100%;">
+      <div class="modal-header border-bottom pb-2 pt-3 flex-shrink-0">
+        <h5 class="modal-title text-body fw-bold mb-0">Booking Details</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body p-3 overflow-y-auto flex-grow-1" style="max-height: calc(70vh - 200px);">
+        <div class="row g-3">
+          <!-- Left Column - Consultant Info -->
+          <div class="col-md-5">
+            <div class="text-center mb-2">
+              <div class="rounded-circle overflow-hidden mx-auto mb-2" style="width: 80px; height: 80px;">
+                <img [src]="booking.consultantAvatar" [alt]="booking.consultantName" class="w-100 h-100" style="object-fit: cover;">
+              </div>
+              <h6 class="fw-bold text-body mb-1">{{ booking.consultantName }}</h6>
+              <p class="text-body-secondary small mb-2">{{ booking.consultantTitle }}</p>
+              <button class="btn btn-sm btn-outline-primary" (click)="onViewConsultantProfile()">
+                <i class="bi bi-person me-1"></i>View Profile
+              </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <span class="badge rounded-pill px-2 py-1 fw-medium border small" [ngClass]="getStatusClass(booking.status)">
+                <i class="bi me-1" [ngClass]="getStatusIcon(booking.status)"></i>
+                {{ getStatusText(booking.status) }}
+              </span>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 small">
+                <i class="bi me-1" [ngClass]="getServiceTypeIcon(booking.serviceType)"></i>
+                {{ booking.serviceType | titlecase }}
+              </span>
+              <span class="badge rounded-pill px-2 py-1 fw-medium border small" [ngClass]="booking.source === 'application' ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'">
+                {{ booking.source | titlecase }}
+              </span>
+            </div>
+
+            <ul class="list-group list-group-flush rounded-3 border">
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Date:</span>
+                <span class="small">{{ booking.bookingDate | date:'EEEE, MMMM dd, yyyy' }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Time:</span>
+                <span class="small">{{ booking.scheduledTime }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Duration:</span>
+                <span class="small">{{ booking.duration }} minutes</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Location:</span>
+                <span class="small">
+                  <i class="bi me-1" [ngClass]="booking.location === 'online' ? 'bi-camera-video-fill text-primary' : 'bi-geo-alt-fill text-info'"></i>
+                  {{ booking.location | titlecase }}
+                </span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Price:</span>
+                <span class="text-success fw-bold">${{ booking.price.toFixed(2) }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Payment:</span>
+                <span class="badge rounded-pill px-2 py-1 small" [ngClass]="getPaymentStatusClass(booking.paymentStatus)">
+                  {{ booking.paymentStatus | titlecase }}
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column - Details -->
+          <div class="col-md-7">
+            <div class="mb-2">
+              <h6 class="text-body fw-bold mb-1 small">Session Notes</h6>
+              <p class="text-body-secondary small mb-0">{{ booking.notes || 'No notes provided' }}</p>
+            </div>
+
+            <!-- Meeting Link (Online) -->
+            <div *ngIf="booking.location === 'online' && booking.meetingLink" class="mb-2">
+              <h6 class="text-body fw-bold mb-1 small">Meeting Link</h6>
+              <div class="d-flex align-items-center gap-2 p-2 bg-body-tertiary rounded-3">
+                <i class="bi bi-link-45deg text-primary"></i>
+                <a [href]="booking.meetingLink" target="_blank" class="text-primary small text-decoration-none flex-grow-1" style="word-break: break-all;">
+                  {{ booking.meetingLink }}
+                </a>
+                <button class="btn btn-sm btn-primary" (click)="onJoinMeeting()">
+                  <i class="bi bi-box-arrow-up-right me-1"></i>Join
+                </button>
+              </div>
+            </div>
+
+            <!-- Address (In-Person) -->
+            <div *ngIf="booking.location === 'in-person' && booking.address" class="mb-2">
+              <h6 class="text-body fw-bold mb-1 small">Address</h6>
+              <div class="d-flex align-items-start gap-2 p-2 bg-body-tertiary rounded-3">
+                <i class="bi bi-geo-alt-fill text-info mt-1"></i>
+                <span class="text-body small">{{ booking.address }}</span>
+              </div>
+            </div>
+
+            <!-- Status-specific Information -->
+            <div *ngIf="booking.status === 'upcoming'" class="alert alert-primary border-primary py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-clock-fill"></i>
+                <span class="small fw-semibold">Upcoming Session</span>
+              </div>
+              <p class="mb-1 small">Your session is scheduled for {{ booking.bookingDate | date:'MMMM dd, yyyy' }} at {{ booking.scheduledTime }}.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="small">Days remaining:</span>
+                <span class="badge bg-primary px-2 py-1 small">{{ getDaysUntilBooking(booking.bookingDate) }} days</span>
+              </div>
+            </div>
+
+            <div *ngIf="booking.status === 'completed'" class="alert alert-success border-success py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-check-circle-fill"></i>
+                <span class="small fw-semibold">Completed</span>
+              </div>
+              <p class="mb-0 small" *ngIf="booking.completedAt">
+                Session completed on {{ booking.completedAt | date:'MMM dd, yyyy' }}
+              </p>
+            </div>
+
+            <div *ngIf="booking.status === 'cancelled'" class="alert alert-danger border-danger py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-x-circle-fill"></i>
+                <span class="small fw-semibold">Cancelled</span>
+              </div>
+              <p class="mb-0 small" *ngIf="booking.cancelledAt">
+                Booking cancelled on {{ booking.cancelledAt | date:'MMM dd, yyyy' }}
+              </p>
+            </div>
+
+            <div *ngIf="booking.status === 'rescheduled'" class="alert alert-warning border-warning py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-arrow-repeat"></i>
+                <span class="small fw-semibold">Rescheduled</span>
+              </div>
+              <p class="mb-0 small">This booking has been rescheduled. Please check the new date and time above.</p>
+            </div>
+
+            <div class="pt-2 border-top">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-body-secondary">Booked on:</span>
+                <span class="small text-body">{{ booking.createdAt | date:'MMM dd, yyyy' }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="small text-body-secondary">Source:</span>
+                <span class="badge rounded-pill px-2 py-1 small" [ngClass]="booking.source === 'application' ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'">
+                  {{ booking.source | titlecase }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top bg-body-tertiary py-2 px-4 flex-shrink-0">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-sm btn-success" *ngIf="booking.status === 'upcoming' && booking.location === 'online' && booking.meetingLink" (click)="onJoinMeeting()">
+          <i class="bi bi-camera-video me-1"></i>Join Meeting
+        </button>
+        <button type="button" class="btn btn-sm btn-info" *ngIf="booking.status === 'upcoming'" (click)="onRescheduleBooking()">
+          <i class="bi bi-arrow-repeat me-1"></i>Reschedule
+        </button>
+        <button type="button" class="btn btn-sm btn-primary" *ngIf="booking.status === 'completed'" (click)="onDownloadReceipt()">
+          <i class="bi bi-download me-1"></i>Download Receipt
+        </button>
+        <button type="button" class="btn btn-sm btn-danger" *ngIf="booking.status === 'upcoming'" (click)="onCancelBooking()">
+          <i class="bi bi-x-circle me-1"></i>Cancel Booking
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
+

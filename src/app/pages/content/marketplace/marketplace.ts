@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { InputComponent } from '../../../components/ui/input/input';
@@ -7,6 +7,7 @@ import { ButtonComponent } from '../../../components/ui/button/button';
 import { PageHeader } from '../../../components/page-header/page-header';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth';
+import { BookingService, Artisan } from '../../../services/booking.service';
 
 @Component({
   selector: 'app-marketplace',
@@ -15,15 +16,26 @@ import { AuthService } from '../../../services/auth';
   templateUrl: './marketplace.html',
   styleUrl: './marketplace.scss',
 })
-export class Marketplace implements OnInit {
+export class Marketplace implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
+  artisans: Artisan[] = [];
   private authSubscription?: Subscription;
-  constructor(private router: Router,
-    private authService: AuthService
+  
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private bookingService: BookingService
   ) { }
 
-  viewDetails(id: number) {
+  viewDetails(id: string) {
     this.router.navigate(['/content/market-place', id]);
+  }
+
+  bookArtisan(id: string) {
+    // Navigate to bookings page with artisan ID
+    this.router.navigate(['/account/bookings'], { 
+      queryParams: { artisanId: id } 
+    });
   }
   categoryOptions: AccountTypeOption[] = [
     { title: 'All Categories', value: 'all', description: 'Show all service categories', icon: 'bi-grid' },
@@ -42,44 +54,13 @@ export class Marketplace implements OnInit {
     { title: 'Price: High to Low', value: 'price_desc', description: 'Expensive options first', icon: 'bi-arrow-down' }
   ];
 
-  listings = [
-    {
-      id: 1,
-      category: 'Plumbing',
-      date: 'Dec 03',
-      title: 'Professional Plumbing Services',
-      description: 'I am a professional plumbing services provider with over 5 years of experience...',
-      priceRange: '₦2,000 - 5,000',
-      location: 'Sabo Bakin Zuwo Street, Gwarinpa, Nigeria',
-      image: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?q=80&w=2072&auto=format&fit=crop'
-    },
-    {
-      id: 2,
-      category: 'Electrical',
-      date: 'Nov 21',
-      title: 'Expert Electrical Repairs',
-      description: 'Highly skilled electrician available for home and office repairs. Wiring, installation, and maintenance.',
-      priceRange: '₦4,000 - 10,000',
-      location: '67, Zone D, Apo Resettlement, Abuja',
-      image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop'
-    },
-    {
-      id: 3,
-      category: 'Academic',
-      date: 'Nov 21',
-      title: 'Learn Academic Research',
-      description: 'Learn academic research with an experience and dedicated researcher. Thesis and project assistance.',
-      priceRange: '₦3,000 - 10,000',
-      location: 'Conference Center ABU Zaria',
-      image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop'
-    }
-  ];
-
   ngOnInit(): void {
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
-      // Filter menu items based on authentication status
       this.isAuthenticated = isAuth;
     });
+
+    // Load artisans from service
+    this.artisans = this.bookingService.getArtisans();
   }
 
   ngOnDestroy(): void {

@@ -1,1 +1,390 @@
-<p>progress works!</p>
+<div class="container-fluid p-0">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <app-page-header title="My Applications" description="Track your job applications and their status"></app-page-header>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-briefcase-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ totalApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Total Applications</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-clock-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ pendingApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Pending</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-eye-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ reviewingApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Reviewing</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success" style="width: 54px; height: 54px; flex-shrink: 0;">
+            <i class="bi bi-check-circle-fill fs-4"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ acceptedApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Accepted</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="card border shadow-sm rounded-4 p-2 mb-4 bg-body">
+    <div class="row g-3 mx-2 pt-2">
+      <div class="col-lg-4 col-md-6">
+        <app-input
+          label="Search"
+          placeholder="Search jobs, companies..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()">
+        </app-input>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <app-account-type-selector
+          label="Status"
+          placeholder="All Applications"
+          [accountTypes]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="onStatusChange()">
+        </app-account-type-selector>
+      </div>
+      <!-- <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2">
+        <app-button label="Clear" variant="secondary" [outline]="true" icon="bi-x-circle" (clicked)="onClear()"></app-button>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="d-none d-lg-block">
+    <div class="card border rounded-4 shadow-sm overflow-hidden bg-body">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="bg-body-tertiary">
+            <tr class="text-body small fw-bold text-uppercase border-bottom">
+              <th class="text-body ps-4 py-3">Job Title</th>
+              <th class="text-body py-3">Company</th>
+              <th class="text-body py-3">Location</th>
+              <th class="text-body py-3">Job Type</th>
+              <th class="text-body py-3">Applied Date</th>
+              <th class="text-body py-3">Status</th>
+              <th class="text-body pe-4 py-3 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let application of filteredApplications" class="border-bottom">
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="rounded overflow-hidden flex-shrink-0" style="width: 40px; height: 40px;">
+                    <img [src]="application.companyLogo" [alt]="application.company" class="w-100 h-100" style="object-fit: cover;">
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-body">{{ application.jobTitle }}</h6>
+                    <span class="text-body-secondary small" *ngIf="application.salary">{{ application.salary }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="text-body small">{{ application.company }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-geo-alt-fill text-primary small"></i>
+                  <span class="text-body small">{{ application.location }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge rounded-pill px-3 py-1 small" [ngClass]="getJobTypeClass(application.jobType)">
+                  {{ application.jobType | titlecase }}
+                </span>
+              </td>
+              <td>
+                <div class="text-body small">
+                  <div>{{ application.appliedDate | date:'MMM dd, yyyy' }}</div>
+                  <div class="text-body-secondary extra-small">{{ getDaysSinceApplication(application.appliedDate) }} days ago</div>
+                </div>
+              </td>
+              <td>
+                <span class="badge rounded-pill px-3 py-1 fw-medium border small" [ngClass]="getStatusClass(application.status)">
+                  <i class="bi me-1" [ngClass]="getStatusIcon(application.status)"></i>
+                  {{ getStatusText(application.status) }}
+                </span>
+              </td>
+              <td class="pe-4 text-end">
+                <div class="dropdown">
+                  <button class="btn btn-sm text-body" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item py-2 text-body" (click)="viewApplication(application)"><i class="bi bi-eye me-2 text-primary"></i>View Details</a></li>
+                    <li *ngIf="application.status === 'pending' || application.status === 'reviewing'"><hr class="dropdown-divider"></li>
+                    <li *ngIf="application.status === 'pending' || application.status === 'reviewing'"><a class="dropdown-item py-2 text-danger" (click)="withdrawApplication(application)"><i class="bi bi-x-circle me-2"></i>Withdraw</a></li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="filteredApplications.length === 0" class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+        <h5 class="mt-3 fw-bold text-body">No Applications Found</h5>
+        <p class="text-body-secondary">Try adjusting your filters</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="d-lg-none">
+    <div *ngFor="let application of filteredApplications" class="card border rounded-4 shadow-sm mb-3 bg-body" (click)="viewApplication(application)">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded overflow-hidden flex-shrink-0" style="width: 50px; height: 50px;">
+            <img [src]="application.companyLogo" [alt]="application.company" class="w-100 h-100" style="object-fit: cover;">
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1 text-body">{{ application.jobTitle }}</h6>
+            <div class="text-body extra-small mb-2">{{ application.company }}</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge rounded-pill px-2 py-1 extra-small" [ngClass]="getJobTypeClass(application.jobType)">
+                {{ application.jobType | titlecase }}
+              </span>
+              <span class="badge rounded-pill border px-2 py-1 fw-medium extra-small" [ngClass]="getStatusClass(application.status)">
+                <i class="bi me-1" [ngClass]="getStatusIcon(application.status)"></i>
+                {{ getStatusText(application.status) }}
+              </span>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm text-body" type="button" data-bs-toggle="dropdown" (click)="$event.stopPropagation()">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li><a class="dropdown-item py-2 text-body" (click)="viewApplication(application)"><i class="bi bi-eye me-2 text-primary"></i>View Details</a></li>
+              <li *ngIf="application.status === 'pending' || application.status === 'reviewing'"><hr class="dropdown-divider"></li>
+              <li *ngIf="application.status === 'pending' || application.status === 'reviewing'"><a class="dropdown-item py-2 text-danger" (click)="withdrawApplication(application)"><i class="bi bi-x-circle me-2"></i>Withdraw</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-end pt-2 border-top border">
+          <div>
+            <div class="text-body extra-small mb-1">Location</div>
+            <div class="text-body small fw-semibold">
+              <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ application.location }}
+            </div>
+          </div>
+          <div class="text-end">
+            <div class="text-body extra-small mb-1">Applied</div>
+            <div class="fw-semibold text-body small">{{ application.appliedDate | date:'MMM dd' }}</div>
+            <div class="text-body-secondary extra-small">{{ getDaysSinceApplication(application.appliedDate) }} days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="filteredApplications.length === 0" class="text-center py-5">
+      <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+      <h5 class="mt-3 fw-bold text-body">No Applications Found</h5>
+      <p class="text-body-secondary">Try adjusting your filters</p>
+    </div>
+  </div>
+</div>
+
+<!-- Application Details Modal -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" *ngIf="selectedApplication">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" style="max-height: calc(70vh - 80px);">
+    <div class="modal-content border-0 shadow-lg rounded-4 bg-body d-flex flex-column" style="max-height: 100%;">
+      <div class="modal-header border-bottom pb-2 pt-3 flex-shrink-0">
+        <h5 class="modal-title text-body fw-bold mb-0">Application Details</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body p-3 overflow-y-auto flex-grow-1" style="max-height: calc(70vh - 200px);">
+        <div class="row g-3">
+          <!-- Left Column - Job Info -->
+          <div class="col-md-5">
+            <div class="text-center mb-2">
+              <div class="rounded overflow-hidden mx-auto mb-2" style="width: 80px; height: 80px;">
+                <img [src]="selectedApplication.companyLogo" [alt]="selectedApplication.company" class="w-100 h-100" style="object-fit: cover;">
+              </div>
+              <h6 class="fw-bold text-body mb-1">{{ selectedApplication.jobTitle }}</h6>
+              <p class="text-body-secondary small mb-2">{{ selectedApplication.company }}</p>
+              <div class="d-flex align-items-center gap-2 justify-content-center mb-2">
+                <i class="bi bi-geo-alt-fill text-primary small"></i>
+                <span class="text-body small">{{ selectedApplication.location }}</span>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <span class="badge rounded-pill px-2 py-1 fw-medium border small" [ngClass]="getStatusClass(selectedApplication.status)">
+                <i class="bi me-1" [ngClass]="getStatusIcon(selectedApplication.status)"></i>
+                {{ getStatusText(selectedApplication.status) }}
+              </span>
+              <span class="badge rounded-pill px-2 py-1 small" [ngClass]="getJobTypeClass(selectedApplication.jobType)">
+                {{ selectedApplication.jobType | titlecase }}
+              </span>
+            </div>
+
+            <ul class="list-group list-group-flush rounded-3 border">
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Applied Date:</span>
+                <span class="small">{{ selectedApplication.appliedDate | date:'MMMM dd, yyyy' }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Days Since:</span>
+                <span class="small">{{ getDaysSinceApplication(selectedApplication.appliedDate) }} days</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3" *ngIf="selectedApplication.salary">
+                <span class="small fw-semibold">Salary:</span>
+                <span class="text-success fw-bold small">{{ selectedApplication.salary }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3">
+                <span class="small fw-semibold">Application Method:</span>
+                <span class="small">
+                  <i class="bi me-1" [ngClass]="getApplicationMethodIcon(selectedApplication.applicationMethod)"></i>
+                  {{ selectedApplication.applicationMethod | titlecase }}
+                </span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3" *ngIf="selectedApplication.responseDate">
+                <span class="small fw-semibold">Response Date:</span>
+                <span class="small">{{ selectedApplication.responseDate | date:'MMM dd, yyyy' }}</span>
+              </li>
+              <li class="list-group-item bg-body text-body d-flex justify-content-between align-items-center py-1 px-3" *ngIf="selectedApplication.interviewDate">
+                <span class="small fw-semibold">Interview Date:</span>
+                <span class="small">{{ selectedApplication.interviewDate | date:'MMM dd, yyyy h:mm a' }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Column - Details -->
+          <div class="col-md-7">
+            <div class="mb-2">
+              <h6 class="text-body fw-bold mb-1 small">Job Description</h6>
+              <p class="text-body-secondary small mb-0">{{ selectedApplication.jobDescription }}</p>
+            </div>
+
+            <div class="mb-2">
+              <h6 class="text-body fw-bold mb-1 small">Requirements</h6>
+              <ul class="list-unstyled mb-0">
+                <li *ngFor="let req of selectedApplication.requirements" class="d-flex align-items-start gap-2 mb-1">
+                  <i class="bi bi-check-circle-fill text-success mt-1 small"></i>
+                  <span class="text-body small">{{ req }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="mb-2" *ngIf="selectedApplication.applicationNotes">
+              <h6 class="text-body fw-bold mb-1 small">Application Notes</h6>
+              <div class="p-2 bg-body-tertiary rounded-3">
+                <p class="text-body small mb-0">{{ selectedApplication.applicationNotes }}</p>
+              </div>
+            </div>
+
+            <!-- Status-specific Information -->
+            <div *ngIf="selectedApplication.status === 'pending'" class="alert alert-warning border-warning py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-clock-fill"></i>
+                <span class="small fw-semibold">Pending Review</span>
+              </div>
+              <p class="mb-0 small">Your application is pending review by the hiring team. You'll be notified once they've reviewed it.</p>
+            </div>
+
+            <div *ngIf="selectedApplication.status === 'reviewing'" class="alert alert-info border-info py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-eye-fill"></i>
+                <span class="small fw-semibold">Under Review</span>
+              </div>
+              <p class="mb-0 small">Your application is currently being reviewed. The hiring team will get back to you soon.</p>
+            </div>
+
+            <div *ngIf="selectedApplication.status === 'shortlisted'" class="alert alert-primary border-primary py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-star-fill"></i>
+                <span class="small fw-semibold">Shortlisted</span>
+              </div>
+              <p class="mb-0 small">Congratulations! You've been shortlisted. The next step in the process will be communicated soon.</p>
+            </div>
+
+            <div *ngIf="selectedApplication.status === 'interview'" class="alert alert-success border-success py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-calendar-check"></i>
+                <span class="small fw-semibold">Interview Scheduled</span>
+              </div>
+              <p class="mb-1 small">Your interview is scheduled for {{ selectedApplication.interviewDate | date:'MMMM dd, yyyy' }} at {{ selectedApplication.interviewDate | date:'h:mm a' }}.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="small">Days until interview:</span>
+                <span class="badge bg-success px-2 py-1 small" *ngIf="selectedApplication.interviewDate">{{ getDaysUntilInterview(selectedApplication.interviewDate) }} days</span>
+              </div>
+            </div>
+
+            <div *ngIf="selectedApplication.status === 'accepted'" class="alert alert-success border-success py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-check-circle-fill"></i>
+                <span class="small fw-semibold">Application Accepted</span>
+              </div>
+              <p class="mb-0 small">Congratulations! Your application has been accepted. The company will contact you with next steps.</p>
+            </div>
+
+            <div *ngIf="selectedApplication.status === 'rejected'" class="alert alert-danger border-danger py-2 px-3 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-x-circle-fill"></i>
+                <span class="small fw-semibold">Application Rejected</span>
+              </div>
+              <p class="mb-1 small" *ngIf="selectedApplication.rejectionReason">
+                <strong>Reason:</strong> {{ selectedApplication.rejectionReason }}
+              </p>
+              <p class="mb-0 small" *ngIf="selectedApplication.responseDate">
+                Response received on {{ selectedApplication.responseDate | date:'MMM dd, yyyy' }}
+              </p>
+            </div>
+
+            <div class="pt-2 border-top">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-body-secondary">Application ID:</span>
+                <span class="small text-body">{{ selectedApplication.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top bg-body-tertiary py-2 px-4 flex-shrink-0">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-sm btn-danger" *ngIf="selectedApplication.status === 'pending' || selectedApplication.status === 'reviewing'" (click)="withdrawApplication(selectedApplication)">
+          <i class="bi bi-x-circle me-1"></i>Withdraw Application
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal" (click)="closeModal()"></div>
