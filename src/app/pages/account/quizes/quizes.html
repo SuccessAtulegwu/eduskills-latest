@@ -1,1 +1,285 @@
-<p>quizes works!</p>
+<div class="container-fluid p-0">
+  <!-- Header -->
+  <app-page-header title="Quizzes" description="Test your knowledge and create quiz questions"></app-page-header>
+
+  <!-- Tabs -->
+  <div class="card border rounded-4 shadow-sm mb-4 bg-body">
+    <ul class="nav nav-tabs border-bottom px-3 pt-3" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" 
+                [class.active]="activeTab === 'answer'"
+                [class.text-body]="activeTab === 'answer'"
+                type="button"
+                (click)="activeTab = 'answer'">
+          <i class="bi bi-question-circle me-2"></i>Answer Quizzes
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" 
+                [class.active]="activeTab === 'create'"
+                [class.text-body]="activeTab === 'create'"
+                type="button"
+                (click)="activeTab = 'create'">
+          <i class="bi bi-plus-circle me-2"></i>Create Quiz
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content p-4">
+      <!-- Answer Quizzes Tab -->
+      <div *ngIf="activeTab === 'answer'" class="tab-pane fade show active">
+        <div class="row">
+          <!-- Quiz List -->
+          <div class="col-lg-4 mb-4 mb-lg-0">
+            <h5 class="fw-bold text-body mb-3">Available Quizzes</h5>
+            <div *ngIf="getQuizGroups().length === 0" class="text-center py-5">
+              <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+              <p class="text-body-secondary mt-3">No quizzes available</p>
+            </div>
+            <div *ngFor="let group of getQuizGroups()" class="mb-3">
+              <h6 class="text-body fw-semibold small mb-2">{{ group.lectureTitle }}</h6>
+              <div class="list-group">
+                <button *ngFor="let quiz of group.quizzes"
+                        type="button"
+                        class="list-group-item list-group-item-action rounded-3 mb-2"
+                        [class.active]="selectedQuiz?.id === quiz.id"
+                        (click)="selectQuiz(quiz)">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h6 class="mb-1 small fw-semibold text-body">{{ quiz.question }}</h6>
+                      <p class="mb-0 extra-small text-body-secondary">{{ quiz.points }} points</p>
+                    </div>
+                    <i class="bi bi-chevron-right ms-2"></i>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiz Question -->
+          <div class="col-lg-8">
+            <div *ngIf="!selectedQuiz" class="text-center py-5">
+              <i class="bi bi-question-circle fs-1 text-body-secondary opacity-50"></i>
+              <h5 class="mt-3 fw-bold text-body">Select a Quiz</h5>
+              <p class="text-body-secondary">Choose a quiz question from the list to start</p>
+            </div>
+
+            <div *ngIf="selectedQuiz && !quizSubmitted" class="card border rounded-4 shadow-sm bg-body">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small mb-2">
+                      {{ selectedQuiz.lectureTitle }}
+                    </span>
+                    <h4 class="fw-bold text-body mb-0">{{ selectedQuiz.question }}</h4>
+                  </div>
+                  <span class="badge bg-info-subtle text-info rounded-pill px-3 py-1">
+                    {{ selectedQuiz.points }} points
+                  </span>
+                </div>
+
+                <div class="mb-4">
+                  <div *ngFor="let option of selectedQuiz.options; let i = index" 
+                       class="form-check mb-3 p-3 border rounded-3"
+                       [class.bg-primary-subtle]="userAnswers[selectedQuiz.id] === i"
+                       style="cursor: pointer;"
+                       (click)="selectAnswer(selectedQuiz.id, i)">
+                    <input class="form-check-input" 
+                           type="radio" 
+                           [name]="'quiz-' + selectedQuiz.id"
+                           [id]="'option-' + selectedQuiz.id + '-' + i"
+                           [value]="i"
+                           [checked]="userAnswers[selectedQuiz.id] === i"
+                           (change)="selectAnswer(selectedQuiz.id, i)">
+                    <label class="form-check-label text-body fw-medium" 
+                           [for]="'option-' + selectedQuiz.id + '-' + i"
+                           style="cursor: pointer;">
+                      {{ getOptionLetter(i) }}. {{ option }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <app-button label="Submit Answer" icon="bi-check-circle" variant="primary" (clicked)="submitQuiz()"></app-button>
+                  <app-button label="Reset" icon="bi-arrow-counterclockwise" variant="secondary" [outline]="true" (clicked)="resetQuiz()"></app-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quiz Result -->
+            <div *ngIf="selectedQuiz && quizSubmitted && quizResult" class="card border rounded-4 shadow-sm bg-body">
+              <div class="card-body p-4">
+                <div class="text-center mb-4">
+                  <div class="mb-3">
+                    <i class="bi" 
+                       [ngClass]="quizResult.percentage >= 70 ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+                       style="font-size: 4rem;"></i>
+                  </div>
+                  <h3 class="fw-bold text-body mb-2">
+                    {{ quizResult.percentage >= 70 ? 'Correct!' : 'Incorrect' }}
+                  </h3>
+                  <p class="text-body-secondary mb-0">
+                    You scored {{ quizResult.score }} out of {{ quizResult.totalPoints }} points
+                  </p>
+                  <div class="mt-3">
+                    <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">
+                      {{ quizResult.percentage.toFixed(0) }}%
+                    </span>
+                  </div>
+                </div>
+
+                <div class="alert" 
+                     [ngClass]="quizResult.percentage >= 70 ? 'alert-success' : 'alert-danger'"
+                     role="alert">
+                  <div class="d-flex align-items-start gap-2">
+                    <i class="bi" [ngClass]="quizResult.percentage >= 70 ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                    <div>
+                      <strong>{{ quizResult.percentage >= 70 ? 'Well done!' : 'Not quite right.' }}</strong>
+                      <p class="mb-0 mt-1 small">
+                        The correct answer is: <strong>{{ getOptionLetter(selectedQuiz.correctAnswer) }}. {{ selectedQuiz.options[selectedQuiz.correctAnswer] }}</strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-center">
+                  <app-button label="Try Another Quiz" icon="bi-arrow-left" variant="secondary" [outline]="true" (clicked)="selectedQuiz = null; quizSubmitted = false; quizResult = null"></app-button>
+                  <app-button label="Reset This Quiz" icon="bi-arrow-counterclockwise" variant="primary" (clicked)="resetQuiz()"></app-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Quiz Tab -->
+      <div *ngIf="activeTab === 'create'" class="tab-pane fade show active">
+        <div class="row">
+          <div class="col-lg-8 mx-auto">
+            <h5 class="fw-bold text-body mb-4">Create Quiz Question</h5>
+            
+            <form class="card border rounded-4 shadow-sm p-4 bg-body">
+              <div class="mb-3">
+                <app-input
+                  label="Lecture Title"
+                  placeholder="e.g., Introduction to Angular"
+                  [(ngModel)]="createQuizForm.lectureTitle"
+                  name="lectureTitle">
+                </app-input>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small">Question *</label>
+                <textarea class="form-control" 
+                          rows="3" 
+                          placeholder="Enter your question here..."
+                          [(ngModel)]="createQuizForm.question"
+                          name="question"
+                          required></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label text-body fw-semibold small mb-3">Options *</label>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <app-input
+                      label="Option A"
+                      placeholder="First option"
+                      [(ngModel)]="createQuizForm.option1"
+                      name="option1">
+                    </app-input>
+                  </div>
+                  <div class="col-md-6">
+                    <app-input
+                      label="Option B"
+                      placeholder="Second option"
+                      [(ngModel)]="createQuizForm.option2"
+                      name="option2">
+                    </app-input>
+                  </div>
+                  <div class="col-md-6">
+                    <app-input
+                      label="Option C"
+                      placeholder="Third option"
+                      [(ngModel)]="createQuizForm.option3"
+                      name="option3">
+                    </app-input>
+                  </div>
+                  <div class="col-md-6">
+                    <app-input
+                      label="Option D"
+                      placeholder="Fourth option"
+                      [(ngModel)]="createQuizForm.option4"
+                      name="option4">
+                    </app-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <app-account-type-selector
+                    label="Correct Answer"
+                    placeholder="Select correct answer"
+                    [accountTypes]="correctAnswerOptions"
+                    [(ngModel)]="createQuizForm.correctAnswer"
+                    name="correctAnswer">
+                  </app-account-type-selector>
+                </div>
+                <div class="col-md-6">
+                  <app-input
+                    label="Points"
+                    type="number"
+                    placeholder="10"
+                    [(ngModel)]="createQuizForm.points"
+                    name="points">
+                  </app-input>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <app-button label="Create Quiz" icon="bi-plus-circle" variant="primary" (clicked)="createQuiz()"></app-button>
+                <app-button label="Reset Form" icon="bi-arrow-counterclockwise" variant="secondary" [outline]="true" (clicked)="resetCreateForm()"></app-button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Created Quizzes List -->
+        <div class="mt-5">
+          <h5 class="fw-bold text-body mb-4">Created Quizzes</h5>
+          <div *ngIf="createdQuizzes.length === 0" class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+            <p class="text-body-secondary mt-3">No quizzes created yet</p>
+          </div>
+          <div class="row g-3">
+            <div *ngFor="let quiz of createdQuizzes" class="col-md-6 col-lg-4">
+              <div class="card border rounded-4 shadow-sm h-100 bg-body">
+                <div class="card-body p-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 extra-small">
+                      {{ quiz.lectureTitle }}
+                    </span>
+                    <button class="btn btn-sm text-danger" (click)="deleteQuiz(quiz.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                  <h6 class="fw-bold text-body small mb-2">{{ quiz.question }}</h6>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-body-secondary extra-small">
+                      Correct: {{ getOptionLetter(quiz.correctAnswer) }}
+                    </span>
+                    <span class="badge bg-info-subtle text-info rounded-pill px-2 py-1 extra-small">
+                      {{ quiz.points }} pts
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
