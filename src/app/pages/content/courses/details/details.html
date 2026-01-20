@@ -116,3 +116,13 @@
         </div>
     </ng-template>
 </div>
+
+<!-- Payment Modal -->
+<app-payment-modal
+  [showModal]="showPaymentModal"
+  [paymentDetails]="paymentDetails"
+  [paymentProvider]="'both'"
+  (close)="closePaymentModal()"
+  (payWithPaystack)="handlePaystackPayment($event)"
+  (payWithStripe)="handleStripePayment($event)">
+</app-payment-modal>
