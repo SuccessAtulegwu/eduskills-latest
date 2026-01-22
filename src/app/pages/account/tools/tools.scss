@@ -1,0 +1,264 @@
+.tools-container {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    // Tool Cards
+    .tool-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+
+        &:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .tool-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+
+            i {
+                font-size: 2.5rem;
+                color: white;
+            }
+
+            &.purple-gradient {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            &.green-gradient {
+                background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            }
+
+            &.cyan-gradient {
+                background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            }
+
+            &.orange-gradient {
+                background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);
+            }
+
+            &.blue-gradient {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            &.pink-gradient {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            &.teal-gradient {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            }
+
+            &.indigo-gradient {
+                background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+            }
+
+            &.red-gradient {
+                background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            }
+        }
+
+        &:hover .tool-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .tool-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .tool-btn {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+            i {
+                font-size: 1.1rem;
+            }
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+
+            &.purple-btn {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            &.green-btn {
+                background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            }
+
+            &.cyan-btn {
+                background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            }
+
+            &.orange-btn {
+                background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);
+            }
+
+            &.blue-btn {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            &.pink-btn {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            &.teal-btn {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            }
+
+            &.indigo-btn {
+                background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+            }
+
+            &.red-btn {
+                background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            }
+        }
+    }
+    // Animations
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    // Responsive Design
+    @media (max-width: 992px) {
+        padding: 1rem;
+
+        .tool-card {
+            padding: 1.5rem;
+
+            .tool-icon-wrapper {
+                width: 70px;
+                height: 70px;
+
+                i {
+                    font-size: 2rem;
+                }
+            }
+
+            .tool-title {
+                font-size: 1.1rem;
+            }
+
+            .tool-description {
+                font-size: 0.9rem;
+            }
+        }
+
+        .quick-tips-section {
+            padding: 1.5rem;
+
+            .quick-tips-header {
+                h2 {
+                    font-size: 1.5rem;
+                }
+
+                i {
+                    font-size: 1.5rem;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .tool-card {
+            .tool-btn {
+                font-size: 0.9rem;
+                padding: 0.65rem 1.25rem;
+            }
+        }
+
+        .quick-tips-section {
+            margin-top: 2rem;
+
+            .tip-card {
+                padding: 1.25rem;
+            }
+        }
+    }
+
+    @media (max-width: 576px) {
+        padding: 0.75rem;
+
+        .tool-card {
+            padding: 1.25rem;
+
+            .tool-icon-wrapper {
+                width: 60px;
+                height: 60px;
+
+                i {
+                    font-size: 1.75rem;
+                }
+            }
+        }
+
+        .quick-tips-section {
+            padding: 1.25rem;
+            border-radius: 16px;
+
+            .quick-tips-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+
+                h2 {
+                    font-size: 1.25rem;
+                }
+            }
+        }
+    }
+}

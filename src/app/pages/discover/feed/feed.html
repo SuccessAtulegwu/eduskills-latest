@@ -1,1 +1,101 @@
-<p>feed works!</p>
+<div class="feed-container" #feedScroll (scroll)="onScroll($event)">
+    <!-- Video Feed Items -->
+    <div class="video-feed-item" *ngFor="let video of videos; let i = index">
+        <!-- Video Player -->
+        <video [id]="'video-' + i" class="video-player" [src]="video.videoUrl" [poster]="video.thumbnailUrl" loop
+            playsinline preload="metadata" (click)="togglePlayPause(video, i, $event)"></video>
+
+        <!-- Play Button Overlay -->
+        <div class="play-button-overlay" *ngIf="!video.isPlaying" (click)="togglePlayPause(video, i, $event)">
+            <div class="play-button">
+                <i class="bi bi-play-fill"></i>
+            </div>
+        </div>
+
+        <!-- Video Overlay Content -->
+        <div class="video-overlay">
+            <!-- Top Gradient -->
+            <div class="gradient-top">
+                <!-- Fullscreen Button -->
+                <button class="fullscreen-btn" (click)="openFullscreen(video, i, $event)" title="Watch fullscreen">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+            </div>
+
+            <!-- Bottom Content -->
+            <div class="video-info">
+                <!-- Author Info -->
+                <div class="author-section">
+                    <div class="author-avatar">
+                        <img [src]="video.authorAvatar" [alt]="video.author">
+                    </div>
+                    <div class="author-details">
+                        <h3 class="author-name">{{ video.author }}</h3>
+                        <p class="video-meta">
+                            <span>{{ video.views }} views</span>
+                            <span class="separator">•</span>
+                            <span>{{ video.timeAgo }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Video Title & Description -->
+                <div class="video-text">
+                    <h2 class="video-title">{{ video.title }}</h2>
+                    <p class="video-description">{{ video.description }}</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Right Side) -->
+            <div class="action-buttons">
+                <!-- Like Button -->
+                <button class="action-btn" [class.active]="video.isLiked" (click)="toggleLike(video, $event)"
+                    title="Like">
+                    <i class="bi" [class.bi-heart-fill]="video.isLiked" [class.bi-heart]="!video.isLiked"></i>
+                    <span class="action-count">{{ formatNumber(video.likes) }}</span>
+                </button>
+
+                <!-- Dislike Button -->
+                <button class="action-btn" [class.active]="video.isDisliked" (click)="toggleDislike(video, $event)"
+                    title="Dislike">
+                    <i class="bi" [class.bi-hand-thumbs-down-fill]="video.isDisliked"
+                        [class.bi-hand-thumbs-down]="!video.isDisliked"></i>
+                </button>
+
+                <!-- Comment Button -->
+                <button class="action-btn" (click)="openComments(video, $event)" title="Comment">
+                    <i class="bi bi-chat-fill"></i>
+                    <span class="action-count">{{ formatNumber(video.comments) }}</span>
+                </button>
+
+                <!-- Share Button -->
+                <button class="action-btn" (click)="shareVideo(video, $event)" title="Share">
+                    <i class="bi bi-share-fill"></i>
+                    <span class="action-count">{{ formatNumber(video.shares) }}</span>
+                </button>
+
+                <!-- Favorite Button -->
+                <button class="action-btn" [class.active]="video.isFavorited" (click)="toggleFavorite(video, $event)"
+                    title="Add to favorites">
+                    <i class="bi" [class.bi-bookmark-fill]="video.isFavorited"
+                        [class.bi-bookmark]="!video.isFavorited"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="navigation-buttons" *ngIf="videos.length > 1">
+        <button class="nav-btn nav-up" *ngIf="currentVideoIndex > 0" (click)="scrollToVideo('up')"
+            title="Previous video">
+            <i class="bi bi-chevron-up"></i>
+        </button>
+        <button class="nav-btn nav-down" *ngIf="currentVideoIndex < videos.length - 1" (click)="scrollToVideo('down')"
+            title="Next video">
+            <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+
+    <!-- Video Counter -->
+    <div class="video-counter" *ngIf="videos.length > 0">
+        {{ currentVideoIndex + 1 }} / {{ videos.length }}
+    </div>
+</div>
