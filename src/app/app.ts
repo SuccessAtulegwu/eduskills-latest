@@ -10,5 +10,5 @@ import { ConfirmationModalComponent } from './components/ui/confirmation-modal/c
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('EduSkill');
+  protected readonly title = signal('SkillShow');
 }
