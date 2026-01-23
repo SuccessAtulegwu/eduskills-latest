@@ -86,7 +86,19 @@ export class VideoCard {
     this.isLoading = true;
   }
 
-  onVideoClick(){
+  onVideoClick(event?: Event){
+    // Prevent default video behavior (especially on iOS)
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    // Pause the video before navigating
+    if (this.videoElement && this.videoElement.nativeElement) {
+      const video = this.videoElement.nativeElement;
+      video.pause();
+    }
+    
     // Navigate to video viewer
     const videosToPass = this.allVideos.length > 0 ? this.allVideos : [this.data];
     const indexToPass = this.allVideos.length > 0 ? this.videoIndex : 0;

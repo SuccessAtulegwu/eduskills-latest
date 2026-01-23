@@ -1,19 +1,120 @@
 <div class="follow-container">
-     <app-page-header title="Following" description="Videos from creators you follow"></app-page-header>
+     <app-page-header title="Connections" description="Manage your followers, following, and friends"></app-page-header>
 
-     <div class="px-3 px-md-4 mt-5">
-          <div class="alert alert-primary d-flex flex-column gap-3 rounded-4 border-0 shadow-sm p-4" role="alert">
-               <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-info-circle fs-4 text-primary"></i>
-                    <span class="fw-semibold">You're not following anyone yet. Explore creators to find content you
-                         like!</span>
-               </div>
-               <div>
-                    <app-button label="Explore Now" icon="bi-compass" customClass="custom-gradient-btn px-4 py-2"
-                         (clicked)="onExplore()"></app-button>
+     <div class="px-3 px-md-4 mt-4">
+          <!-- Tab Navigation -->
+          <div class="tabs-wrapper">
+               <div class="tabs-container">
+                    <button class="tab-button" [class.active]="activeTab() === 'following'"
+                         (click)="setActiveTab('following')">
+                         <i class="bi bi-person-check"></i>
+                         <span>Following</span>
+                         <span class="badge">{{ following().length }}</span>
+                    </button>
+                    <button class="tab-button" [class.active]="activeTab() === 'followers'"
+                         (click)="setActiveTab('followers')">
+                         <i class="bi bi-people"></i>
+                         <span>Followers</span>
+                         <span class="badge">{{ followers().length }}</span>
+                    </button>
+                    <button class="tab-button" [class.active]="activeTab() === 'friends'"
+                         (click)="setActiveTab('friends')">
+                         <i class="bi bi-heart"></i>
+                         <span>Friends</span>
+                         <span class="badge">{{ friends().length }}</span>
+                    </button>
                </div>
           </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content-wrapper mt-4">
+               @if (getCurrentList().length === 0) {
+               <div class="empty-state">
+                    <div class="empty-icon">
+                         @if (activeTab() === 'following') {
+                         <i class="bi bi-person-plus"></i>
+                         } @else if (activeTab() === 'followers') {
+                         <i class="bi bi-people"></i>
+                         } @else {
+                         <i class="bi bi-heart"></i>
+                         }
+                    </div>
+                    <h4 class="empty-title">
+                         @if (activeTab() === 'following') {
+                         You're not following anyone yet
+                         } @else if (activeTab() === 'followers') {
+                         No followers yet
+                         } @else {
+                         No friends yet
+                         }
+                    </h4>
+                    <p class="empty-description">
+                         @if (activeTab() === 'following') {
+                         Explore creators to find content you like!
+                         } @else if (activeTab() === 'followers') {
+                         Share your content to attract followers
+                         } @else {
+                         Connect with people to build friendships
+                         }
+                    </p>
+                    <app-button label="Explore Now" icon="bi-compass" customClass="custom-gradient-btn px-4 py-2"
+                         (clicked)="onExplore()">
+                    </app-button>
+               </div>
+               } @else {
+               <div class="users-grid">
+                    @for (user of getCurrentList(); track user.id) {
+                    <div class="user-card">
+                         <div class="user-card-header">
+                              <img [src]="user.avatar" [alt]="user.name" class="user-avatar">
+                              <div class="user-info">
+                                   <h5 class="user-name">{{ user.name }}</h5>
+                                   <p class="user-username">{{ user.username }}</p>
+                              </div>
+                         </div>
+
+                         <p class="user-bio">{{ user.bio }}</p>
+
+                         <div class="user-stats">
+                              <div class="stat">
+                                   <span class="stat-value">{{ user.followers | number }}</span>
+                                   <span class="stat-label">Followers</span>
+                              </div>
+                              <div class="stat-divider"></div>
+                              <div class="stat">
+                                   <span class="stat-value">{{ user.following | number }}</span>
+                                   <span class="stat-label">Following</span>
+                              </div>
+                         </div>
+
+                         <div class="user-actions">
+                              @if (activeTab() === 'followers') {
+                              <button class="btn-action btn-primary-action" [class.btn-following]="user.isFollowing"
+                                   (click)="onFollowToggle(user)">
+                                   <i [class]="user.isFollowing ? 'bi bi-person-check' : 'bi bi-person-plus'"></i>
+                                   {{ user.isFollowing ? 'Following' : 'Follow Back' }}
+                              </button>
+                              } @else if (activeTab() === 'following') {
+                              <button class="btn-action btn-secondary-action" (click)="onFollowToggle(user)">
+                                   <i class="bi bi-person-dash"></i>
+                                   Unfollow
+                              </button>
+                              } @else {
+                              <button class="btn-action btn-danger-action" (click)="onRemoveFriend(user)">
+                                   <i class="bi bi-person-x"></i>
+                                   Remove
+                              </button>
+                              }
+
+                              <button class="btn-action btn-outline-action" (click)="onViewProfile(user)">
+                                   <i class="bi bi-eye"></i>
+                                   View Profile
+                              </button>
+                         </div>
+                    </div>
+                    }
+               </div>
+               }
+          </div>
      </div>
-
-
 </div>

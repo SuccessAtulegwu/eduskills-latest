@@ -1,0 +1,230 @@
+<div class="user-profile-container" *ngIf="!isLoading()">
+    <!-- Cover Image -->
+    <div class="cover-section">
+        <img [src]="userProfile()?.coverImage" alt="Cover" class="cover-image">
+        <button class="btn-back" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i>
+            Back
+        </button>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="profile-header-content">
+                <div class="profile-avatar-section">
+                    <img [src]="userProfile()?.avatar" [alt]="userProfile()?.name" class="profile-avatar">
+                </div>
+
+                <div class="profile-info-section">
+                    <div class="profile-main-info">
+                        <div>
+                            <h1 class="profile-name">{{ userProfile()?.name }}</h1>
+                            <p class="profile-username">{{ userProfile()?.username }}</p>
+                        </div>
+
+                        <div class="profile-actions">
+                            <button class="btn-action btn-follow" [class.following]="userProfile()?.isFollowing"
+                                (click)="onFollowToggle()">
+                                <i
+                                    [class]="userProfile()?.isFollowing ? 'bi bi-person-check' : 'bi bi-person-plus'"></i>
+                                {{ userProfile()?.isFollowing ? 'Following' : 'Follow' }}
+                            </button>
+                            <button class="btn-action btn-friend" [class.is-friend]="userProfile()?.isFriend"
+                                (click)="onAddFriend()">
+                                <i [class]="userProfile()?.isFriend ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                                {{ userProfile()?.isFriend ? 'Friends' : 'Add Friend' }}
+                            </button>
+                            <button class="btn-action btn-message" (click)="onMessage()">
+                                <i class="bi bi-chat-dots"></i>
+                                Message
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="profile-bio">{{ userProfile()?.bio }}</p>
+
+                    <div class="profile-meta">
+                        <div class="meta-item" *ngIf="userProfile()?.location">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>{{ userProfile()?.location }}</span>
+                        </div>
+                        <div class="meta-item" *ngIf="userProfile()?.website">
+                            <i class="bi bi-link-45deg"></i>
+                            <a [href]="'https://' + userProfile()?.website" target="_blank">{{ userProfile()?.website
+                                }}</a>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-calendar"></i>
+                            <span>Joined {{ userProfile()?.joinedDate }}</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ formatNumber(userProfile()?.followers || 0) }}</span>
+                            <span class="stat-label">Followers</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ formatNumber(userProfile()?.following || 0) }}</span>
+                            <span class="stat-label">Following</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ formatNumber(userProfile()?.friends || 0) }}</span>
+                            <span class="stat-label">Friends</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="tabs-section">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="tabs-container">
+                <button class="tab-button" [class.active]="activeTab() === 'videos'" (click)="setActiveTab('videos')">
+                    <i class="bi bi-play-circle"></i>
+                    <span>Videos</span>
+                    <span class="badge">{{ videos().length }}</span>
+                </button>
+                <button class="tab-button" [class.active]="activeTab() === 'followers'"
+                    (click)="setActiveTab('followers')">
+                    <i class="bi bi-people"></i>
+                    <span>Followers</span>
+                    <span class="badge">{{ formatNumber(userProfile()?.followers || 0) }}</span>
+                </button>
+                <button class="tab-button" [class.active]="activeTab() === 'following'"
+                    (click)="setActiveTab('following')">
+                    <i class="bi bi-person-check"></i>
+                    <span>Following</span>
+                    <span class="badge">{{ formatNumber(userProfile()?.following || 0) }}</span>
+                </button>
+                <button class="tab-button" [class.active]="activeTab() === 'friends'" (click)="setActiveTab('friends')">
+                    <i class="bi bi-heart"></i>
+                    <span>Friends</span>
+                    <span class="badge">{{ formatNumber(userProfile()?.friends || 0) }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content-section">
+        <div class="container-fluid px-3 px-md-4">
+            <!-- Videos Tab -->
+            @if (activeTab() === 'videos') {
+            <div class="videos-grid">
+                @for (video of videos(); track video.id) {
+                <div class="video-card" (click)="onVideoClick(video)">
+                    <div class="video-thumbnail">
+                        <img [src]="video.thumbnail" [alt]="video.title">
+                        <div class="video-duration">{{ video.duration }}</div>
+                        <div class="video-overlay">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </div>
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title">{{ video.title }}</h3>
+                        <div class="video-stats">
+                            <span><i class="bi bi-eye"></i> {{ formatNumber(video.views) }}</span>
+                            <span><i class="bi bi-heart"></i> {{ formatNumber(video.likes) }}</span>
+                            <span><i class="bi bi-clock"></i> {{ video.uploadDate }}</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Followers Tab -->
+            @if (activeTab() === 'followers') {
+            <div class="connections-grid">
+                @for (follower of followers(); track follower.id) {
+                <div class="connection-card">
+                    <img [src]="follower.avatar" [alt]="follower.name" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4 class="connection-name">{{ follower.name }}</h4>
+                        <p class="connection-username">{{ follower.username }}</p>
+                        <p class="connection-bio">{{ follower.bio }}</p>
+                    </div>
+                    <div class="connection-actions">
+                        <button class="btn-connection btn-follow-sm" [class.following]="follower.isFollowing"
+                            (click)="onFollowConnection(follower)">
+                            <i [class]="follower.isFollowing ? 'bi bi-person-check' : 'bi bi-person-plus'"></i>
+                            {{ follower.isFollowing ? 'Following' : 'Follow' }}
+                        </button>
+                        <button class="btn-connection btn-view" (click)="onConnectionClick(follower)">
+                            <i class="bi bi-eye"></i>
+                            View
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Following Tab -->
+            @if (activeTab() === 'following') {
+            <div class="connections-grid">
+                @for (user of following(); track user.id) {
+                <div class="connection-card">
+                    <img [src]="user.avatar" [alt]="user.name" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4 class="connection-name">{{ user.name }}</h4>
+                        <p class="connection-username">{{ user.username }}</p>
+                        <p class="connection-bio">{{ user.bio }}</p>
+                    </div>
+                    <div class="connection-actions">
+                        <button class="btn-connection btn-unfollow" (click)="onFollowConnection(user)">
+                            <i class="bi bi-person-dash"></i>
+                            Unfollow
+                        </button>
+                        <button class="btn-connection btn-view" (click)="onConnectionClick(user)">
+                            <i class="bi bi-eye"></i>
+                            View
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Friends Tab -->
+            @if (activeTab() === 'friends') {
+            <div class="connections-grid">
+                @for (friend of friends(); track friend.id) {
+                <div class="connection-card">
+                    <img [src]="friend.avatar" [alt]="friend.name" class="connection-avatar">
+                    <div class="connection-info">
+                        <h4 class="connection-name">{{ friend.name }}</h4>
+                        <p class="connection-username">{{ friend.username }}</p>
+                        <p class="connection-bio">{{ friend.bio }}</p>
+                    </div>
+                    <div class="connection-actions">
+                        <button class="btn-connection btn-message-sm">
+                            <i class="bi bi-chat-dots"></i>
+                            Message
+                        </button>
+                        <button class="btn-connection btn-view" (click)="onConnectionClick(friend)">
+                            <i class="bi bi-eye"></i>
+                            View
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading()">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="loading-text">Loading profile...</p>
+</div>
