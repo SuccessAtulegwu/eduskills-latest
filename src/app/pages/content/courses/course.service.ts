@@ -1,25 +1,24 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+    CreateCourseRequest,
+    UpdateCourseRequest,
+    CourseResponse,
+    GetCoursesQueryParams,
+    CourseModel
+} from '../../../models/course.model';
 
-export interface CourseModel {
-    id: number;
-    title: string;
-    image: string;
-    price: number;
-    level: string; // 'Beginner', 'Intermediate', 'Advanced'
-    views: number;
-    enrolled: number;
-    category: string;
-    description?: string;
-    creator?: string;
-    duration?: string;
-    createdDate?: string;
-}
+// API Base URL - Update this with your actual API base URL
+const API_BASE_URL = '/api/v1';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CourseService {
+    private apiUrl = API_BASE_URL;
 
+    // Fallback courses for backward compatibility
     private courses: CourseModel[] = [
         {
             id: 1,
@@ -107,13 +106,179 @@ export class CourseService {
         }
     ];
 
-    constructor() { }
+    constructor(private http: HttpClient) { }
 
+    /**
+     * Create a new course
+     * POST /api/v1/Course
+     */
+    createCourse(courseData: CreateCourseRequest): Observable<CourseResponse> {
+        const formData = new FormData();
+        
+        // Add required fields
+        formData.append('title', courseData.title);
+        formData.append('description', courseData.description);
+        
+        // Add optional fields if provided
+        if (courseData.price !== undefined) {
+            formData.append('price', courseData.price.toString());
+        }
+        if (courseData.durationHours !== undefined) {
+            formData.append('durationHours', courseData.durationHours.toString());
+        }
+        if (courseData.categoryId !== undefined) {
+            formData.append('categoryId', courseData.categoryId.toString());
+        }
+        if (courseData.level) {
+            formData.append('level', courseData.level);
+        }
+        if (courseData.examType !== undefined) {
+            formData.append('examType', courseData.examType.toString());
+        }
+        if (courseData.certificationEnabled !== undefined) {
+            formData.append('certificationEnabled', courseData.certificationEnabled.toString());
+        }
+        if (courseData.certificateTemplateId !== undefined) {
+            formData.append('certificateTemplateId', courseData.certificateTemplateId.toString());
+        }
+        if (courseData.passingScore !== undefined) {
+            formData.append('passingScore', courseData.passingScore.toString());
+        }
+        
+        // Handle thumbnail file
+        if (courseData.thumbnailFile) {
+            if (courseData.thumbnailFile instanceof File) {
+                formData.append('thumbnailFile', courseData.thumbnailFile);
+            } else {
+                // If it's a base64 string, convert it to a blob
+                const byteString = atob(courseData.thumbnailFile.split(',')[1] || courseData.thumbnailFile);
+                const mimeString = courseData.thumbnailFile.split(',')[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                formData.append('thumbnailFile', blob, 'thumbnail.png');
+            }
+        }
+
+        return this.http.post<CourseResponse>(`${this.apiUrl}/Course`, formData);
+    }
+
+    /**
+     * Get all courses with optional query parameters
+     * GET /api/v1/Course
+     */
+    getAllCourses(params?: GetCoursesQueryParams): Observable<CourseResponse[]> {
+        let httpParams = new HttpParams();
+        
+        if (params) {
+            if (params.categoryId !== undefined) {
+                httpParams = httpParams.set('categoryId', params.categoryId.toString());
+            }
+            if (params.level) {
+                httpParams = httpParams.set('level', params.level);
+            }
+            if (params.examType !== undefined) {
+                httpParams = httpParams.set('examType', params.examType.toString());
+            }
+            if (params.searchTerm) {
+                httpParams = httpParams.set('searchTerm', params.searchTerm);
+            }
+            if (params.maxPrice !== undefined) {
+                httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
+            }
+            if (params.sortBy) {
+                httpParams = httpParams.set('sortBy', params.sortBy);
+            }
+        }
+
+        return this.http.get<CourseResponse[]>(`${this.apiUrl}/Course`, { params: httpParams });
+    }
+
+    /**
+     * Get course by ID
+     * GET /api/v1/Course/{id}
+     */
+    getCourseById(id: number): Observable<CourseResponse> {
+        return this.http.get<CourseResponse>(`${this.apiUrl}/Course/${id}`);
+    }
+
+    /**
+     * Update course by ID
+     * PUT /api/v1/Course/{id}
+     */
+    updateCourse(id: number, courseData: UpdateCourseRequest): Observable<CourseResponse> {
+        const formData = new FormData();
+        
+        // Add fields if provided
+        if (courseData.title !== undefined) {
+            formData.append('title', courseData.title);
+        }
+        if (courseData.description !== undefined) {
+            formData.append('description', courseData.description);
+        }
+        if (courseData.price !== undefined) {
+            formData.append('price', courseData.price.toString());
+        }
+        if (courseData.durationHours !== undefined) {
+            formData.append('durationHours', courseData.durationHours.toString());
+        }
+        if (courseData.categoryId !== undefined) {
+            formData.append('categoryId', courseData.categoryId.toString());
+        }
+        if (courseData.level !== undefined) {
+            formData.append('level', courseData.level);
+        }
+        if (courseData.examType !== undefined) {
+            formData.append('examType', courseData.examType.toString());
+        }
+        if (courseData.certificationEnabled !== undefined) {
+            formData.append('certificationEnabled', courseData.certificationEnabled.toString());
+        }
+        if (courseData.certificateTemplateId !== undefined) {
+            formData.append('certificateTemplateId', courseData.certificateTemplateId.toString());
+        }
+        if (courseData.passingScore !== undefined) {
+            formData.append('passingScore', courseData.passingScore.toString());
+        }
+        
+        // Handle thumbnail file
+        if (courseData.thumbnailFile) {
+            if (courseData.thumbnailFile instanceof File) {
+                formData.append('thumbnailFile', courseData.thumbnailFile);
+            } else {
+                // If it's a base64 string, convert it to a blob
+                const byteString = atob(courseData.thumbnailFile.split(',')[1] || courseData.thumbnailFile);
+                const mimeString = courseData.thumbnailFile.split(',')[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                formData.append('thumbnailFile', blob, 'thumbnail.png');
+            }
+        }
+
+        return this.http.put<CourseResponse>(`${this.apiUrl}/Course/${id}`, formData);
+    }
+
+    /**
+     * Delete course by ID
+     * DELETE /api/v1/Course/{id}
+     */
+    deleteCourse(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/Course/${id}`);
+    }
+
+    // Legacy methods for backward compatibility
     getCourses(): CourseModel[] {
         return this.courses;
     }
 
-    getCourseById(id: number): CourseModel | undefined {
+    getCourseByIdLegacy(id: number): CourseModel | undefined {
         return this.courses.find(course => course.id === id);
     }
 }

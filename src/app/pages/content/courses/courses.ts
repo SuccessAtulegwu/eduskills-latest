@@ -6,7 +6,9 @@ import { PageHeader } from '../../../components/page-header/page-header';
 import { AccountTypeSelectorComponent, AccountTypeOption } from '../../../components/account-type-selector/account-type-selector.component';
 import { InputComponent } from '../../../components/ui/input/input';
 import { ButtonComponent } from '../../../components/ui/button/button';
-import { CourseService, CourseModel } from './course.service';
+import { CourseService } from './course.service';
+import { CourseModel, CourseResponse, GetCoursesQueryParams } from '../../../models/course.model';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-courses',
@@ -63,15 +65,71 @@ export class Courses implements OnInit {
 
   courses: CourseModel[] = [];
   filteredCourses: CourseModel[] = [];
+  apiCourses: CourseResponse[] = [];
+  isLoading: boolean = false;
+  useApi: boolean = true; // Toggle between API and mock data
 
   constructor(
     private router: Router,
-    private courseService: CourseService
+    private courseService: CourseService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
-    this.courses = this.courseService.getCourses();
-    this.filteredCourses = [...this.courses];
+    this.loadCourses();
+  }
+
+  loadCourses() {
+    if (this.useApi) {
+      this.isLoading = true;
+      this.courseService.getAllCourses().subscribe({
+        next: (courses) => {
+          this.apiCourses = courses;
+          // Convert API courses to CourseModel format for display
+          this.courses = this.convertToCourseModel(courses);
+          this.filteredCourses = [...this.courses];
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading courses:', error);
+          this.toastService.show('Failed to load courses. Using fallback data.', 'warning');
+          // Fallback to mock data
+          this.courses = this.courseService.getCourses();
+          this.filteredCourses = [...this.courses];
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Use mock data
+      this.courses = this.courseService.getCourses();
+      this.filteredCourses = [...this.courses];
+    }
+  }
+
+  // Convert API CourseResponse to CourseModel for display compatibility
+  private convertToCourseModel(courses: CourseResponse[]): CourseModel[] {
+    return courses.map((course, index) => ({
+      id: course.id,
+      title: course.title,
+      image: course.thumbnailUrl || '/assets/images/placeholder.jpg',
+      price: course.price || 0,
+      level: course.level || 'Beginner',
+      views: 0, // These fields might not be in API response
+      enrolled: 0,
+      category: this.getCategoryName(course.categoryId),
+      description: course.description,
+      duration: course.durationHours ? `${course.durationHours} hours` : undefined,
+      createdDate: course.createdAt ? new Date(course.createdAt).toLocaleDateString() : undefined
+    }));
+  }
+
+  private getCategoryName(categoryId?: number): string {
+    const categoryMap: { [key: number]: string } = {
+      1: 'Development',
+      2: 'Design',
+      3: 'Business'
+    };
+    return categoryMap[categoryId || 1] || 'Other';
   }
 
   createCourse() {
@@ -79,15 +137,103 @@ export class Courses implements OnInit {
   }
 
   onFilter() {
-    console.log('Filtering courses', {
-      category: this.selectedCategory,
-      level: this.selectedLevel,
-      exam: this.selectedExamType,
-      price: this.maxPrice,
-      search: this.searchQuery,
-      sort: this.selectedSort
-    });
-    // Implement actual filter logic here if needed, or just mock it
+    if (this.useApi) {
+      // Use API filtering
+      this.isLoading = true;
+      
+      const queryParams: GetCoursesQueryParams = {};
+      
+      if (this.selectedCategory !== 'all') {
+        queryParams.categoryId = this.getCategoryId(this.selectedCategory);
+      }
+      if (this.selectedLevel !== 'all') {
+        queryParams.level = this.selectedLevel;
+      }
+      if (this.selectedExamType !== 'all') {
+        queryParams.examType = this.getExamTypeNumber(this.selectedExamType);
+      }
+      if (this.searchQuery.trim()) {
+        queryParams.searchTerm = this.searchQuery.trim();
+      }
+      if (this.maxPrice) {
+        queryParams.maxPrice = parseFloat(this.maxPrice);
+      }
+      if (this.selectedSort !== 'recent') {
+        queryParams.sortBy = this.getSortByField(this.selectedSort);
+      }
+
+      this.courseService.getAllCourses(queryParams).subscribe({
+        next: (courses) => {
+          this.apiCourses = courses;
+          this.courses = this.convertToCourseModel(courses);
+          this.filteredCourses = [...this.courses];
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error filtering courses:', error);
+          this.toastService.show('Failed to filter courses', 'error');
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Client-side filtering for mock data
+      let filtered = [...this.courses];
+
+      if (this.selectedCategory !== 'all') {
+        filtered = filtered.filter(c => c.category.toLowerCase() === this.selectedCategory);
+      }
+      if (this.selectedLevel !== 'all') {
+        filtered = filtered.filter(c => c.level.toLowerCase() === this.selectedLevel);
+      }
+      if (this.searchQuery.trim()) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter(c => 
+          c.title.toLowerCase().includes(query) || 
+          c.description?.toLowerCase().includes(query)
+        );
+      }
+      if (this.maxPrice) {
+        const max = parseFloat(this.maxPrice);
+        filtered = filtered.filter(c => c.price <= max);
+      }
+
+      // Sort
+      if (this.selectedSort === 'price_low') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (this.selectedSort === 'price_high') {
+        filtered.sort((a, b) => b.price - a.price);
+      }
+
+      this.filteredCourses = filtered;
+    }
+  }
+
+  private getCategoryId(category: string): number {
+    const categoryMap: { [key: string]: number } = {
+      'development': 1,
+      'design': 2,
+      'business': 3,
+      'marketing': 4
+    };
+    return categoryMap[category] || 1;
+  }
+
+  private getExamTypeNumber(examType: string): number {
+    const examTypeMap: { [key: string]: number } = {
+      'waec': 1,
+      'jamb': 2,
+      'neco': 3
+    };
+    return examTypeMap[examType] || 0;
+  }
+
+  private getSortByField(sort: string): string {
+    const sortMap: { [key: string]: string } = {
+      'price_low': 'price',
+      'price_high': 'price',
+      'recent': 'createdAt'
+    };
+    return sortMap[sort] || 'createdAt';
   }
 
   onClear() {

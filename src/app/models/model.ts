@@ -1,6 +1,3 @@
-
-
-
 export interface User {
   id: string;
   firstname:string;
@@ -24,3 +21,6 @@ export interface signUpDto {
   phone:string;
   email: string;
 }
+
+// Re-export course models for convenience
+export * from './course.model';
