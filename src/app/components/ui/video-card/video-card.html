@@ -1,5 +1,5 @@
 <div class="video-card" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
-  <div class="video-container" (click)="onVideoClick()">
+  <div class="video-container" (click)="onVideoClick($event)">
     <!-- Thumbnail (shown when not hovering) -->
     <div class="thumbnail" *ngIf="!isHovered && data.thumbnailUrl">
       <img [src]="data.thumbnailUrl" [alt]="data.title" />
@@ -7,8 +7,8 @@
 
     <!-- Video element (shown when hovering) -->
     <video #videoElement class="video-player" [class.visible]="isHovered" [src]="data.videoUrl"
-      [poster]="data.thumbnailUrl" muted loop preload="none" (loadeddata)="onVideoLoadedData()"
-      (loadstart)="onVideoLoadStart()"></video>
+      [poster]="data.thumbnailUrl" muted loop preload="none" playsinline webkit-playsinline
+      (loadeddata)="onVideoLoadedData()" (loadstart)="onVideoLoadStart()" (click)="$event.preventDefault()"></video>
 
     <!-- Loading spinner (Facebook style) -->
     <div class="loading-spinner" *ngIf="isHovered && isLoading">

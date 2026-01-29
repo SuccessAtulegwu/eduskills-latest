@@ -175,6 +175,10 @@ export const routes: Routes = [
             path: 'following',
             canActivate: [authGuard],
             loadComponent: () => import('./pages/discover/following/following').then(m => m.Following)
+          },
+          {
+            path: 'user-profile/:id',
+            loadComponent: () => import('./pages/discover/user-profile/user-profile').then(m => m.UserProfile)
           }
         ]
       },

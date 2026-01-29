@@ -3,6 +3,7 @@
   top: 0;
   left: 0;
   height: 100vh;
+  height: 100dvh; // Dynamic viewport height for mobile browsers
   width: var(--sidebar-width);
   background-color: var(--sidebar-bg);
   color: var(--sidebar-text);
@@ -11,6 +12,8 @@
   transition: all 0.3s ease;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
   //box-shadow: var(--shadow);
 
   // Mobile: Sidebar takes 80% width and full device height
@@ -19,6 +22,8 @@
     max-width: 320px;
     top: 0;
     height: 100vh;
+    height: 100dvh; // Dynamic viewport height
+    -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
   }
 
   @media (min-width: 992px) {
@@ -159,6 +164,15 @@
 
 .sidebar-nav {
   padding: 1rem 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+  
+  // Ensure nav can scroll independently on mobile
+  @media (max-width: 991px) {
+    min-height: 0; // Allow flexbox to shrink
+  }
 }
 
 .nav-link {

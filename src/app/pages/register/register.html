@@ -95,6 +95,12 @@
                 </div>
             </div>
 
+            <!-- Artisan Registration Info -->
+            <div class="alert alert-info artisan-info" *ngIf="f['accountType'].value === 'artisan'">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Artisan Registration:</strong> After successful registration, you'll be prompted to create your
+                artisan profile and upload your skills and certificates.
+            </div>
 
             <!-- Content Creator Checkbox -->
             <div class="mb-3 form-check">
@@ -131,5 +137,5 @@
 
         </form>
     </div>
-     <app-theme-toggle></app-theme-toggle>
+    <app-theme-toggle></app-theme-toggle>
 </div>
