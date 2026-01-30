@@ -4,14 +4,16 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { AuthApiService } from '../../services/auth-api.service';
 import { signUpDto } from '../../models/model';
 import { ThemeService } from '../../services/theme';
 import { ThemeToggleComponent } from '../../components/ui/theme-toggle/theme-toggle.component';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AccountTypeSelectorComponent,ThemeToggleComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AccountTypeSelectorComponent, ThemeToggleComponent],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
@@ -28,7 +30,9 @@ export class Register implements OnInit {
     private formBuilder: FormBuilder,
     private router: Router,
     private authService: AuthService,
+    private authApiService: AuthApiService,
     private themeService: ThemeService,
+    private toastService: ToastService
   ) {
     this.registerForm = this.formBuilder.group({
       firstName: ['', Validators.required],
@@ -43,11 +47,11 @@ export class Register implements OnInit {
   }
 
   accountTypes: AccountTypeOption[] = [
-        { title: 'Student', description: "I'm here to learn", value: 'student', icon: 'bi-mortarboard' },
-        { title: 'Artisan', description: "I provide service", value: 'artisan', icon: 'bi-tools' },
-        { title: 'Employer', description: "I'm hiring", value: 'employer', icon: 'bi-briefcase' },
-        { title: 'General User', description: "Just simpler account", value: 'general', icon: 'bi-person' }
-    ];
+    { title: 'Student', description: "I'm here to learn", value: 'student', icon: 'bi-mortarboard' },
+    { title: 'Artisan', description: "I provide service", value: 'artisan', icon: 'bi-tools' },
+    { title: 'Employer', description: "I'm hiring", value: 'employer', icon: 'bi-briefcase' },
+    { title: 'General User', description: "Just simpler account", value: 'general', icon: 'bi-person' }
+  ];
 
 
   ngOnInit(): void {
@@ -99,31 +103,28 @@ export class Register implements OnInit {
     console.log('Form Submitted', this.registerForm.value);
     const { firstName, lastName, email, phoneNumber, password, accountType, isContentCreator } = this.registerForm.value;
     var createdto: signUpDto = {
-      accountType: accountType,
-      creatorconsent: isContentCreator,
-      email: email,
-      firstname: firstName,
-      lastname: lastName,
-      password: password,
-      phone: phoneNumber,
+      SelectedRole: accountType,
+      IsCreator: isContentCreator,
+      Email: email,
+      FirstName: firstName,
+      LastName: lastName,
+      Password: password,
+      PhoneNumber: phoneNumber,
     }
-    this.authService.createUser(createdto)
+    this.authApiService.register(createdto)
       .subscribe({
-        next: (success) => {
-          if (success) {
-            setTimeout(() => {
-              this.isLoading = false;
-              this.onReset();
-              this.router.navigate(['/login']);
-            }, 1500);
-          } else {
-            this.errorMessage = 'Invalid username or password';
-          }
+        next: (response) => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.toastService.success('Registration successful! Please login.');
+            this.onReset();
+            this.router.navigate(['/login']);
+          }, 1500);
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = 'An error occurred. Please try again.';
-          console.error('SignUp error:', error);
+          this.errorMessage = error?.error?.message || error?.message || 'An error occurred. Please try again.';
+          //console.error('SignUp error:', error);
         }
       });
     // Simulate API call

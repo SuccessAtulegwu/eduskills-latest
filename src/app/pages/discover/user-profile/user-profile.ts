@@ -47,7 +47,7 @@ type ProfileTab = 'videos' | 'followers' | 'following' | 'friends';
 @Component({
     selector: 'app-user-profile',
     standalone: true,
-    imports: [CommonModule, PageHeader, ButtonComponent],
+    imports: [CommonModule],
     templateUrl: './user-profile.html',
     styleUrl: './user-profile.scss',
 })

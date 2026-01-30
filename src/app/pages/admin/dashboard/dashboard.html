@@ -1,0 +1,363 @@
+<div class="admin-dashboard">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="page-title mb-0">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Admin Dashboard
+                </h1>
+                <p class="text-muted mb-0">Welcome back, Administrator</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-primary me-2">
+                    <i class="bi bi-download me-2"></i>
+                    Export Report
+                </button>
+                <button class="btn btn-outline-primary">
+                    <i class="bi bi-gear me-2"></i>
+                    Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Total Users -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card card border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stats-label text-muted mb-1">Total Users</p>
+                            <h3 class="stats-value mb-0">{{stats.totalUsers | number}}</h3>
+                            <small class="stats-change text-success">
+                                <i class="bi bi-arrow-up"></i> {{stats.usersGrowth}}% this month
+                            </small>
+                        </div>
+                        <div class="stats-icon bg-primary-subtle">
+                            <i class="bi bi-people-fill text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Courses -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card card border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stats-label text-muted mb-1">Total Courses</p>
+                            <h3 class="stats-value mb-0">{{stats.totalCourses | number}}</h3>
+                            <small class="stats-change text-success">
+                                <i class="bi bi-arrow-up"></i> {{stats.coursesGrowth}}% this month
+                            </small>
+                        </div>
+                        <div class="stats-icon bg-success-subtle">
+                            <i class="bi bi-book-fill text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Enrollments -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card card border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stats-label text-muted mb-1">Active Enrollments</p>
+                            <h3 class="stats-value mb-0">{{stats.activeEnrollments | number}}</h3>
+                            <small class="stats-change text-info">
+                                <i class="bi bi-arrow-up"></i> {{stats.enrollmentsGrowth}}% this month
+                            </small>
+                        </div>
+                        <div class="stats-icon bg-info-subtle">
+                            <i class="bi bi-mortarboard-fill text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card card border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stats-label text-muted mb-1">Total Revenue</p>
+                            <h3 class="stats-value mb-0">${{stats.totalRevenue | number}}</h3>
+                            <small class="stats-change text-success">
+                                <i class="bi bi-arrow-up"></i> {{stats.revenueGrowth}}% this month
+                            </small>
+                        </div>
+                        <div class="stats-icon bg-warning-subtle">
+                            <i class="bi bi-currency-dollar text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+        <!-- User Growth Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up me-2"></i>
+                            User Growth
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary active">Week</button>
+                            <button class="btn btn-outline-primary">Month</button>
+                            <button class="btn btn-outline-primary">Year</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Categories -->
+        <div class="col-lg-4">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pie-chart me-2"></i>
+                        Course Categories
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="categoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity & Quick Actions -->
+    <div class="row g-3 mb-4">
+        <!-- Recent Users -->
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Recent Users
+                        </h5>
+                        <a href="#" class="btn btn-sm btn-link">View All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let user of recentUsers">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div
+                                                class="avatar-sm bg-primary-subtle rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                <span class="text-primary fw-bold">{{user.name.charAt(0)}}</span>
+                                            </div>
+                                            <span class="fw-medium">{{user.name}}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">{{user.email}}</td>
+                                    <td>
+                                        <span class="badge" [ngClass]="{
+                      'bg-primary': user.role === 'student',
+                      'bg-success': user.role === 'teacher',
+                      'bg-danger': user.role === 'admin'
+                    }">
+                                            {{user.role}}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{user.joinedDate | date:'short'}}</td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Courses -->
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-book me-2"></i>
+                            Recent Courses
+                        </h5>
+                        <a href="#" class="btn btn-sm btn-link">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0" *ngFor="let course of recentCourses">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <div class="course-icon bg-primary-subtle rounded me-3 p-3">
+                                        <i class="bi bi-{{course.icon}} text-primary fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{course.title}}</h6>
+                                        <p class="text-muted mb-0 small">
+                                            <i class="bi bi-person me-1"></i>{{course.instructor}}
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-people me-1"></i>{{course.students}} students
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success-subtle text-success">{{course.status}}</span>
+                                    <p class="text-muted mb-0 small mt-1">{{course.createdDate | date:'short'}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status & Quick Actions -->
+    <div class="row g-3">
+        <!-- System Status -->
+        <div class="col-lg-4">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-hdd me-2"></i>
+                        System Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Server Load</span>
+                            <span class="fw-medium">{{systemStatus.serverLoad}}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                [style.width.%]="systemStatus.serverLoad"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Storage Used</span>
+                            <span class="fw-medium">{{systemStatus.storageUsed}}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" role="progressbar"
+                                [style.width.%]="systemStatus.storageUsed"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Memory Usage</span>
+                            <span class="fw-medium">{{systemStatus.memoryUsage}}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                [style.width.%]="systemStatus.memoryUsage"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Database Load</span>
+                            <span class="fw-medium">{{systemStatus.databaseLoad}}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar"
+                                [style.width.%]="systemStatus.databaseLoad"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-8">
+            <div class="card border-0">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-lightning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-primary w-100 text-start">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                Add New User
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-success w-100 text-start">
+                                <i class="bi bi-book-fill me-2"></i>
+                                Create Course
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-info w-100 text-start">
+                                <i class="bi bi-megaphone-fill me-2"></i>
+                                Send Announcement
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-warning w-100 text-start">
+                                <i class="bi bi-file-earmark-text-fill me-2"></i>
+                                Generate Report
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-danger w-100 text-start">
+                                <i class="bi bi-shield-fill-check me-2"></i>
+                                Security Settings
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <button class="quick-action-btn btn btn-outline-secondary w-100 text-start">
+                                <i class="bi bi-database-fill me-2"></i>
+                                Backup Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

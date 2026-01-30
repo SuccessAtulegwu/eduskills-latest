@@ -1,0 +1,232 @@
+<div class="admin-layout" [attr.data-theme]="currentTheme">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" [class.collapsed]="sidebarCollapsed">
+        <!-- Logo & Brand -->
+        <div class="sidebar-header">
+            <div class="brand">
+                <i class="bi bi-mortarboard-fill text-primary"></i>
+                <span class="brand-text" *ngIf="!sidebarCollapsed">EduSkill Admin</span>
+            </div>
+            <button class="btn btn-link sidebar-toggle d-lg-none" (click)="toggleSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Admin Profile -->
+        <div class="admin-profile" *ngIf="!sidebarCollapsed">
+            <div class="profile-avatar">
+                <div class="avatar-circle">
+                    <span>{{getInitials()}}</span>
+                </div>
+            </div>
+            <div class="profile-info">
+                <h6 class="profile-name">{{currentUser?.firstname}} {{currentUser?.lastname}}</h6>
+                <p class="profile-role">Administrator</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-speedometer2"></i>
+                        <span *ngIf="!sidebarCollapsed">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-section" *ngIf="!sidebarCollapsed">
+                    <span>Management</span>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/users" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-people"></i>
+                        <span *ngIf="!sidebarCollapsed">Users</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/courses" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-book"></i>
+                        <span *ngIf="!sidebarCollapsed">Courses</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/enrollments" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-mortarboard"></i>
+                        <span *ngIf="!sidebarCollapsed">Enrollments</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/payments" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-credit-card"></i>
+                        <span *ngIf="!sidebarCollapsed">Payments</span>
+                    </a>
+                </li>
+
+                <li class="nav-section" *ngIf="!sidebarCollapsed">
+                    <span>Content</span>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/categories" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-tags"></i>
+                        <span *ngIf="!sidebarCollapsed">Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/announcements" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-megaphone"></i>
+                        <span *ngIf="!sidebarCollapsed">Announcements</span>
+                    </a>
+                </li>
+
+                <li class="nav-section" *ngIf="!sidebarCollapsed">
+                    <span>Analytics</span>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/reports" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-graph-up"></i>
+                        <span *ngIf="!sidebarCollapsed">Reports</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/analytics" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-bar-chart"></i>
+                        <span *ngIf="!sidebarCollapsed">Analytics</span>
+                    </a>
+                </li>
+
+                <li class="nav-section" *ngIf="!sidebarCollapsed">
+                    <span>System</span>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/settings" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-gear"></i>
+                        <span *ngIf="!sidebarCollapsed">Settings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a routerLink="/admin/logs" routerLinkActive="active" class="nav-link">
+                        <i class="bi bi-file-text"></i>
+                        <span *ngIf="!sidebarCollapsed">Activity Logs</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <button class="btn btn-link nav-link" (click)="backToMainSite()">
+                <i class="bi bi-arrow-left-circle"></i>
+                <span *ngIf="!sidebarCollapsed">Back to Site</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+        <!-- Top Header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="btn btn-link sidebar-toggle" (click)="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div class="breadcrumb-container d-none d-md-block">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a routerLink="/admin">Admin</a></li>
+                            <li class="breadcrumb-item active">{{currentPage}}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <!-- Search -->
+                <div class="search-box d-none d-md-block">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control" placeholder="Search...">
+                </div>
+
+                <!-- Notifications -->
+                <div class="header-icon" [class.has-badge]="notificationCount > 0">
+                    <button class="btn btn-link">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge bg-danger" *ngIf="notificationCount > 0">{{notificationCount}}</span>
+                    </button>
+                </div>
+
+                <!-- Theme Toggle -->
+                <div class="header-icon">
+                    <button class="btn btn-link" (click)="toggleTheme()">
+                        <i class="bi" [class.bi-moon-stars]="currentTheme === 'light'"
+                            [class.bi-sun]="currentTheme === 'dark'"></i>
+                    </button>
+                </div>
+
+                <!-- Admin Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" type="button" id="adminMenuDropdown"
+                        data-bs-toggle="dropdown">
+                        <div class="user-avatar">
+                            <span>{{getInitials()}}</span>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" routerLink="/admin/profile">
+                                <i class="bi bi-person me-2"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" routerLink="/admin/settings">
+                                <i class="bi bi-gear me-2"></i>
+                                Settings
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger" (click)="logout()">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="admin-content">
+            <router-outlet></router-outlet>
+        </main>
+
+        <!-- Footer -->
+        <footer class="admin-footer">
+            <div class="footer-content">
+                <p class="mb-0">&copy; 2026 EduSkill. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" *ngIf="!sidebarCollapsed" (click)="toggleSidebar()"></div>
+</div>

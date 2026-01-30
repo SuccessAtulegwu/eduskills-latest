@@ -25,7 +25,7 @@ export interface FeedVideo {
 
 @Component({
   selector: 'app-feed',
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule],
   templateUrl: './feed.html',
   styleUrl: './feed.scss',
 })

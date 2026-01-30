@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { AuthApiService } from '../../services/auth-api.service';
 import { ThemeService } from '../../services/theme';
 import { ThemeToggleComponent } from '../../components/ui/theme-toggle/theme-toggle.component';
 import { ToastService } from '../../services/toast.service';
+import { RoleNavigationService } from '../../services/role-navigation.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule,ThemeToggleComponent],
+  imports: [CommonModule, ReactiveFormsModule, ThemeToggleComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -24,10 +26,12 @@ export class Login implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private authApiService: AuthApiService,
     private themeService: ThemeService,
     private router: Router,
     private builder: FormBuilder,
-    private toastService:ToastService
+    private toastService: ToastService,
+    private roleNavigation: RoleNavigationService
   ) {
     this.loginForm = builder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -40,7 +44,9 @@ export class Login implements OnInit {
 
     // Check if user is already logged in
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      // Navigate based on role
+      this.roleNavigation.navigateByRole();
+      return;
     }
 
     // Subscribe to theme changes
@@ -51,7 +57,7 @@ export class Login implements OnInit {
     var email = localStorage.getItem('email');
     if (email) {
       this.loginForm.patchValue({ email: email });
-      this.loginForm.patchValue({rememberMe: true});
+      this.loginForm.patchValue({ rememberMe: true });
     }
 
   }
@@ -76,24 +82,30 @@ export class Login implements OnInit {
     this.errorMessage = '';
     this.isLoading = true;
     const { email, password, rememberMe } = this.loginForm.value;
+    if (rememberMe) {
+      localStorage.setItem('email', email);
+    }
 
-    this.authService.login(email, password, rememberMe)
+    const credentials = {
+      Email: email,
+      Password: password
+    };
+
+    this.authApiService.login(credentials)
       .subscribe({
-        next: (success) => {
+        next: (response) => {
           this.isLoading = false;
-          if (success) {
-            this.toastService.success('Login successful!')
-            this.onReset();
-            this.router.navigate(['/home']);
-          } else {
-            this.toastService.error('Invalid username or password')
-            this.errorMessage = 'Invalid username or password';
-          }
+          this.toastService.success('Login successful!');
+          this.onReset();
+
+          // Navigate based on user role
+          this.roleNavigation.navigateByRole();
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isLoading = false;
-          this.errorMessage = 'An error occurred. Please try again.';
-          console.error('Login error:', error);
+          this.errorMessage = error?.error?.message || error?.message || 'An error occurred. Please try again.';
+          this.toastService.error(this.errorMessage);
+          //console.log('Login error:', error,);
         }
       });
   }

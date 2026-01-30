@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { InputComponent } from '../../../components/ui/input/input';
 import { ThemeToggleComponent } from '../../../components/ui/theme-toggle/theme-toggle.component';
+import { AuthApiService } from '../../../services/auth-api.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -21,7 +23,9 @@ export class ForgotPassword implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private apiService: AuthApiService,
+    private toastService: ToastService
   ) {
     this.forgotForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -48,16 +52,23 @@ export class ForgotPassword implements OnInit {
 
     this.isLoading = true;
     const { email } = this.forgotForm.value;
-
-    // Simulate API call
-    setTimeout(() => {
-      this.isLoading = false;
-      // Correct logic would be to call auth service
-      // For now, mock success
-      this.successMessage = `If an account exists for ${email}, you will receive password reset instructions.`;
-      this.submitted = false;
-      this.forgotForm.reset();
-      this.router.navigate(['/otp']);
-    }, 1500);
+    this.apiService.forgotPassword(email)
+      .subscribe({
+        next: (response) => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.successMessage = `If an account exists for ${email}, you will receive password reset instructions.`;
+            this.toastService.success(`If an account exists for ${email}, you will receive password reset instructions.`);
+            this.submitted = false;
+            this.forgotForm.reset();
+            this.router.navigate(['/otp']);
+          }, 1500);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          this.errorMessage = error?.error?.message || error?.message || 'An error occurred. Please try again.';
+          this.toastService.error(this.errorMessage);
+        }
+      });
   }
 }

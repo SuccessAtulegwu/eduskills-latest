@@ -3,6 +3,7 @@ import { authGuard } from './guards/auth-guard';
 import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { MainLayout } from './components/layout/main-layout/main-layout';
+import { AdminLayout } from './components/layout/admin-layout/admin-layout';
 import { VideoViewer } from './components/ui/video-viewer/video-viewer';
 import { AllVideos } from './pages/all-videos/all-videos';
 import { Register } from './pages/register/register';
@@ -41,6 +42,22 @@ export const routes: Routes = [
     path: 'change-password',
     canActivate: [authGuard],
     component: ChangePassword
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    //canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/admin/dashboard/dashboard').then(m => m.AdminDashboard)
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
   },
   // Main layout routes
   {
@@ -160,6 +177,7 @@ export const routes: Routes = [
           }
         ]
       },
+
       {
         path: 'discover',
         children: [

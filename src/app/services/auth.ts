@@ -1,10 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
-import { signUpDto, User } from '../models/model';
+import { User } from '../models/model';
+import { SecureStorageService } from './secure-storage.service';
+import { ApiService } from './api.service';
 
-
-
+/**
+ * Authentication State Management Service
+ * Manages user state, authentication status, and session data
+ * Does NOT handle API calls - use AuthApiService for that
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -15,113 +20,123 @@ export class AuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private router: Router) {
-    // Check if user is already logged in on service initialization
+  constructor(
+    private router: Router,
+    private secureStorage: SecureStorageService,
+    private apiService: ApiService
+  ) {
+    // Load user state from storage on initialization
     this.checkAuthStatus();
   }
 
+  /**
+   * Check authentication status from storage
+   */
   private checkAuthStatus(): void {
-    const token = localStorage.getItem('auth_token');
-    const userData = localStorage.getItem('user_data');
+    const token = this.secureStorage.getItem('authToken');
+    const user = this.secureStorage.getObject<User>('user_data');
 
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        this.currentUserSubject.next(user);
-        this.isAuthenticatedSubject.next(true);
-      } catch (error) {
-        this.logout();
-      }
+    if (token && user) {
+      this.currentUserSubject.next(user);
+      this.isAuthenticatedSubject.next(true);
     }
   }
 
-  login(email: string, password: string, rememberMe: boolean): Observable<boolean> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        const user = this.parseUser(localStorage.getItem('user_data'));
-        if (user) {
-          if (user.email === email && user.password === password) {
-            user.rememberMe = rememberMe;
+  /**
+   * Set current user and authentication state
+   * Called by AuthApiService after successful login/registration
+   */
+  setCurrentUser(user: User | null): void {
+    this.currentUserSubject.next(user);
+    this.isAuthenticatedSubject.next(!!user);
 
-            if (rememberMe) {
-              localStorage.setItem('email', email);
-            } else {
-              localStorage.removeItem('email');
-            }
-
-            const token = 'mock_jwt_token_' + Date.now();
-
-            localStorage.setItem('auth_token', token);
-            localStorage.setItem('user_data', JSON.stringify(user));
-
-            this.currentUserSubject.next(user);
-            this.isAuthenticatedSubject.next(true);
-
-            observer.next(true);
-          } else {
-            observer.next(false);
-          }
-        } else {
-          observer.next(false);
-        }
-        observer.complete();
-      }, 1000);
-    });
+    if (user) {
+      this.secureStorage.setItem('user_data', JSON.stringify(user));
+    }
   }
 
-  createUser(dto: signUpDto): Observable<boolean> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        var user: User = {
-          accountType: dto.accountType,
-          creatorconsent: dto.creatorconsent,
-          email: dto.email,
-          firstname: dto.firstname,
-          lastname: dto.lastname,
-          password: dto.password,
-          phone: dto.password,
-          role: 'administrator',
-          username: dto.firstname,
-          id: '1',
-          rememberMe: false,
-        }
-        localStorage.setItem('user_data', JSON.stringify(user));
-        observer.next(true);
-        observer.complete();
-      }, 1000);
-    });
-  }
-
-  logout(): void {
-    localStorage.removeItem('auth_token');
-    //localStorage.removeItem('user_data');
-    //this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
-    this.router.navigate(['/login']);
-  }
-
-  isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
-  }
-
+  /**
+   * Get current user (synchronous)
+   */
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean {
+    return this.isAuthenticatedSubject.value;
   }
 
-  parseUser(data: string | null): User | null {
-    if (!data) return null;
+  /**
+   * Get authentication token
+   */
+  getToken(): string | null {
+    return this.secureStorage.getItem('authToken');
+  }
 
-    try {
-      const parsed = JSON.parse(data);
-      return parsed as User;
-    } catch (error) {
-      console.error('Failed to parse user data:', error);
-      return null;
+  /**
+   * Logout user - calls API, clears session and redirects to login
+   */
+  logout(): void {
+    if (this.isAuthenticated()) {
+      this.apiService.post('/auth/logout', {}).subscribe({
+        next: () => {
+          this.clearSession();
+          this.router.navigate(['/login']);
+        },
+        error: () => {
+          // Clear session even if API call fails
+          this.clearSession();
+          this.router.navigate(['/login']);
+        }
+      });
+    } else {
+      // Not authenticated, just clear and redirect
+      this.clearSession();
+      this.router.navigate(['/login']);
     }
-  };
+  }
 
+  /**
+   * Clear user session data
+   */
+  private clearSession(): void {
+    // Clear secure storage
+    this.secureStorage.removeItem('authToken');
+    this.secureStorage.removeItem('user_data');
+    this.secureStorage.removeItem('refreshToken');
+    // Reset state
+    this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
+  }
+
+  /**
+   * Update user data in storage and state
+   */
+  updateUser(user: User): void {
+    this.currentUserSubject.next(user);
+    this.secureStorage.setItem('user_data', JSON.stringify(user));
+  }
+
+  /**
+   * Check if user has specific role
+   */
+  hasRole(role: string): boolean {
+    const user = this.getCurrentUser();
+    return user?.role?.toLowerCase() === role.toLowerCase();
+  }
+
+  /**
+   * Check if user has any of the specified roles
+   */
+  hasAnyRole(roles: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user || !user.role) return false;
+
+    return roles.some(role =>
+      user.role.toLowerCase() === role.toLowerCase()
+    );
+  }
 }
