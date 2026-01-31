@@ -91,3 +91,6 @@ export interface AuthResponse {
     roles?: string;
     refreshToken?: string;
 }
+
+// Re-export course models for convenience
+export * from './course.model';
