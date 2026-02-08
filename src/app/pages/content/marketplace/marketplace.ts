@@ -7,7 +7,25 @@ import { ButtonComponent } from '../../../components/ui/button/button';
 import { PageHeader } from '../../../components/page-header/page-header';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth';
+import { MarketplaceService } from '../../../services/marketplace.service';
 import { BookingService, Artisan } from '../../../services/booking.service';
+
+interface MarketplaceListing {
+  id: string;
+  name: string;
+  title: string;
+  avatar?: string;
+  image?: string;
+  category: string;
+  rating?: number;
+  reviews?: number;
+  priceRange?: string;
+  location?: string;
+  description: string;
+  responseTime?: string;
+  phone?: string;
+  availability?: ('online' | 'in-person')[];
+}
 
 @Component({
   selector: 'app-marketplace',
@@ -19,12 +37,15 @@ import { BookingService, Artisan } from '../../../services/booking.service';
 export class Marketplace implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
   artisans: Artisan[] = [];
+  listings: MarketplaceListing[] = [];
+  isLoading: boolean = false;
   private authSubscription?: Subscription;
-  
+
   constructor(
     private router: Router,
     private authService: AuthService,
-    private bookingService: BookingService
+    private marketplaceService: MarketplaceService,
+    private bookingService: BookingService // Keep for fallback to mock data
   ) { }
 
   viewDetails(id: string) {
@@ -33,10 +54,11 @@ export class Marketplace implements OnInit, OnDestroy {
 
   bookArtisan(id: string) {
     // Navigate to bookings page with artisan ID
-    this.router.navigate(['/account/bookings'], { 
-      queryParams: { artisanId: id } 
+    this.router.navigate(['/account/bookings'], {
+      queryParams: { artisanId: id }
     });
   }
+
   categoryOptions: AccountTypeOption[] = [
     { title: 'All Categories', value: 'all', description: 'Show all service categories', icon: 'bi-grid' },
     { title: 'Plumbing', value: 'plumbing', description: 'Pipes, drains, and water systems', icon: 'bi-tools' },
@@ -59,8 +81,93 @@ export class Marketplace implements OnInit, OnDestroy {
       this.isAuthenticated = isAuth;
     });
 
-    // Load artisans from service
+    // Load marketplace listings from API
+    this.loadMarketplaceListings();
+  }
+
+  loadMarketplaceListings(): void {
+    this.isLoading = true;
+    this.marketplaceService.getListings().subscribe({
+      next: (response: any) => {
+        // Map API response to local listing format
+        if (Array.isArray(response)) {
+          this.listings = response.map((listing: any) => this.mapToMarketplaceListing(listing));
+          // Also update artisans for backward compatibility with template
+          this.artisans = this.listings.map(l => this.convertListingToArtisan(l));
+        } else if (response?.data && Array.isArray(response.data)) {
+          this.listings = response.data.map((listing: any) => this.mapToMarketplaceListing(listing));
+          this.artisans = this.listings.map(l => this.convertListingToArtisan(l));
+        } else {
+          console.warn('Unexpected API response format, using fallback data');
+          this.useFallbackData();
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load marketplace listings:', err);
+        // Fallback to mock data from BookingService
+        this.useFallbackData();
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private useFallbackData(): void {
     this.artisans = this.bookingService.getArtisans();
+    this.listings = this.artisans.map(a => ({
+      id: a.id,
+      name: a.name,
+      title: a.title,
+      avatar: a.avatar,
+      image: a.image,
+      category: a.category,
+      rating: a.rating,
+      reviews: a.reviews,
+      priceRange: a.priceRange,
+      location: a.location,
+      description: a.description,
+      responseTime: a.responseTime,
+      phone: a.phone,
+      availability: a.availability
+    }));
+  }
+
+  private mapToMarketplaceListing(apiListing: any): MarketplaceListing {
+    return {
+      id: apiListing.id || apiListing.listingId,
+      name: apiListing.name || apiListing.title || 'Unknown',
+      title: apiListing.title || apiListing.serviceType || '',
+      avatar: apiListing.avatar || apiListing.imageUrl,
+      image: apiListing.image || apiListing.imageUrl,
+      category: apiListing.category || 'General',
+      rating: apiListing.rating || 0,
+      reviews: apiListing.reviewCount || apiListing.reviews || 0,
+      priceRange: apiListing.priceRange || apiListing.price,
+      location: apiListing.location,
+      description: apiListing.description || '',
+      responseTime: apiListing.responseTime,
+      phone: apiListing.phone || apiListing.contactPhone,
+      availability: apiListing.availability || ['online', 'in-person']
+    };
+  }
+
+  private convertListingToArtisan(listing: MarketplaceListing): Artisan {
+    return {
+      id: listing.id,
+      name: listing.name,
+      title: listing.title,
+      avatar: listing.avatar || 'https://i.pravatar.cc/150',
+      category: listing.category,
+      rating: listing.rating || 0,
+      reviews: listing.reviews || 0,
+      priceRange: listing.priceRange || 'Contact for pricing',
+      location: listing.location || 'Location not specified',
+      description: listing.description,
+      image: listing.image || listing.avatar || 'https://via.placeholder.com/400',
+      responseTime: listing.responseTime || 'N/A',
+      phone: listing.phone || '',
+      availability: listing.availability || ['online', 'in-person']
+    };
   }
 
   ngOnDestroy(): void {

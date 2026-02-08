@@ -1,0 +1,186 @@
+<div class="artisan-create-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="bi bi-person-badge"></i>
+            Create Artisan Profile
+        </h1>
+        <p class="page-subtitle">Complete your professional profile to start receiving service requests</p>
+    </div>
+
+    <form [formGroup]="artisanForm" (ngSubmit)="onSubmit()" class="artisan-form">
+
+        <!-- Professional Information Section -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="bi bi-briefcase-fill"></i>
+                <h2>Professional Information</h2>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <app-input label="Specialization" type="text" placeholder="e.g., Plumbing, Electrical, Carpentry"
+                        formControlName="specialization" [required]="true" icon="bi-tools"></app-input>
+                </div>
+
+                <div class="form-group">
+                    <app-input label="Years of Experience" type="number" placeholder="Enter years of experience"
+                        formControlName="yearsOfExperience" [required]="true" [min]="0" [max]="100"
+                        icon="bi-calendar-check"></app-input>
+                </div>
+
+                <div class="form-group">
+                    <app-input label="Hourly Rate ($)" type="number" placeholder="Enter your hourly rate"
+                        formControlName="hourlyRate" [required]="true" [min]="0" [step]="0.01"
+                        icon="bi-currency-dollar"></app-input>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-toggle-on"></i>
+                        Availability Status
+                    </label>
+                    <div class="availability-toggle">
+                        <label class="toggle-option">
+                            <input type="radio" formControlName="isAvailable" [value]="true" name="availability" />
+                            <span class="toggle-label available">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Available
+                            </span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" formControlName="isAvailable" [value]="false" name="availability" />
+                            <span class="toggle-label unavailable">
+                                <i class="bi bi-x-circle-fill"></i>
+                                Unavailable
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <app-textarea label="Bio"
+                    placeholder="Tell us about yourself, your experience, and what makes you stand out..."
+                    formControlName="bio" [rows]="4" [maxlength]="1000"
+                    helpText="Maximum 1000 characters"></app-textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <app-input label="Skills" type="text" placeholder="e.g., Pipe fitting, Leak repair, Installation"
+                        formControlName="skills" [required]="true" icon="bi-star-fill"
+                        helpText="Separate skills with commas"></app-input>
+                </div>
+
+                <div class="form-group">
+                    <app-input label="Certifications" type="text" placeholder="e.g., Licensed Plumber, EPA Certified"
+                        formControlName="certifications" icon="bi-award-fill"
+                        helpText="Separate certifications with commas"></app-input>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <app-input label="Portfolio URL" type="url" placeholder="https://yourportfolio.com"
+                    formControlName="portfolioUrl" icon="bi-link-45deg"
+                    helpText="Link to your portfolio or website (optional)"></app-input>
+            </div>
+        </div>
+
+        <!-- Location Information Section -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="bi bi-geo-alt-fill"></i>
+                <h2>Location & Service Areas</h2>
+            </div>
+
+            <div class="form-group full-width">
+                <app-input label="Service Areas" type="text" placeholder="e.g., Downtown, Suburbs, North District"
+                    formControlName="serviceAreas" [required]="true" icon="bi-map"
+                    helpText="Areas where you provide services (separate with commas)"></app-input>
+            </div>
+
+            <div class="form-group full-width">
+                <app-input label="Location Address" type="text" placeholder="Enter your business address"
+                    formControlName="locationAddress" [required]="true" icon="bi-house-door-fill"></app-input>
+            </div>
+
+            <div class="location-coords">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <app-input label="Latitude" type="number" placeholder="e.g., 40.7128" formControlName="latitude"
+                            [required]="true" [step]="0.000001" icon="bi-compass"></app-input>
+                    </div>
+
+                    <div class="form-group">
+                        <app-input label="Longitude" type="number" placeholder="e.g., -74.0060"
+                            formControlName="longitude" [required]="true" [step]="0.000001"
+                            icon="bi-compass-fill"></app-input>
+                    </div>
+                </div>
+
+                <app-button label="Get Current Location" variant="secondary" icon="bi-crosshair" type="button"
+                    (clicked)="getCurrentLocation()" class="location-btn"></app-button>
+            </div>
+        </div>
+
+        <!-- Certificate Upload Section -->
+        <div class="form-section">
+            <div class="section-header">
+                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                <h2>Certificate Files</h2>
+            </div>
+
+            <div class="upload-area">
+                <input type="file" id="certificateFiles" multiple
+                    accept="image/jpeg,image/png,image/jpg,application/pdf"
+                    (change)="onCertificateFilesSelected($event)" class="file-input" />
+                <label for="certificateFiles" class="upload-label">
+                    <div class="upload-icon">
+                        <i class="bi bi-cloud-upload"></i>
+                    </div>
+                    <div class="upload-text">
+                        <h3>Upload Certificate Files</h3>
+                        <p>Click to browse or drag and drop files here</p>
+                        <span class="file-types">Supported formats: JPEG, PNG, PDF</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Certificate Preview -->
+            <div class="certificate-preview" *ngIf="selectedCertificates.length > 0">
+                <h3 class="preview-title">
+                    <i class="bi bi-files"></i>
+                    Selected Files ({{ selectedCertificates.length }})
+                </h3>
+                <div class="preview-grid">
+                    <div class="preview-item" *ngFor="let file of selectedCertificates; let i = index">
+                        <div class="preview-content">
+                            <div class="preview-image" *ngIf="certificatePreviewUrls[i]">
+                                <img [src]="certificatePreviewUrls[i]" [alt]="file.name" />
+                            </div>
+                            <div class="preview-pdf" *ngIf="!certificatePreviewUrls[i]">
+                                <i class="bi bi-file-pdf"></i>
+                            </div>
+                        </div>
+                        <div class="preview-info">
+                            <span class="file-name" [title]="file.name">{{ file.name }}</span>
+                            <span class="file-size">{{ (file.size / 1024).toFixed(2) }} KB</span>
+                        </div>
+                        <button type="button" class="remove-btn" (click)="removeCertificate(i)" title="Remove file">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <app-button label="Cancel" variant="secondary" type="button" [outline]="true" size="lg" icon="bi-x-lg"
+                (clicked)="onCancel()"></app-button>
+
+            <app-button label="Create Profile" variant="primary" type="submit" size="lg" icon="bi-check-lg"
+                [loading]="isSubmitting" [disabled]="isSubmitting"></app-button>
+        </div>
+    </form>
+</div>

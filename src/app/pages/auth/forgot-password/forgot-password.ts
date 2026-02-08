@@ -61,7 +61,7 @@ export class ForgotPassword implements OnInit {
             this.toastService.success(`If an account exists for ${email}, you will receive password reset instructions.`);
             this.submitted = false;
             this.forgotForm.reset();
-            this.router.navigate(['/otp']);
+            this.router.navigate(['/otp'], { queryParams: { email: email } });
           }, 1500);
         },
         error: (error: any) => {

@@ -29,10 +29,10 @@ export class App implements OnInit {
     ).subscribe(event => {
       if (event instanceof NavigationStart) {
         // Show loader when navigation starts
-        this.loadingService.show();
+        //this.loadingService.show();
       } else {
         // Hide loader when navigation ends, is cancelled, or errors
-        this.loadingService.hide();
+       // this.loadingService.hide();
       }
     });
   }

@@ -1,8 +1,10 @@
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ThemeToggleComponent } from '../../../components/ui/theme-toggle/theme-toggle.component';
+import { AuthApiService } from '../../../services/auth-api.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-otp',
@@ -11,21 +13,31 @@ import { ThemeToggleComponent } from '../../../components/ui/theme-toggle/theme-
   templateUrl: './otp.html',
   styleUrl: './otp.scss'
 })
-export class OtpComponent {
+export class OtpComponent implements OnInit {
   otpForm: FormGroup;
   isLoading = false;
   successMessage = '';
   errorMessage = '';
+  email: string = '';
 
   @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef>;
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private apiService: AuthApiService,
+    private toastService: ToastService
   ) {
     this.otpForm = this.fb.group({
       digits: this.fb.array(new Array(6).fill('').map(() => this.fb.control('', [Validators.required, Validators.pattern('[0-9]')]))),
     });
+  }
+
+
+  ngOnInit(): void {
+    this.email = this.route.snapshot.queryParamMap.get('email')!;
+    console.log('OTP for email:', this.email);
   }
 
   get digits(): FormArray {
@@ -101,15 +113,33 @@ export class OtpComponent {
 
     const code = this.digits.value.join('');
     console.log('Verifying OTP:', code);
-
-    // Simulate API
-    setTimeout(() => {
+    if (!this.email) {
+      this.toastService.warning('Email is missing. Please try again.');
       this.isLoading = false;
-      this.successMessage = 'Verification successful! Redirecting...';
-      setTimeout(() => {
-        this.router.navigate(['/reset-password']); 
-      }, 1000);
-    }, 1500);
+      return;
+    }
+
+    this.apiService.VerifyResetOtp({ email: this.email, token: code })
+      .subscribe({
+        next: (response) => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.successMessage = 'Verification successful! Redirecting...';
+            this.toastService.success(`Verification successful! Redirecting...`);
+            this.otpForm.reset();
+            this.router.navigate(['/reset-password'], { queryParams: { email: this.email, token: code } });
+          }, 1500);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          this.errorMessage = error?.error?.message || error?.message || 'An error occurred. Please try again.';
+          //this.toastService.error(this.errorMessage);
+           this.otpForm.reset();
+           setTimeout(() => {
+             this.errorMessage = '';
+           }, 3000);
+        }
+      });
   }
 
   resendCode(): void {

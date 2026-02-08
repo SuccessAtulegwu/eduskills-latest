@@ -116,9 +116,17 @@ export class Register implements OnInit {
         next: (response) => {
           setTimeout(() => {
             this.isLoading = false;
-            this.toastService.success('Registration successful! Please login.');
+            this.toastService.success('Registration successful!');
             this.onReset();
-            this.router.navigate(['/login']);
+
+            // Redirect artisans to profile creation, others to login
+            if (accountType === 'artisan') {
+              this.toastService.success('Please complete your artisan profile.');
+              this.router.navigate(['/artisan/create']);
+            } else {
+              this.toastService.success('Please login to continue.');
+              this.router.navigate(['/login']);
+            }
           }, 1500);
         },
         error: (error) => {

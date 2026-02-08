@@ -19,6 +19,7 @@ const PUBLIC_ENDPOINTS = [
     '/auth/reset-password',
     '/auth/verify-email',
     '/auth/refresh-token',  // Don't add token to refresh endpoint
+    '/auth/verify-forgot-password-otp',
     '/public',
     '/health',
     '/status'

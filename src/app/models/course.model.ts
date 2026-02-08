@@ -31,22 +31,45 @@ export interface UpdateCourseRequest {
     thumbnailFile?: File | string; // File object or base64 string
 }
 
+export enum ExamType {
+  None = 0,
+  WAEC = 1,
+  NECO = 2,
+  JAMB = 3,
+  NABTEB = 4,
+  GCE = 5
+}
+
+// models/category.model.ts
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 // API Response Interfaces
 export interface CourseResponse {
-    id: number;
-    title: string;
-    description: string;
-    price?: number;
-    durationHours?: number;
-    categoryId?: number;
-    level?: string;
-    examType?: number;
-    certificationEnabled?: boolean;
-    certificateTemplateId?: number;
-    passingScore?: number;
-    thumbnailUrl?: string;
-    createdAt?: string;
-    updatedAt?: string;
+   id: number;
+  title: string;
+  description: string;
+  price: number;
+  thumbnailUrl: string;
+  createdAt: string; // or Date if you parse it
+  durationHours: number;
+  categoryId: number;
+  category: Category;
+  level: string;
+  examType: ExamType;
+  isPublished: boolean;
+  certificationEnabled: boolean;
+  certificateTemplateId?: number;
+  passingScore?: number;
+  views: number;
+  enrollmentCount: number;
+  rating?: number;
+  ratingCount: number;
+  creatorId: string;
+  creatorName: string;
 }
 
 // Query Parameters Interface

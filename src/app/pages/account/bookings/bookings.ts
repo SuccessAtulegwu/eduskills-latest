@@ -22,7 +22,7 @@ export class Bookings implements OnInit, OnDestroy {
   filteredBookings: Booking[] = [];
   selectedStatus: string = 'all';
   searchQuery: string = '';
-  
+
   // Statistics
   totalBookings: number = 0;
   upcomingBookings: number = 0;
@@ -54,7 +54,7 @@ export class Bookings implements OnInit, OnDestroy {
     private bookingService: BookingService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Subscribe to bookings from service
@@ -105,7 +105,7 @@ export class Bookings implements OnInit, OnDestroy {
     // Filter by search query
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(b => 
+      filtered = filtered.filter(b =>
         b.consultantName.toLowerCase().includes(query) ||
         b.consultantTitle.toLowerCase().includes(query) ||
         b.serviceType.toLowerCase().includes(query) ||
@@ -131,7 +131,7 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: string): string {
-    switch(status) {
+    switch (status) {
       case 'upcoming': return 'text-primary bg-primary-subtle border-primary-subtle';
       case 'completed': return 'text-success bg-success-subtle border-success-subtle';
       case 'cancelled': return 'text-danger bg-danger-subtle border-danger-subtle';
@@ -141,7 +141,7 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   getStatusIcon(status: string): string {
-    switch(status) {
+    switch (status) {
       case 'upcoming': return 'bi-clock-fill';
       case 'completed': return 'bi-check-circle-fill';
       case 'cancelled': return 'bi-x-circle-fill';
@@ -151,7 +151,7 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   getStatusText(status: string): string {
-    switch(status) {
+    switch (status) {
       case 'upcoming': return 'Upcoming';
       case 'completed': return 'Completed';
       case 'cancelled': return 'Cancelled';
@@ -161,7 +161,7 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   getPaymentStatusClass(status: string): string {
-    switch(status) {
+    switch (status) {
       case 'paid': return 'text-success bg-success-subtle border-success-subtle';
       case 'pending': return 'text-warning bg-warning-subtle border-warning-subtle';
       case 'refunded': return 'text-info bg-info-subtle border-info-subtle';
@@ -170,7 +170,7 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   getServiceTypeIcon(type: string): string {
-    switch(type) {
+    switch (type) {
       case 'consultation': return 'bi-chat-dots-fill';
       case 'mentoring': return 'bi-person-check-fill';
       case 'tutoring': return 'bi-book-fill';
@@ -204,8 +204,26 @@ export class Bookings implements OnInit, OnDestroy {
 
   cancelBooking(booking: Booking): void {
     if (confirm('Are you sure you want to cancel this booking?')) {
-      this.bookingService.cancelBooking(booking.id);
-      this.closeModal();
+      // Provide the required CancelBookingDto body
+      const cancelDto = {
+        reason: 'Cancelled by user'
+      };
+      this.bookingService.cancelBooking(booking.id, cancelDto).subscribe({
+        next: () => {
+          // Update local state optimistically
+          const current = this.bookings;
+          const updated = current.map(b =>
+            b.id === booking.id ? { ...b, status: 'cancelled' as const, cancelledAt: new Date() } : b
+          );
+          this.bookings = updated;
+          this.filterBookings();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Failed to cancel booking:', err);
+          alert('Failed to cancel booking. Please try again.');
+        }
+      });
     }
   }
 
@@ -233,7 +251,7 @@ export class Bookings implements OnInit, OnDestroy {
   closeBookingFormModal(): void {
     this.showBookingFormModal = false;
     this.selectedArtisan = null;
-    
+
     // Clear query params
     this.router.navigate([], {
       queryParams: {},

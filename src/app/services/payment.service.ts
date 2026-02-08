@@ -1,12 +1,44 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
+import {
+  CreatePaymentRequest,
+  RefundPaymentDto
+} from '../models/api.models';
 import { PaymentDetails, PaymentItem } from '../components/ui/payment-modal/payment-modal.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
+  private readonly endpoint = '/Payment';
   private paystackPublicKey: string = 'pk_test_xxxxxxxxxxxxx'; // Replace with your Paystack public key
   private stripePublicKey: string = 'pk_test_xxxxxxxxxxxxx'; // Replace with your Stripe public key
+
+  constructor(private api: ApiService) { }
+
+  // API Methods
+  createPayment(body: CreatePaymentRequest): Observable<any> {
+    return this.api.post(`${this.endpoint}/CreatePayment`, body);
+  }
+
+  callback(reference?: string): Observable<any> {
+    return this.api.get(`${this.endpoint}/Callback/callback`, { reference });
+  }
+
+  getMyPayments(): Observable<any> {
+    return this.api.get(`${this.endpoint}/GetMyPayments`);
+  }
+
+  getPayment(reference: string): Observable<any> {
+    return this.api.get(`${this.endpoint}/GetPayment/${reference}`);
+  }
+
+  refundPayment(reference: string, body: RefundPaymentDto): Observable<any> {
+    return this.api.post(`${this.endpoint}/RefundPayment/${reference}/refund`, body);
+  }
+
+  // Helper Methods for UI Components
 
   /**
    * Initialize Paystack payment

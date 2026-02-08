@@ -44,6 +44,13 @@ export const routes: Routes = [
     component: ChangePassword
   },
   {
+    path:'artisan',
+     loadChildren: () =>
+              import('./pages/artisan/artisan.routes').then(
+                (m) => m.reportsRoutes,
+              ),
+  },
+  {
     path: 'admin',
     component: AdminLayout,
     //canActivate: [authGuard],

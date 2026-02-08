@@ -92,5 +92,6 @@ export interface AuthResponse {
     refreshToken?: string;
 }
 
-// Re-export course models for convenience
+// Re-export course models and api models for convenience
 export * from './course.model';
+export * from './api.models';

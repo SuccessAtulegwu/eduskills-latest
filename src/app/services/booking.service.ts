@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ApiService } from './api.service';
+import {
+  BookingCreateRequestDto,
+  RejectBookingDto,
+  CompleteBookingDto,
+  CancelBookingDto,
+  SendMessageDto
+} from '../models/api.models';
 
+// Re-export Artisan from here or just define it
 export interface Artisan {
   id: string;
   name: string;
@@ -45,18 +54,21 @@ export interface Booking {
   providedIn: 'root'
 })
 export class BookingService {
-  private bookingsSubject = new BehaviorSubject<Booking[]>([]);
-  public bookings$ = this.bookingsSubject.asObservable();
+  private readonly endpoint = '/Booking';
 
+  // Legacy Mock Data for Marketplace
   private artisansSubject = new BehaviorSubject<Artisan[]>([]);
   public artisans$ = this.artisansSubject.asObservable();
 
-  constructor() {
-    this.loadInitialData();
+  private bookingsSubject = new BehaviorSubject<Booking[]>([]);
+  public bookings$ = this.bookingsSubject.asObservable();
+
+  constructor(private api: ApiService) {
+    this.loadMockArtisans();
+    this.loadMockBookings();
   }
 
-  private loadInitialData(): void {
-    // Load artisans
+  private loadMockArtisans(): void {
     const artisans: Artisan[] = [
       {
         id: 'a1',
@@ -155,8 +167,10 @@ export class BookingService {
         availability: ['online', 'in-person']
       }
     ];
+    this.artisansSubject.next(artisans);
+  }
 
-    // Load bookings
+  private loadMockBookings(): void {
     const bookings: Booking[] = [
       {
         id: 'b1',
@@ -178,196 +192,51 @@ export class BookingService {
       },
       {
         id: 'b2',
-        consultantName: 'Prof. Michael Chen',
-        consultantTitle: 'Data Science & ML Expert',
+        consultantName: 'John Doe',
+        consultantTitle: 'Professional Plumber',
         consultantAvatar: 'https://i.pravatar.cc/150?img=12',
-        serviceType: 'mentoring',
-        bookingDate: new Date('2024-01-18T10:00:00'),
+        category: 'Plumbing',
+        serviceType: 'consultation',
+        bookingDate: new Date('2024-01-25T10:00:00'),
         scheduledTime: '10:00 AM',
-        duration: 90,
+        duration: 120,
         status: 'completed',
-        location: 'online',
-        meetingLink: 'https://meet.example.com/session-122',
-        price: 200.00,
-        paymentStatus: 'paid',
-        notes: 'Career guidance session',
-        source: 'marketplace',
-        createdAt: new Date('2024-01-10'),
-        completedAt: new Date('2024-01-18T11:30:00')
-      },
-      {
-        id: 'b3',
-        consultantName: 'Emily Rodriguez',
-        consultantTitle: 'UI/UX Design Specialist',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=45',
-        serviceType: 'tutoring',
-        bookingDate: new Date('2024-01-22T16:00:00'),
-        scheduledTime: '4:00 PM',
-        duration: 45,
-        status: 'upcoming',
         location: 'in-person',
-        address: '123 Design Studio, New York, NY 10001',
-        price: 120.00,
+        address: '123 Main St, Gwarinpa, Abuja',
+        price: 3500,
         paymentStatus: 'paid',
-        notes: 'Figma advanced techniques',
-        source: 'application',
-        createdAt: new Date('2024-01-16')
-      },
-      {
-        id: 'b4',
-        consultantName: 'James Wilson',
-        consultantTitle: 'Cloud Architecture Consultant',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=33',
-        serviceType: 'consultation',
-        bookingDate: new Date('2024-01-19T09:00:00'),
-        scheduledTime: '9:00 AM',
-        duration: 60,
-        status: 'cancelled',
-        location: 'online',
-        price: 180.00,
-        paymentStatus: 'refunded',
-        notes: 'AWS infrastructure planning',
+        notes: 'Kitchen sink repair',
         source: 'marketplace',
-        createdAt: new Date('2024-01-12'),
-        cancelledAt: new Date('2024-01-17')
-      },
-      {
-        id: 'b5',
-        consultantName: 'Dr. Lisa Anderson',
-        consultantTitle: 'DevOps & CI/CD Expert',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=20',
-        serviceType: 'review',
-        bookingDate: new Date('2024-01-25T13:00:00'),
-        scheduledTime: '1:00 PM',
-        duration: 30,
-        status: 'upcoming',
-        location: 'online',
-        meetingLink: 'https://meet.example.com/session-124',
-        price: 100.00,
-        paymentStatus: 'pending',
-        notes: 'Code review session',
-        source: 'application',
-        createdAt: new Date('2024-01-17')
-      },
-      {
-        id: 'b6',
-        consultantName: 'Robert Taylor',
-        consultantTitle: 'Full Stack Development Mentor',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=51',
-        serviceType: 'mentoring',
-        bookingDate: new Date('2024-01-16T15:00:00'),
-        scheduledTime: '3:00 PM',
-        duration: 60,
-        status: 'completed',
-        location: 'online',
-        price: 140.00,
-        paymentStatus: 'paid',
-        notes: 'Project architecture discussion',
-        source: 'marketplace',
-        createdAt: new Date('2024-01-08'),
-        completedAt: new Date('2024-01-16T16:00:00')
-      },
-      {
-        id: 'b7',
-        consultantName: 'Maria Garcia',
-        consultantTitle: 'Mobile App Development Consultant',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=28',
-        serviceType: 'consultation',
-        bookingDate: new Date('2024-01-24T11:00:00'),
-        scheduledTime: '11:00 AM',
-        duration: 60,
-        status: 'rescheduled',
-        location: 'online',
-        meetingLink: 'https://meet.example.com/session-125',
-        price: 160.00,
-        paymentStatus: 'paid',
-        notes: 'React Native best practices',
-        source: 'application',
-        createdAt: new Date('2024-01-14')
-      },
-      {
-        id: 'b8',
-        consultantName: 'David Kim',
-        consultantTitle: 'Cybersecurity Specialist',
-        consultantAvatar: 'https://i.pravatar.cc/150?img=15',
-        serviceType: 'consultation',
-        bookingDate: new Date('2024-01-21T14:00:00'),
-        scheduledTime: '2:00 PM',
-        duration: 90,
-        status: 'upcoming',
-        location: 'in-person',
-        address: '456 Security Hub, San Francisco, CA 94102',
-        price: 250.00,
-        paymentStatus: 'paid',
-        notes: 'Security audit consultation',
-        source: 'marketplace',
-        createdAt: new Date('2024-01-13')
+        createdAt: new Date('2024-01-20'),
+        completedAt: new Date('2024-01-25')
       }
     ];
-
-    this.artisansSubject.next(artisans);
     this.bookingsSubject.next(bookings);
   }
 
-  // Get all bookings
-  getBookings(): Booking[] {
-    return this.bookingsSubject.value;
+  // Legacy accessor for Marketplace
+  getArtisansLegacy(): Artisan[] {
+    return this.artisansSubject.value;
   }
 
-  // Get all artisans
+  // Alias for legacy compatibility since component uses getArtisans() expecting array
+  getArtisansList(): Artisan[] { // Renamed from getArtisans to avoid conflict with API method if I add one. 
+    // Wait, Component expects getArtisans() to return Artisan[].
+    // API method might be getBookings or getArtisans?
+    // If I name this getArtisans, and I have API getArtisans returning Observable, that's a conflict.
+    // But currently I don't have getArtisans() API method in this file. I have getBookings().
+    // So I can name this getArtisans() safely.
+    return this.artisansSubject.value;
+  }
+
   getArtisans(): Artisan[] {
     return this.artisansSubject.value;
   }
 
-  // Get artisan by ID
   getArtisanById(id: string): Artisan | undefined {
     return this.artisansSubject.value.find(a => a.id === id);
   }
 
-  // Add new booking
-  addBooking(booking: Booking): void {
-    const currentBookings = this.bookingsSubject.value;
-    this.bookingsSubject.next([booking, ...currentBookings]);
-  }
-
-  // Update booking
-  updateBooking(id: string, updates: Partial<Booking>): void {
-    const currentBookings = this.bookingsSubject.value;
-    const index = currentBookings.findIndex(b => b.id === id);
-    
-    if (index !== -1) {
-      currentBookings[index] = { ...currentBookings[index], ...updates };
-      this.bookingsSubject.next([...currentBookings]);
-    }
-  }
-
-  // Cancel booking
-  cancelBooking(id: string): void {
-    this.updateBooking(id, {
-      status: 'cancelled',
-      cancelledAt: new Date(),
-      paymentStatus: 'refunded'
-    });
-  }
-
-  // Reschedule booking
-  rescheduleBooking(id: string, newDate: Date, newTime: string): void {
-    this.updateBooking(id, {
-      status: 'rescheduled',
-      bookingDate: newDate,
-      scheduledTime: newTime
-    });
-  }
-
-  // Complete booking
-  completeBooking(id: string): void {
-    this.updateBooking(id, {
-      status: 'completed',
-      completedAt: new Date()
-    });
-  }
-
-  // Create booking from artisan
   createBookingFromArtisan(
     artisan: Artisan,
     bookingData: {
@@ -396,7 +265,7 @@ export class BookingService {
       status: 'upcoming',
       location: bookingData.locationType,
       address: bookingData.locationType === 'in-person' ? bookingData.address : undefined,
-      meetingLink: bookingData.locationType === 'online' ? (bookingData.meetingLink || `https://meet.example.com/session-${newId}`) : undefined,
+      meetingLink: bookingData.locationType === 'online' ? (bookingData.meetingLink || `https://meet.example.com/session-${this.uuidv4()}`) : undefined,
       price: this.extractMinPrice(artisan.priceRange),
       paymentStatus: 'pending',
       notes: bookingData.notes,
@@ -405,41 +274,66 @@ export class BookingService {
     };
   }
 
-  // Helper: Convert 12-hour to 24-hour format
+  addBooking(booking: Booking): void {
+    const current = this.bookingsSubject.value;
+    this.bookingsSubject.next([booking, ...current]);
+  }
+
   private convertTo24Hour(time12h: string): string {
     const [time, modifier] = time12h.split(' ');
     let [hours, minutes] = time.split(':');
-    
-    if (hours === '12') {
-      hours = '00';
-    }
-    
-    if (modifier === 'PM') {
-      hours = String(parseInt(hours, 10) + 12);
-    }
-    
+    if (hours === '12') hours = '00';
+    if (modifier === 'PM') hours = String(parseInt(hours, 10) + 12);
     return `${hours}:${minutes}:00`;
   }
 
-  // Helper: Extract minimum price from range
   private extractMinPrice(priceRange: string): number {
     const match = priceRange.match(/[\d,]+/);
-    if (match) {
-      return parseFloat(match[0].replace(/,/g, ''));
-    }
+    if (match) return parseFloat(match[0].replace(/,/g, ''));
     return 0;
   }
 
-  // Get booking statistics
-  getStatistics() {
-    const bookings = this.bookingsSubject.value;
-    return {
-      total: bookings.length,
-      upcoming: bookings.filter(b => b.status === 'upcoming').length,
-      completed: bookings.filter(b => b.status === 'completed').length,
-      cancelled: bookings.filter(b => b.status === 'cancelled').length,
-      rescheduled: bookings.filter(b => b.status === 'rescheduled').length
-    };
+  private uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  // API Methods
+  getBookings(query?: { status?: string }): Observable<any> {
+    return this.api.get(`${this.endpoint}`, query);
+  }
+
+  createBooking(body: BookingCreateRequestDto): Observable<any> {
+    return this.api.post(`${this.endpoint}`, body);
+  }
+
+  getBooking(id: string): Observable<any> {
+    return this.api.get(`${this.endpoint}/${id}`);
+  }
+
+  confirmBooking(id: string): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/confirm`, {});
+  }
+
+  rejectBooking(id: string, body: RejectBookingDto): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/reject`, body);
+  }
+
+  startBooking(id: string): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/start`, {});
+  }
+
+  completeBooking(id: string, body: CompleteBookingDto): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/complete`, body);
+  }
+
+  cancelBooking(id: string, body: CancelBookingDto): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/cancel`, body);
+  }
+
+  sendMessage(id: string, body: SendMessageDto): Observable<any> {
+    return this.api.post(`${this.endpoint}/${id}/message`, body);
   }
 }
-

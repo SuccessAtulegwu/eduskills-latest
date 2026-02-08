@@ -122,6 +122,13 @@ export class AuthApiService {
     }
 
     /**
+    * Verify Reset Otp
+    */
+    VerifyResetOtp(data: { email: string, token: string }): Observable<any> {
+        return this.apiService.post('/auth/verify-forgot-password-otp', data);
+    }
+
+    /**
      * Request password reset
      */
     forgotPassword(email: string): Observable<any> {
@@ -131,7 +138,7 @@ export class AuthApiService {
     /**
      * Reset password with token
      */
-    resetPassword(data: { token: string; email: string; password: string; password_confirmation: string }): Observable<any> {
+    resetPassword(data: { token: string; email: string; newPassword: string; confirmPassword: string }): Observable<any> {
         return this.apiService.post('/auth/reset-password', data);
     }
 
