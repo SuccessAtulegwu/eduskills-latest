@@ -92,6 +92,22 @@ export interface AuthResponse {
     refreshToken?: string;
 }
 
+export interface VideoResponse {
+    id: number;
+    title: string;
+    description: string;
+    videoUrl: string;
+    thumbnailUrl: string;
+    creatorName: string;
+    categoryName: string;
+    views: number;
+    likes: number;
+    isLiked: boolean;
+    uploadedAt: string;
+    durationSeconds: number;
+    lastWatchPosition: number;
+}
+
 // Re-export course models and api models for convenience
 export * from './course.model';
 export * from './api.models';

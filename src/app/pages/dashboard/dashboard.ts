@@ -9,11 +9,12 @@ import { StoryCircles } from '../../components/ui/story-circles/story-circles';
 import { Subscription } from 'rxjs';
 import { LucideAngularModule, MoveRight } from 'lucide-angular';
 import { LandingBanner } from '../../components/ui/landing-banner/landing-banner';
-import { User } from '../../models/model';
+import { User, VideoResponse } from '../../models/model';
+import { VideosService } from '../../services/videos.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule, VideoCard, RouterLink, StoryCircles, LucideAngularModule,LandingBanner],
+  imports: [CommonModule, FormsModule, VideoCard, RouterLink, StoryCircles, LucideAngularModule, LandingBanner],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -23,8 +24,10 @@ export class Dashboard implements OnInit {
   currentDate = new Date();
   searchQuery: string = '';
   private authSubscription?: Subscription;
-  isAuth : boolean = false;
-  sectionTitle : string = 'trending';
+  isAuth: boolean = false;
+  sectionTitle: string = 'trending';
+  isLoadingFollowing: boolean = false;
+  isLoadingRecommended: boolean = false;
 
   followingVideos: VideoCardData[] = [];
   recommendedVideos: VideoCardData[] = [];
@@ -32,7 +35,8 @@ export class Dashboard implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private videoViewerService: VideoViewerService
+    private videoViewerService: VideoViewerService,
+    private videosService: VideosService
   ) { }
 
   ngOnInit(): void {
@@ -41,7 +45,7 @@ export class Dashboard implements OnInit {
     });
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
       this.isAuth = isAuth;
-      if(isAuth)
+      if (isAuth)
         this.sectionTitle = 'recommended';
     });
 
@@ -50,7 +54,81 @@ export class Dashboard implements OnInit {
   }
 
   loadFollowingVideos(): void {
-    // Sample data - replace with actual API call
+    this.isLoadingFollowing = true;
+    // For following videos, we could use a specific endpoint or filter
+    // For now, using getTrending as a placeholder for "following" content
+    this.videosService.getTrending().subscribe({
+      next: (videos: VideoResponse[]) => {
+        this.followingVideos = videos.map(video => this.mapVideoResponseToCardData(video));
+        this.isLoadingFollowing = false;
+      },
+      error: (err) => {
+        console.error('Failed to load following videos:', err);
+        this.loadFollowingVideosFallback();
+        this.isLoadingFollowing = false;
+      }
+    });
+  }
+
+  loadRecommendedVideos(): void {
+    this.isLoadingRecommended = true;
+    // Fetch all videos or use getVideos() without category for recommended
+    this.videosService.getVideos().subscribe({
+      next: (videos: VideoResponse[]) => {
+        this.recommendedVideos = videos.map(video => this.mapVideoResponseToCardData(video));
+        this.isLoadingRecommended = false;
+      },
+      error: (err) => {
+        console.error('Failed to load recommended videos:', err);
+        this.loadRecommendedVideosFallback();
+        this.isLoadingRecommended = false;
+      }
+    });
+  }
+
+  private mapVideoResponseToCardData(video: VideoResponse): VideoCardData {
+    return {
+      id: video.id.toString(),
+      title: video.title,
+      author: video.creatorName,
+      authorAvatar: `https://i.pravatar.cc/150?u=${video.creatorName}`,
+      views: this.formatViews(video.views),
+      timeAgo: this.formatTimeAgo(video.uploadedAt),
+      videoUrl: video.videoUrl,
+      thumbnailUrl: video.thumbnailUrl
+    };
+  }
+
+  private formatViews(views: number): string {
+    if (views >= 1000000) {
+      return (views / 1000000).toFixed(1) + 'M';
+    } else if (views >= 1000) {
+      return (views / 1000).toFixed(1) + 'k';
+    }
+    return views.toString();
+  }
+
+  private formatTimeAgo(uploadedAt: string): string {
+    const now = new Date();
+    const uploaded = new Date(uploadedAt);
+    const diffMs = now.getTime() - uploaded.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+
+    if (diffMonths > 0) {
+      return `${diffMonths}mo ago`;
+    } else if (diffWeeks > 0) {
+      return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+    } else if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else {
+      return 'Today';
+    }
+  }
+
+  private loadFollowingVideosFallback(): void {
+    // Fallback to mock data if API fails
     this.followingVideos = [
       {
         id: '1',
@@ -95,8 +173,8 @@ export class Dashboard implements OnInit {
     ];
   }
 
-  loadRecommendedVideos(): void {
-    // Sample data - replace with actual API call
+  private loadRecommendedVideosFallback(): void {
+    // Fallback to mock data if API fails
     this.recommendedVideos = [
       {
         id: '5',

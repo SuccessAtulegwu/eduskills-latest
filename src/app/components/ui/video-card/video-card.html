@@ -33,26 +33,30 @@
         </div>
       </div>
       <div ngbDropdown placement="bottom-end" container="body">
-        <button ngbDropdownToggle class="dropdown-toggle btn text-dark arrow-none border-0 fw-bold" type="button" role="button" aria-haspopup="true" aria-expanded="false"
-          >
+        <button ngbDropdownToggle class="dropdown-toggle btn text-dark arrow-none border-0 fw-bold" type="button"
+          role="button" aria-haspopup="true" aria-expanded="false">
           <i class="bi bi-three-dots-vertical"></i>
         </button>
         <div ngbDropdownMenu
           class="dropdown-menu dropdown-menu-end dropdown-menu-animated border shadow-sm bg-light rounded-4 py-2 px-1 mt-2">
-          <button class="dropdown-item d-flex gap-2 align-items-center rounded" (click)="onDropdownAction('save', $event)">
+          <button class="dropdown-item d-flex gap-2 align-items-center rounded"
+            (click)="onDropdownAction('save', $event)">
             <i class="bi bi-bookmark"></i>
             <span>Save to playlist</span>
           </button>
-          <button class="dropdown-item d-flex gap-2 align-items-center rounded" (click)="onDropdownAction('share', $event)">
+          <button class="dropdown-item d-flex gap-2 align-items-center rounded"
+            (click)="onDropdownAction('share', $event)">
             <i class="bi bi-share"></i>
             <span>Share</span>
           </button>
-          <button class="dropdown-item d-flex gap-2 align-items-center rounded" (click)="onDropdownAction('notInterested', $event)">
+          <button class="dropdown-item d-flex gap-2 align-items-center rounded"
+            (click)="onDropdownAction('notInterested', $event)">
             <i class="bi bi-eye-slash"></i>
             <span>Not interested</span>
           </button>
           <div class="dropdown-divider"></div>
-          <button class="dropdown-item danger d-flex gap-2 align-items-center text-danger fw-bold rounded" (click)="onDropdownAction('report', $event)">
+          <button class="dropdown-item danger d-flex gap-2 align-items-center text-danger fw-bold rounded"
+            (click)="onDropdownAction('report', $event)">
             <i class="bi bi-flag"></i>
             <span>Report</span>
           </button>
