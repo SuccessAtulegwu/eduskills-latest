@@ -1,0 +1,49 @@
+.edit-container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .card {
+    background: #ffffff;
+    border: 2px solid #f0f0f0;
+  }
+
+  .file-input-wrapper {
+    cursor: pointer;
+
+    input[type="file"] {
+      cursor: pointer;
+    }
+  }
+
+  .custom-checkbox {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+  }
+
+  .certification-fields {
+    border-color: #6366f1 !important;
+  }
+
+  .current-thumbnail-preview {
+    margin-top: 0.5rem;
+    
+    img {
+      border-radius: 0.5rem;
+      object-fit: cover;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}

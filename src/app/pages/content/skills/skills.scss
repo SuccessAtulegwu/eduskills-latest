@@ -1,0 +1,117 @@
+// Proficiency Gradient Classes
+.proficiency-beginner {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+.proficiency-intermediate {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  color: white !important;
+  border-color: #8b5cf6 !important;
+}
+
+.proficiency-advanced {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: white !important;
+  border-color: #f59e0b !important;
+}
+
+.proficiency-expert {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  border-color: #10b981 !important;
+}
+
+// Grid Layouts - Auto-fill responsive
+.skills-grid,
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Card Hover Effects & Thumbnail Container
+.skill-card,
+.recommendation-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// Thumbnail Containers - 16:9 Aspect Ratio
+.skill-thumbnail-container,
+.recommendation-thumbnail-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  overflow: hidden;
+  
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Badge on Image
+.proficiency-badge,
+.recommendation-match-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.recommendation-match-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+// Icon Circle
+.skill-icon,
+.recommendation-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+}
+
+.recommendation-icon {
+  background: linear-gradient(135deg, var(--warning-color), var(--info-color));
+}
+
+// Text Truncation
+.card-title,
+.skill-notes {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-title {
+  -webkit-line-clamp: 2;
+}
+
+.skill-notes {
+  -webkit-line-clamp: 2;
+}

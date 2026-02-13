@@ -284,7 +284,6 @@ function handleError(
         errorMessage = `Error: ${error.error.message}`;
     } else {
         // Server-side error
-        console.log('Server Error', error);
         switch (error.status) {
             case 0:
                 errorMessage = 'No internet connection. Please check your network.';

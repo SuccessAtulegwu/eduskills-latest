@@ -6,7 +6,7 @@ export interface AccountTypeOption {
     label?: string; // Legacy support
     title: string;
     description: string;
-    value: string;
+    value: any;
     icon: string;
 }
 
@@ -37,7 +37,7 @@ export class AccountTypeSelectorComponent implements ControlValueAccessor {
     isDisabled: boolean = false;
     internalTouched: boolean = false;
     isOpen: boolean = false;
-    
+
     onChange: (value: any) => void = () => { };
     onTouched: () => void = () => { };
 

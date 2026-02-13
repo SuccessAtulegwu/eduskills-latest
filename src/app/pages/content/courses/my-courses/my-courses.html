@@ -1,0 +1,70 @@
+<div class="course-container pt-4">
+    <app-page-header title="My Courses" description="Manage the courses you have created"
+        actionButtonText="Back to All Courses" actionButtonIcon="bi bi-arrow-left" (actionButtonClick)="goBack()">
+    </app-page-header>
+
+    <div class="mt-4">
+        <div *ngIf="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading your courses...</p>
+        </div>
+
+        <div *ngIf="!isLoading">
+            <!-- Empty State -->
+            <div *ngIf="courses.length === 0" class="text-center py-5 bg-white rounded-4 shadow-sm border">
+                <i class="bi bi-journal-plus display-1 text-muted mb-3"></i>
+                <h3 class="fw-bold text-dark mt-3">You haven't created any courses yet</h3>
+                <p class="text-muted mb-4 lead">Start sharing your knowledge with the world today!</p>
+                <app-button label="Create New Course" variant="primary" icon="bi-plus-lg" size="lg"
+                    (clicked)="createCourse()">
+                </app-button>
+            </div>
+
+            <!-- Course Grid -->
+            <div class="row g-4" *ngIf="courses.length > 0">
+                <div class="col-md-6 col-lg-4" *ngFor="let course of courses">
+                    <div class="card course-card h-100 border rounded-4 shadow-sm overflow-hidden">
+                        <!-- Image Container -->
+                        <div class="course-img-container position-relative">
+                            <img [src]="course.image" class="card-img-top" [alt]="course.title" appImageError
+                                [fallbackText]="course.title" [category]="course.category">
+                            <div class="overlay"></div>
+                        </div>
+
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge badge-level rounded-2 px-3 py-2">{{ course.level }}</span>
+                                <h4 class="fw-bold text-dark m-0 fs-5 course-price">₦{{ course.price | number:'1.2-2' }}
+                                </h4>
+                            </div>
+
+                            <h5 class="card-title fw-bold text-dark mb-3 line-clamp-2" style="min-height: 3rem;">{{
+                                course.title }}</h5>
+
+                            <p class="text-muted small mb-4 line-clamp-2 flex-grow-1">
+                                {{ course.description || 'No description available' }}
+                            </p>
+
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex gap-3 text-muted small mb-3">
+                                    <span><i class="bi bi-eye me-1"></i> {{ course.views }} views</span>
+                                    <span><i class="bi bi-people me-1"></i> {{ course.enrolled }} enrolled</span>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <app-button label="View" variant="primary" size="sm"
+                                        (clicked)="viewCourse(course.id)"></app-button>
+                                    <app-button label="Edit" variant="secondary" size="sm" icon="bi-pencil"
+                                        (clicked)="editCourse(course.id)"></app-button>
+                                    <app-button label="Delete" variant="danger" size="sm" icon="bi-trash"
+                                        (clicked)="deleteCourse(course.id)"></app-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

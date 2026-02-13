@@ -37,17 +37,20 @@
                 </app-account-type-selector>
             </div>
 
-            <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2" style="padding-bottom: 27px;">
+ <div class="col-lg-6 col-md-12 d-flex align-items-end gap-2" style="padding-bottom: 27px;">
                 <app-button label="Filter" variant="primary" icon="bi-search" (clicked)="onFilter()"></app-button>
                 <app-button label="Clear" variant="secondary" [outline]="true" icon="bi-x-circle"
                     (clicked)="onClear()"></app-button>
+                <app-button label="My Courses" variant="secondary" [outline]="true" icon="bi-person-badge"
+                    (clicked)="viewMyCourses()" *ngIf="currentUser">
+                </app-button>
             </div>
         </div>
     </div>
 
     <!-- Course Grid -->
     <div class="row g-4">
-        <div class="col-md-6 col-lg-4" *ngFor="let course of filteredCourses">
+        <div class="col-md-6 col-lg-4" *ngFor="let course of filteredCourses"  (clicked)="viewCourse(course.id) " style="cursor: pointer;">
             <div class="card course-card h-100 border rounded-4 shadow-sm overflow-hidden">
                 <!-- Image Container -->
                 <div class="course-img-container position-relative">
@@ -70,14 +73,25 @@
                         students.
                     </p>
 
-                    <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
-                        <div class="d-flex gap-3 text-muted small">
-                            <span><i class="bi bi-eye me-1"></i> {{ course.views }} views</span>
-                            <span><i class="bi bi-people me-1"></i> {{ course.enrolled }} enrolled</span>
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex justify-content-between text-muted small mb-2">
+                            <span>
+                                <i class="bi bi-eye me-1"></i> {{ course.views }} views
+                            </span>
+                            <span>
+                                <i class="bi bi-people me-1"></i> {{ course.enrolled }} enrolled
+                            </span>
                         </div>
-                        <app-button label="View Details" variant="primary" size="sm"
-                            (clicked)="viewCourse(course.id)"></app-button>
+                    
+                        <app-button
+                            label="View Details"
+                            variant="primary"
+                            size="sm"
+                            class="w-100"
+                            (clicked)="viewCourse(course.id)">
+                        </app-button>
                     </div>
+                    
                 </div>
             </div>
         </div>

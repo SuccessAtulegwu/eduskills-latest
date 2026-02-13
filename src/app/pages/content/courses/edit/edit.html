@@ -1,0 +1,132 @@
+<div class="edit-container container-fluid py-4">
+    <app-page-header title="Edit Course" description="Update course information"></app-page-header>
+
+    <div class="card border-2 shadow-sm rounded-4 p-4 p-md-5 mt-4" *ngIf="!isLoadingCourse">
+        <form (ngSubmit)="onSubmit()">
+            <!-- Title -->
+            <div class="mb-4">
+                <app-input label="Title" placeholder="Course Title" [required]="true" [(ngModel)]="courseTitle"
+                    name="title"></app-input>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <app-textarea label="Description" placeholder="Course description" [rows]="4"
+                    [(ngModel)]="courseDescription" name="description"></app-textarea>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <!-- Price -->
+                <div class="col-md-6">
+                    <app-input label="Price" placeholder="0.00" type="number" [(ngModel)]="price"
+                        name="price"></app-input>
+                </div>
+                <!-- Duration -->
+                <div class="col-md-6">
+                    <app-input label="Duration Hours" placeholder="Hours" [(ngModel)]="duration"
+                        name="duration"></app-input>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <!-- Category -->
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary mb-2">Category</label>
+                    <app-account-type-selector [accountTypes]="categories" [(ngModel)]="selectedCategory"
+                        name="category"
+                        [placeholder]="isLoadingCategories ? 'Loading categories...' : 'Select Category (Optional)'">
+                    </app-account-type-selector>
+                    <div class="form-text text-muted mt-2 small" *ngIf="isLoadingCategories">
+                        <i class="bi bi-arrow-repeat spin me-1"></i> Loading categories from API...
+                    </div>
+                </div>
+                <!-- Level -->
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small text-secondary mb-2">Level</label>
+                    <app-account-type-selector [accountTypes]="levels" [(ngModel)]="selectedLevel" name="level"
+                        placeholder="Select Level (Optional)"></app-account-type-selector>
+                </div>
+            </div>
+
+            <!-- Exam Type -->
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-secondary mb-2">Exam Type</label>
+                <app-account-type-selector [accountTypes]="examTypes" [(ngModel)]="selectedExamType" name="examType"
+                    placeholder="None"></app-account-type-selector>
+                <div class="form-text text-muted mt-2 small">Select the exam type this course is designed for (e.g.,
+                    WAEC, NECO, JAMB)</div>
+            </div>
+
+            <!-- Current Thumbnail -->
+            <div class="mb-3" *ngIf="currentThumbnailUrl">
+                <label class="form-label fw-bold small text-secondary mb-2">Current Thumbnail</label>
+                <div class="current-thumbnail-preview">
+                    <img [src]="currentThumbnailUrl" alt="Current thumbnail" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                </div>
+            </div>
+
+            <!-- Thumbnail Image -->
+            <div class="mb-5">
+                <label class="form-label fw-bold small text-secondary mb-2">Update Thumbnail Image</label>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="file-input-wrapper position-relative">
+                        <button type="button" class="btn btn-outline-secondary fw-semibold px-4">Choose File</button>
+                        <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                            (change)="onFileSelected($event)" accept="image/*">
+                    </div>
+                    <span class="text-secondary small">{{ selectedFileName }}</span>
+                </div>
+                <div class="form-text text-muted mt-2 small">Recommended size: 1200x675px. Leave empty to keep current thumbnail.</div>
+            </div>
+
+            <hr class="my-5 border-secondary-subtle">
+
+            <!-- Certification Settings -->
+            <div class="mb-5">
+                <h5 class="fw-bold text-dark mb-4">Certification Settings</h5>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input custom-checkbox" type="checkbox" id="enableCert"
+                        [(ngModel)]="enableCertification" name="enableCert">
+                    <label class="form-check-label fs-5 text-secondary" for="enableCert">
+                        Enable certification for this course
+                    </label>
+                    <div class="form-text text-muted mt-2">Students who complete this course will be eligible for a
+                        certificate.</div>
+                </div>
+
+                <div *ngIf="enableCertification" class="certification-fields ps-4 border-start border-3 ms-2">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary mb-2">Certificate Template</label>
+                        <app-account-type-selector [accountTypes]="certificateTemplates" [(ngModel)]="selectedTemplate"
+                            name="template" placeholder="Use Default Template"></app-account-type-selector>
+                        <div class="form-text text-muted mt-2 small">Select a template for certificates issued for this
+                            course.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <app-input label="Passing Score (%)" placeholder="e.g., 70" type="number"
+                            [(ngModel)]="passingScore" name="passingScore"
+                            helpText="Minimum score required to earn certificate (0-100). Leave empty if not required."></app-input>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-between align-items-center pt-3">
+                <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold"
+                    (click)="onCancel()">Cancel</button>
+                <app-button label="Update Course" variant="primary" icon="bi-check-circle"
+                    customClass="custom-gradient-btn px-5 py-2" [disabled]="isSubmitting" (clicked)="onSubmit()"></app-button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading State -->
+    <div class="text-center py-5" *ngIf="isLoadingCourse">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading course data...</p>
+    </div>
+</div>

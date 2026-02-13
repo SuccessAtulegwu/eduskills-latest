@@ -5,10 +5,13 @@ import { Router } from '@angular/router';
 import { PageHeader } from '../../../components/page-header/page-header';
 import { AccountTypeSelectorComponent, AccountTypeOption } from '../../../components/account-type-selector/account-type-selector.component';
 import { InputComponent } from '../../../components/ui/input/input';
-import { ButtonComponent } from '../../../components/ui/button/button';
-import { CourseService } from './course.service';
+import { ButtonComponent } from '../../../components/ui/button/button'; 
 import { CourseModel, CourseResponse, GetCoursesQueryParams } from '../../../models/course.model';
 import { ToastService } from '../../../services/toast.service';
+import { AuthService } from '../../../services/auth';
+import { User } from '../../../models/model';
+import { CourseService } from '../../../services/course.service';
+
 
 @Component({
   selector: 'app-courses',
@@ -19,12 +22,13 @@ import { ToastService } from '../../../services/toast.service';
     PageHeader,
     AccountTypeSelectorComponent,
     InputComponent,
-    ButtonComponent
+    ButtonComponent,
   ],
   templateUrl: './courses.html',
   styleUrl: './courses.scss',
 })
 export class Courses implements OnInit {
+  currentUser: User | null = null;
 
   // Filter States
   selectedCategory: string = 'all';
@@ -72,10 +76,14 @@ export class Courses implements OnInit {
   constructor(
     private router: Router,
     private courseService: CourseService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadCourses();
   }
 
@@ -94,14 +102,13 @@ export class Courses implements OnInit {
           console.error('Error loading courses:', error);
           this.toastService.show('Failed to load courses. Using fallback data.', 'warning');
           // Fallback to mock data
-          this.courses = this.courseService.getCourses();
+          this.useApi = false; // Switch to mock data mode
           this.filteredCourses = [...this.courses];
           this.isLoading = false;
         }
       });
     } else {
-      // Use mock data
-      this.courses = this.courseService.getCourses();
+      
       this.filteredCourses = [...this.courses];
     }
   }
@@ -114,10 +121,12 @@ export class Courses implements OnInit {
       image: course.thumbnailUrl || '/assets/images/placeholder.jpg',
       price: course.price || 0,
       level: course.level || 'Beginner',
-      views: 0, // These fields might not be in API response
-      enrolled: 0,
-      category: this.getCategoryName(course.categoryId),
+      views: course.views || 0,
+      enrolled: course.enrollmentCount || 0,
+      category: course.category?.name || this.getCategoryName(course.categoryId),
       description: course.description,
+      creator: course.creatorName,
+      creatorId: course.creatorId,
       duration: course.durationHours ? `${course.durationHours} hours` : undefined,
       createdDate: course.createdAt ? new Date(course.createdAt).toLocaleDateString() : undefined
     }));
@@ -140,9 +149,9 @@ export class Courses implements OnInit {
     if (this.useApi) {
       // Use API filtering
       this.isLoading = true;
-      
+
       const queryParams: GetCoursesQueryParams = {};
-      
+
       if (this.selectedCategory !== 'all') {
         queryParams.categoryId = this.getCategoryId(this.selectedCategory);
       }
@@ -187,8 +196,8 @@ export class Courses implements OnInit {
       }
       if (this.searchQuery.trim()) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(c => 
-          c.title.toLowerCase().includes(query) || 
+        filtered = filtered.filter(c =>
+          c.title.toLowerCase().includes(query) ||
           c.description?.toLowerCase().includes(query)
         );
       }
@@ -206,6 +215,10 @@ export class Courses implements OnInit {
 
       this.filteredCourses = filtered;
     }
+  }
+
+  viewMyCourses() {
+    this.router.navigate(['/content/courses/my-courses']);
   }
 
   private getCategoryId(category: string): number {
@@ -254,5 +267,30 @@ export class Courses implements OnInit {
 
   viewCourse(id: number) {
     this.router.navigate(['/content/courses', id]);
+  }
+
+  editCourse(id: number) {
+    this.router.navigate(['/content/courses/edit', id]);
+  }
+
+  deleteCourse(id: number) {
+    if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      this.courseService.deleteCourse(id).subscribe({
+        next: () => {
+          this.toastService.show('Course deleted successfully', 'success');
+          // Reload courses
+          this.loadCourses();
+        },
+        error: (error) => {
+          console.error('Error deleting course:', error);
+          this.toastService.show('Failed to delete course', 'error');
+        }
+      });
+    }
+  }
+
+  isCreator(course: CourseModel): boolean {
+    if (!this.currentUser || !course.creatorId) return false;
+    return this.currentUser.id === course.creatorId;
   }
 }

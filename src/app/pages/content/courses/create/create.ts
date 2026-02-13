@@ -7,7 +7,7 @@ import { TextareaComponent } from '../../../../components/ui/textarea/textarea';
 import { ButtonComponent } from '../../../../components/ui/button/button';
 import { AccountTypeSelectorComponent, AccountTypeOption } from '../../../../components/account-type-selector/account-type-selector.component';
 import { PageHeader } from '../../../../components/page-header/page-header';
-import { CourseService } from '../course.service';
+import { CourseService } from '../../../../services/course.service';
 import { CreateCourseRequest } from '../../../../models/course.model';
 import { ToastService } from '../../../../services/toast.service';
 

@@ -5,9 +5,10 @@ import { ButtonComponent } from '../../../../components/ui/button/button';
 import { PageHeader } from '../../../../components/page-header/page-header';
 import { PaymentModalComponent, PaymentDetails, PaymentItem } from '../../../../components/ui/payment-modal/payment-modal.component';
 import { PaymentService } from '../../../../services/payment.service';
-import { CourseService } from '../course.service';
+
 import { CourseModel, CourseResponse } from '../../../../models/course.model';
 import { ToastService } from '../../../../services/toast.service';
+import { CourseService } from '../../../../services/course.service';
 
 @Component({
   selector: 'app-course-details',
@@ -60,14 +61,10 @@ export class CourseDetails implements OnInit {
           console.error('Error loading course:', error);
           this.toastService.show('Failed to load course. Using fallback data.', 'warning');
           // Fallback to mock data
-          this.course = this.courseService.getCourseByIdLegacy(this.courseId!);
           this.isLoading = false;
         }
       });
-    } else {
-      // Use mock data
-      this.course = this.courseService.getCourseByIdLegacy(this.courseId);
-    }
+    } 
   }
 
   // Convert API CourseResponse to CourseModel for display compatibility

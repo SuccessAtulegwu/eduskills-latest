@@ -1,83 +1,170 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
-import {
-    CourseCreateDto,
-    CourseUpdateDto,
-    UpdateVideoProgressDto
-} from '../models/api.models';
-import { CourseResponse } from '../models/model';
+import { map, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { CourseModel, CourseResponse, CreateCourseRequest, GetAllCoursesResponse, GetCoursesQueryParams, UpdateCourseRequest, } from '../models/model';
+
 
 @Injectable({
     providedIn: 'root'
 })
 export class CourseService {
-    private readonly endpoint = '/Course';
+    private apiUrl = environment.apiUrl;
 
-    constructor(private api: ApiService) { }
+    // Fallback courses for backward compatibility - EMPTY now as requested
+    private courses: CourseModel[] = [];
 
-    getCourses(query?: {
-        categoryId?: string;
-        level?: string;
-        examType?: string;
-        searchTerm?: string;
-        maxPrice?: number;
-        sortBy?: string;
-    }): Observable<any> {
-        return this.api.get(`${this.endpoint}/GetCourses`, query);
+    constructor(private http: HttpClient) { }
+
+    /**
+     * Create a new course
+     */
+    createCourse(courseData: CreateCourseRequest): Observable<CourseResponse> {
+        // Prepare JSON payload (no FormData, no file)
+        const payload = {
+            title: courseData.title,
+            description: courseData.description,
+            price: courseData.price,
+            durationHours: courseData.durationHours,
+            categoryId: courseData.categoryId,
+            level: courseData.level,
+            examType: courseData.examType,
+            certificationEnabled: courseData.certificationEnabled,
+            certificateTemplateId: courseData.certificateTemplateId,
+            passingScore: courseData.passingScore
+        };
+
+        return this.http.post<CourseResponse>(`${this.apiUrl}/Course/CreateCourse`, payload);
     }
 
-    getAllCourses(): Observable<CourseResponse[]> {
-        return this.api.get(`${this.endpoint}/GetAllCourses`);
-    }
-
-    getCourse(id: string): Observable<any> {
-        return this.api.get(`${this.endpoint}/GetCourse/${id}`);
-    }
-
-    createCourse(body: CourseCreateDto): Observable<any> {
-        return this.api.post(`${this.endpoint}/CreateCourse`, body);
-    }
-
-    uploadThumbnail(id: string, thumbnailFile: File): Observable<any> {
+    /**
+     * Upload or replace thumbnail for a course
+     */
+    uploadThumbnail(courseId: number, thumbnailFile: File | string): Observable<any> {
         const formData = new FormData();
-        formData.append('thumbnailFile', thumbnailFile);
-        return this.api.upload(`${this.endpoint}/UploadThumbnail/${id}/thumbnail`, formData);
-    }
 
-    updateCourse(id: string, body: CourseUpdateDto, thumbnailFile?: File): Observable<any> {
-        const formData = new FormData();
-        Object.keys(body).forEach(key => {
-            formData.append(key, (body as any)[key]);
-        });
-        if (thumbnailFile) {
+        if (thumbnailFile instanceof File) {
             formData.append('thumbnailFile', thumbnailFile);
+        } else {
+            // If it's a base64 string, convert it to a blob
+            const byteString = atob(thumbnailFile.split(',')[1] || thumbnailFile);
+            const mimeString = thumbnailFile.split(',')[0].match(/:(.*?);/)?.[1] || 'image/png';
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            formData.append('thumbnailFile', blob, 'thumbnail.png');
         }
-        // Spec uses PUT with multipart.
-        return this.api.put(`${this.endpoint}/UpdateCourse/${id}`, formData);
+
+        return this.http.post(`${this.apiUrl}/Course/UploadThumbnail/${courseId}`, formData);
     }
 
-    deleteCourse(id: string): Observable<any> {
-        return this.api.delete(`${this.endpoint}/DeleteCourse/${id}`);
+    /**
+     * Get all courses with optional query parameters
+     */
+    getAllCourses(params?: GetCoursesQueryParams): Observable<CourseResponse[]> {
+        let httpParams = new HttpParams();
+
+        if (params) {
+            if (params.categoryId !== undefined) {
+                httpParams = httpParams.set('categoryId', params.categoryId.toString());
+            }
+            if (params.level) {
+                httpParams = httpParams.set('level', params.level);
+            }
+            if (params.examType !== undefined) {
+                httpParams = httpParams.set('examType', params.examType.toString());
+            }
+            if (params.searchTerm) {
+                httpParams = httpParams.set('searchTerm', params.searchTerm);
+            }
+            if (params.maxPrice !== undefined) {
+                httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
+            }
+            if (params.sortBy) {
+                httpParams = httpParams.set('sortBy', params.sortBy);
+            }
+        }
+
+        // Use GetAllCourses endpoint to get all courses including unpublished
+        return this.http.get<GetAllCoursesResponse>(`${this.apiUrl}/Course/GetAllCourses`, { params: httpParams })
+            .pipe(
+                map(response => response.courses || [])
+            );
     }
 
-    getMyCourses(): Observable<any> {
-        return this.api.get(`${this.endpoint}/GetMyCourses/my-courses`);
+    /**
+     * Get courses created by the current user
+     * GET /api/v1/Course/GetMyCourses/my-courses
+     */
+    getMyCourses(): Observable<CourseResponse[]> {
+        return this.http.get<GetAllCoursesResponse>(`${this.apiUrl}/Course/GetMyCourses/my-courses`)
+            .pipe(
+                map(response => response.courses || [])
+            );
     }
 
-    enroll(courseId: string): Observable<any> {
-        return this.api.post(`${this.endpoint}/Enroll/${courseId}/enroll`, {});
+    /**
+     * Get course by ID
+     * GET /api/v1/Course/GetCourse/{id}
+     */
+    getCourseById(id: number): Observable<CourseResponse> {
+        return this.http.get<any>(`${this.apiUrl}/Course/GetCourse/${id}`).pipe(
+            map(response => response.course)
+        );
     }
 
-    getMyEnrollments(): Observable<any> {
-        return this.api.get(`${this.endpoint}/GetMyEnrollments/my-enrollments`);
+    /**
+     * Update course by ID
+     */
+    updateCourse(id: number, courseData: UpdateCourseRequest, thumbnailFile?: File | string): Observable<CourseResponse> {
+        const formData = new FormData();
+
+        // Add fields if provided
+        if (courseData.title !== undefined) formData.append('Title', courseData.title);
+        if (courseData.description !== undefined) formData.append('Description', courseData.description);
+        if (courseData.price !== undefined) formData.append('Price', courseData.price.toString());
+        if (courseData.durationHours !== undefined) formData.append('DurationHours', courseData.durationHours.toString());
+        if (courseData.categoryId !== undefined) formData.append('CategoryId', courseData.categoryId.toString());
+        if (courseData.level !== undefined) formData.append('Level', courseData.level);
+        if (courseData.examType !== undefined) formData.append('ExamType', courseData.examType.toString());
+        if (courseData.certificationEnabled !== undefined) formData.append('CertificationEnabled', courseData.certificationEnabled.toString());
+        if (courseData.certificateTemplateId !== undefined) formData.append('CertificateTemplateId', courseData.certificateTemplateId.toString());
+        if (courseData.passingScore !== undefined) formData.append('PassingScore', courseData.passingScore.toString());
+
+        // Handle thumbnail
+        if (thumbnailFile) {
+            if (thumbnailFile instanceof File) {
+                formData.append('thumbnailFile', thumbnailFile);
+            } else {
+                // For base64 string
+                const byteString = atob(thumbnailFile.split(',')[1] || thumbnailFile);
+                const mimeString = thumbnailFile.split(',')[0].match(/:(.*?);/)?.[1] || 'image/png';
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                formData.append('thumbnailFile', blob, 'thumbnail.png');
+            }
+        }
+
+        return this.http.put<CourseResponse>(`${this.apiUrl}/Course/UpdateCourse/${id}`, formData);
     }
 
-    generateCertificate(courseId: string): Observable<any> {
-        return this.api.post(`${this.endpoint}/GenerateCertificate/${courseId}/generate-certificate`, {});
+    /**
+     * Delete course by ID
+     */
+    deleteCourse(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/Course/DeleteCourse/${id}`);
     }
 
-    updateVideoProgress(courseId: string, videoId: string, body: UpdateVideoProgressDto): Observable<any> {
-        return this.api.post(`${this.endpoint}/UpdateVideoProgress/${courseId}/videos/${videoId}/progress`, body);
-    }
+
 }
+
+
+
+
