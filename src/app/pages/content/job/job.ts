@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router'; // Import Router and ActivatedRoute
+import { Router, ActivatedRoute } from '@angular/router';
 import { PageHeader } from '../../../components/page-header/page-header';
 import { AccountTypeSelectorComponent, AccountTypeOption } from '../../../components/account-type-selector/account-type-selector.component';
 import { InputComponent } from '../../../components/ui/input/input';
 import { ButtonComponent } from '../../../components/ui/button/button';
-import { JobService, JobModel } from './job.service';
+import { JobPostingService } from '../../../services/job-posting.service';
+import { JobPostingModel, JobType, stringToJobType } from '../../../models/job-posting.model';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth';
 
@@ -31,16 +32,18 @@ export class Job implements OnInit, OnDestroy {
   location: string = '';
   searchQuery: string = '';
   isAuthenticated: boolean = false;
+  isLoading: boolean = false;
   private authSubscription?: Subscription;
 
-  jobs: JobModel[] = [];
+  jobs: JobPostingModel[] = [];
+  filteredJobs: JobPostingModel[] = [];
 
   jobTypes: AccountTypeOption[] = [
     { title: 'All Types', value: 'all', description: 'Show all job types', icon: 'bi-briefcase' },
-    { title: 'Full Time', value: 'full_time', description: 'Full-time positions', icon: 'bi-person-fill' },
-    { title: 'Part Time', value: 'part_time', description: 'Part-time positions', icon: 'bi-clock' },
-    { title: 'Contract', value: 'contract', description: 'Contract-based jobs', icon: 'bi-file-text' },
-    { title: 'Internship', value: 'internship', description: 'Internship opportunities', icon: 'bi-book' },
+    { title: 'Full Time', value: '0', description: 'Full-time positions', icon: 'bi-person-fill' },
+    { title: 'Part Time', value: '1', description: 'Part-time positions', icon: 'bi-clock' },
+    { title: 'Contract', value: '2', description: 'Contract-based jobs', icon: 'bi-file-text' },
+    { title: 'Internship', value: '3', description: 'Internship opportunities', icon: 'bi-book' },
   ];
 
   categories: AccountTypeOption[] = [
@@ -59,20 +62,50 @@ export class Job implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private jobService: JobService,
+    private jobPostingService: JobPostingService,
     private authService: AuthService
   ) { }
 
   ngOnInit() {
-    this.jobs = this.jobService.getJobs();
+    this.loadJobs();
     this.authSubscription = this.authService.isAuthenticated$.subscribe(isAuth => {
-      // Filter menu items based on authentication status
       this.isAuthenticated = isAuth;
     });
   }
 
+  loadJobs() {
+    this.isLoading = true;
+    const params: any = {};
+
+    if (this.selectedJobType !== 'all') {
+      params.jobType = parseInt(this.selectedJobType);
+    }
+
+    if (this.location) {
+      params.location = this.location;
+    }
+
+    if (this.searchQuery) {
+      params.searchTerm = this.searchQuery;
+    }
+
+    params.isExpired = false;
+
+    this.jobPostingService.getJobPostingsAsModels(params).subscribe({
+      next: (jobs) => {
+        this.jobs = jobs;
+        this.filteredJobs = jobs;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading jobs:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
   onFilter() {
-    console.log('Filtering jobs...');
+    this.loadJobs();
   }
 
   onClear() {
@@ -81,6 +114,7 @@ export class Job implements OnInit, OnDestroy {
     this.selectedSort = 'recent';
     this.location = '';
     this.searchQuery = '';
+    this.loadJobs();
   }
 
   viewDetails(id: number) {

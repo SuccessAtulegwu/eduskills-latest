@@ -116,9 +116,10 @@ export const routes: Routes = [
             path: 'quizes',
             loadComponent: () => import('./pages/account/quizes/quizes').then(m => m.Quizes)
           },
+         
           {
-            path: 'progress',
-            loadComponent: () => import('./pages/account/progress/progress').then(m => m.Progress)
+            path: 'applications',
+            loadComponent: () => import('./pages/account/applications/applications').then(m => m.Applications)
           },
           {
             path: 'courses',

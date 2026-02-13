@@ -62,31 +62,41 @@
         </div>
     </div>
 
+    <!-- Loading State -->
+    <div class="text-center py-5" *ngIf="isLoading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading jobs...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading available opportunities...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center py-5" *ngIf="!isLoading && jobs.length === 0">
+        <i class="bi bi-briefcase display-1 text-muted"></i>
+        <h3 class="mt-3">No Jobs Found</h3>
+        <p class="text-muted">Try adjusting your filters to see more opportunities</p>
+    </div>
+
     <!-- Dynamic Job List -->
-    <div class="row g-4">
+    <div class="row g-4" *ngIf="!isLoading && jobs.length > 0">
         <div class="col-md-6 col-lg-4" *ngFor="let job of jobs">
             <div class="card job-card h-100 border rounded-4 shadow-sm overflow-hidden">
-                <!-- Status Overlay for Expired/Unavailable -->
-                <div class="status-overlay" *ngIf="job.isExpired || !job.isAvailable">
+                <!-- Status Overlay for Expired Jobs -->
+                <div class="status-overlay" *ngIf="job.isExpired">
                     <div class="status-content">
                         <i class="bi bi-exclamation-triangle-fill fs-4 mb-2"></i>
-                        <h6 class="fw-bold mb-0">Job {{ !job.isAvailable ? 'Unavailable' : 'Expired' }}</h6>
+                        <h6 class="fw-bold mb-0">Job Expired</h6>
                     </div>
                 </div>
 
                 <div class="card-body p-4 d-flex flex-column position-relative">
                     <!-- Top Row: Badge & Date -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="job-badge" [ngClass]="{
-                            'badge-fulltime': job.type === 'FullTime',
-                            'badge-parttime': job.type === 'PartTime',
-                            'badge-contract': job.type === 'Contract',
-                            'badge-internship': job.type === 'Internship'
-                        }">{{ job.type }}</span>
+                        <span class="badge" [ngClass]="job.jobTypeClass">{{ job.jobTypeBadge }}</span>
 
                         <div class="date-badge" [class.text-danger]="job.isExpired">
                             <i class="bi" [ngClass]="job.isExpired ? 'bi-calendar-x' : 'bi-clock'"></i>
-                            <span class="ms-1 small fw-medium">{{ job.expirationDate }}</span>
+                            <span class="ms-1 small fw-medium">{{ job.applicationDeadline }}</span>
                         </div>
                     </div>
 
@@ -95,11 +105,13 @@
 
                     <!-- Company Info -->
                     <div class="d-flex align-items-center mb-3">
-                        <div class="company-logo" [ngClass]="job.logoColor || 'bg-secondary'">
-                            {{ job.company.charAt(0) }}
+                        <div class="company-logo rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
+                             [style.background-color]="job.companyLogoColor"
+                             style="width: 48px; height: 48px; font-size: 1.25rem;">
+                            {{ job.companyName.charAt(0) }}
                         </div>
                         <div class="ms-3">
-                            <h6 class="mb-0 fw-bold company-name">{{ job.company }}</h6>
+                            <h6 class="mb-0 fw-bold company-name">{{ job.companyName }}</h6>
                             <small class="location-text d-flex align-items-center">
                                 <i class="bi bi-geo-alt-fill me-1 text-primary small"></i> {{ job.location }}
                             </small>

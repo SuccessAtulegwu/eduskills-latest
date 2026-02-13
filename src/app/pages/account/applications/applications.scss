@@ -1,0 +1,76 @@
+.container-fluid {
+  max-width: 1400px;
+}
+
+.card {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.badge {
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  h5 {
+    font-size: 1rem;
+  }
+
+  .d-flex.gap-2 {
+    flex-direction: column;
+
+    app-button {
+      width: 100%;
+    }
+  }
+}
+
+// Container Queries for Statistics Layout
+.stats-container {
+  container-type: inline-size;
+}
+
+.stat-item {
+  width: 100%; // Default mobile
+
+  @container (min-width: 600px) {
+    width: 50%;
+  }
+
+  @container (min-width: 900px) {
+    width: 33.333%;
+  }
+
+  @container (min-width: 1200px) {
+    width: 16.666%;
+  }
+}

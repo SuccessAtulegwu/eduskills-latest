@@ -232,14 +232,16 @@ export class MenuService {
           visible: true,
           requiresAuth: true
         },
+
         {
-          id: 'progress',
+          id: 'applications',
           label: 'My Applications',
           icon: BarChart,
-          route: '/account/progress',
+          route: '/account/applications',
           visible: true,
           requiresAuth: true
         },
+       
         {
           id: 'my-courses',
           label: 'My Courses',

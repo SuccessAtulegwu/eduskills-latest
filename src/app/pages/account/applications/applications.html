@@ -1,0 +1,314 @@
+<div class="container-fluid p-0">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <app-page-header title="My Job Applications" description="Track your job application status"></app-page-header>
+    </div>
+    <app-button label="Browse Jobs" icon="bi-briefcase" variant="primary" (clicked)="browseJobs()"></app-button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row g-3 mb-4 stats-container">
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-list-ul fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ totalApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Total</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-clock-fill fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ pendingApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Pending</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-eye-fill fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ reviewedApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Reviewed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-star-fill fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ shortlistedApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Shortlisted</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ acceptedApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Accepted</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="card h-100 border rounded-4 shadow-sm bg-body">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger"
+            style="width: 48px; height: 48px; flex-shrink: 0;">
+            <i class="bi bi-x-circle-fill fs-5"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-body">{{ rejectedApplications }}</h4>
+            <p class="text-body small fw-medium mb-0">Rejected</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border rounded-4 shadow-sm p-4 mb-4">
+    <div class="row g-3">
+      <div class="col-lg-4 col-md-6">
+        <app-account-type-selector label="Status" [accountTypes]="statusOptions" [(ngModel)]="selectedStatus"
+          (ngModelChange)="onStatusChange()"></app-account-type-selector>
+      </div>
+
+      <div class="col-lg-4 col-md-6">
+        <app-input label="Search" placeholder="Search by job title or company..." [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"></app-input>
+      </div>
+
+     
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-3">Loading your applications...</p>
+  </div>
+
+  <!-- Applications List -->
+  <div *ngIf="!isLoading && filteredApplications.length > 0" class="row g-4">
+    <div class="col-12" *ngFor="let application of filteredApplications" (click)="viewApplication(application)"
+      style="cursor: pointer;">
+      <div class="card border rounded-4 shadow-sm overflow-hidden h-100">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <!-- Job Info -->
+            <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
+              <div class="d-flex align-items-start gap-3">
+                <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                  style="width: 56px; height: 56px; flex-shrink: 0; font-size: 24px; font-weight: 600;">
+                  {{ application.companyName.charAt(0) }}
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="fw-bold mb-1">{{ application.jobTitle }}</h5>
+                  <p class="text-muted mb-1 small">{{ application.companyName }}</p>
+
+                  <div class="d-flex align-items-center gap-2 text-muted small">
+                    <i class="bi bi-calendar"></i>
+                    <span>Applied: {{ application.appliedDate }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="col-lg-2 col-md-3 col-6 mb-3 mb-lg-0">
+              <div class="text-center">
+                <span class="badge px-3 py-2 rounded-2 fw-medium" [ngClass]="application.statusClass">
+                  <i class="bi me-1" [ngClass]="application.statusIcon"></i>
+                  {{ application.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Expected Salary -->
+            <div class="col-lg-2 col-md-3 col-6 mb-3 mb-lg-0" *ngIf="application.expectedSalary">
+              <div class="text-center">
+                <p class="text-muted small mb-0">Expected Salary</p>
+                <p class="fw-bold mb-0">{{ application.expectedSalary }}</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-lg-3 col-md-12">
+              <div class="d-flex gap-2 justify-content-end ">
+
+                <app-button label="Details" variant="primary" size="sm"
+                  (clicked)="viewApplication(application)"></app-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cover Letter Preview (Collapsible) -->
+          <div class="mt-3 pt-3 border-top" *ngIf="application.coverLetter">
+            <p class="text-muted small mb-1"><strong>Cover Letter:</strong></p>
+            <p class="small text-muted mb-0" style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+              {{ application.coverLetter }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredApplications.length === 0" class="text-center py-5">
+    <div class="mb-4">
+      <i class="bi bi-inbox display-1 text-muted"></i>
+    </div>
+    <h4 class="fw-bold mb-2">No Applications Found</h4>
+    <p class="text-muted mb-4">
+      {{ applications.length === 0 ? "You haven't applied to any jobs yet." : "No applications match your filters." }}
+    </p>
+
+    <app-button *ngIf="applications.length > 0" label="Clear Filters" variant="secondary" icon="bi-x-circle"
+      (clicked)="onClear()"></app-button>
+  </div>
+
+  <!-- Application Details Modal -->
+  <div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0,0,0,0.5);"
+    *ngIf="showDetailsModal && selectedApplication">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-bottom px-3 pt-3 pb-2">
+          <div>
+            <h5 class="modal-title fw-bold">{{ selectedApplication.jobTitle }}</h5>
+            <p class="text-muted mb-0 small">{{ selectedApplication.companyName }}</p>
+          </div>
+          <button type="button" class="btn-close" (click)="closeApplicationDetails()"></button>
+        </div>
+        <div class="modal-body px-3 py-3">
+          <!-- Status Banner -->
+          <div class="alert mb-3 d-flex align-items-center gap-3" [ngClass]="selectedApplication.statusClass">
+            <i class="bi fs-4" [ngClass]="selectedApplication.statusIcon"></i>
+            <div>
+              <h6 class="fw-bold mb-1">Status: {{ selectedApplication.status }}</h6>
+              <p class="mb-0 small" *ngIf="selectedApplication.statusNotes">{{ selectedApplication.statusNotes }}</p>
+              <p class="mb-0 small" *ngIf="!selectedApplication.statusNotes">Your application is currently {{
+                selectedApplication.status.toLowerCase() }}.</p>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <!-- Application Info -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3">Application Details</h6>
+
+              <div class="mb-3">
+                <label class="text-muted small d-block">Applied On</label>
+                <span class="fw-medium">{{ selectedApplication.appliedDate }}</span>
+              </div>
+
+              <div class="mb-3" *ngIf="selectedApplication.expectedSalary">
+                <label class="text-muted small d-block">Expected Salary</label>
+                <span class="fw-medium">{{ selectedApplication.expectedSalary }}</span>
+              </div>
+
+              <div class="mb-3" *ngIf="selectedApplication.availableStartDate">
+                <label class="text-muted small d-block">Available Start Date</label>
+                <span class="fw-medium">{{ selectedApplication.availableStartDate | date:'mediumDate' }}</span>
+              </div>
+
+              <div class="mb-3" *ngIf="selectedApplication.updatedDate">
+                <label class="text-muted small d-block">Last Updated</label>
+                <span class="fw-medium">{{ selectedApplication.updatedDate }}</span>
+              </div>
+            </div>
+
+            <!-- Attachments -->
+            <div class="col-md-6">
+              <h6 class="fw-bold mb-3">Attachments</h6>
+
+              <div class="d-grid gap-2">
+                <a *ngIf="selectedApplication.resumeUrl" [href]="selectedApplication.resumeUrl" target="_blank"
+                  class="btn btn-outline-secondary d-flex align-items-center justify-content-between text-start">
+                  <span><i class="bi bi-file-earmark-text me-2"></i>Resume</span>
+                  <i class="bi bi-box-arrow-up-right small"></i>
+                </a>
+
+                <a *ngIf="selectedApplication.portfolioUrl" [href]="selectedApplication.portfolioUrl" target="_blank"
+                  class="btn btn-outline-secondary d-flex align-items-center justify-content-between text-start">
+                  <span><i class="bi bi-globe me-2"></i>Portfolio</span>
+                  <i class="bi bi-box-arrow-up-right small"></i>
+                </a>
+
+                <div *ngIf="!selectedApplication.resumeUrl && !selectedApplication.portfolioUrl"
+                  class="text-muted small fst-italic">
+                  No attachments provided.
+                </div>
+              </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="col-12" *ngIf="selectedApplication.jobDescription">
+              <h6 class="fw-bold mb-2">Job Description</h6>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <p class="mb-0 small" style="white-space: pre-wrap;">{{ selectedApplication.jobDescription }}</p>
+                <div class="mt-2 d-flex gap-3 small text-muted border-top pt-2"
+                  *ngIf="selectedApplication.jobLocation || selectedApplication.jobType">
+                  <span *ngIf="selectedApplication.jobLocation"><i class="bi bi-geo-alt me-1"></i>{{
+                    selectedApplication.jobLocation }}</span>
+                  <span *ngIf="selectedApplication.jobType"><i class="bi bi-briefcase me-1"></i>{{
+                    selectedApplication.jobType }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cover Letter -->
+            <div class="col-12">
+              <h6 class="fw-bold mb-2">Cover Letter</h6>
+              <div class="p-3 bg-light rounded-3 border">
+                <p class="mb-0" style="white-space: pre-wrap;">{{ selectedApplication.coverLetter }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 px-3 pb-3">
+          <app-button label="Close" variant="secondary" (clicked)="closeApplicationDetails()"></app-button>
+          <app-button label="View Job Posting" variant="primary"
+            (clicked)="viewJobPosting(selectedApplication)"></app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

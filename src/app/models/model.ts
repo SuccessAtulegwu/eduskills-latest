@@ -111,4 +111,6 @@ export interface VideoResponse {
 // Re-export course models and api models for convenience
 export * from './course.model';
 export * from './skill.model';
+export * from './job-application.model';
+export * from './job-posting.model';
 export * from './api.models';
