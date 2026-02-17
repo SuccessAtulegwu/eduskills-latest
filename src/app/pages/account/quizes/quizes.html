@@ -6,20 +6,14 @@
   <div class="card border rounded-4 shadow-sm mb-4 bg-body">
     <ul class="nav nav-tabs border-bottom px-3 pt-3" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link" 
-                [class.active]="activeTab === 'answer'"
-                [class.text-body]="activeTab === 'answer'"
-                type="button"
-                (click)="activeTab = 'answer'">
+        <button class="nav-link" [class.active]="activeTab === 'answer'" [class.text-body]="activeTab === 'answer'"
+          type="button" (click)="activeTab = 'answer'">
           <i class="bi bi-question-circle me-2"></i>Answer Quizzes
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" 
-                [class.active]="activeTab === 'create'"
-                [class.text-body]="activeTab === 'create'"
-                type="button"
-                (click)="activeTab = 'create'">
+        <button class="nav-link" [class.active]="activeTab === 'create'" [class.text-body]="activeTab === 'create'"
+          type="button" (click)="activeTab = 'create'">
           <i class="bi bi-plus-circle me-2"></i>Create Quiz
         </button>
       </li>
@@ -27,125 +21,283 @@
 
     <!-- Tab Content -->
     <div class="tab-content p-4">
-      <!-- Answer Quizzes Tab -->
+      <!-- Take Quiz Tab -->
       <div *ngIf="activeTab === 'answer'" class="tab-pane fade show active">
-        <div class="row">
-          <!-- Quiz List -->
-          <div class="col-lg-4 mb-4 mb-lg-0">
-            <h5 class="fw-bold text-body mb-3">Available Quizzes</h5>
-            <div *ngIf="getQuizGroups().length === 0" class="text-center py-5">
-              <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
-              <p class="text-body-secondary mt-3">No quizzes available</p>
-            </div>
-            <div *ngFor="let group of getQuizGroups()" class="mb-3">
-              <h6 class="text-body fw-semibold small mb-2">{{ group.lectureTitle }}</h6>
-              <div class="list-group">
-                <button *ngFor="let quiz of group.quizzes"
-                        type="button"
-                        class="list-group-item list-group-item-action rounded-3 mb-2"
-                        [class.active]="selectedQuiz?.id === quiz.id"
-                        (click)="selectQuiz(quiz)">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                      <h6 class="mb-1 small fw-semibold text-body">{{ quiz.question }}</h6>
-                      <p class="mb-0 extra-small text-body-secondary">{{ quiz.points }} points</p>
-                    </div>
-                    <i class="bi bi-chevron-right ms-2"></i>
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-body-secondary mt-3">Loading quizzes...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoading && quizzes.length === 0 && !isTakingQuiz && !showResult" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
+          <h5 class="mt-3 fw-bold text-body">No Quizzes Available</h5>
+          <p class="text-body-secondary">Check back later for new quizzes</p>
+        </div>
+
+        <!-- Quiz List View -->
+        <div *ngIf="!isLoading && quizzes.length > 0 && !isTakingQuiz && !showResult">
+          <div class="row g-4">
+            <div *ngFor="let quiz of quizzes" class="col-md-6 col-lg-4">
+              <div class="card border rounded-4 shadow-sm h-100 bg-body hover-lift">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge rounded-pill px-3 py-2" [ngClass]="quiz.difficultyClass">
+                      {{ quiz.difficultyLevel }}
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                      <i class="bi bi-clock me-1"></i>{{ quiz.durationFormatted }}
+                    </span>
                   </div>
-                </button>
+                  
+                  <h5 class="fw-bold text-body mb-2">{{ quiz.title }}</h5>
+                  <p class="text-body-secondary small mb-3">{{ quiz.description }}</p>
+                  
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge bg-info-subtle text-info">
+                      <i class="bi bi-question-circle me-1"></i>{{ quiz.totalQuestions }} Questions
+                    </span>
+                    <span class="badge bg-success-subtle text-success">
+                      <i class="bi bi-star me-1"></i>{{ quiz.totalPoints }} Points
+                    </span>
+                    <span class="badge bg-warning-subtle text-warning">
+                      <i class="bi bi-trophy me-1"></i>Pass: {{ quiz.passingScore }}%
+                    </span>
+                  </div>
+
+                  <div *ngIf="quiz.videoTitle" class="text-body-secondary extra-small mb-3">
+                    <i class="bi bi-play-circle me-1"></i>{{ quiz.videoTitle }}
+                  </div>
+
+                  <app-button 
+                    label="Start Quiz" 
+                    icon="bi-play-fill" 
+                    variant="primary" 
+                    class="w-100"
+                    (clicked)="startQuiz(quiz)">
+                  </app-button>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Quiz Question -->
-          <div class="col-lg-8">
-            <div *ngIf="!selectedQuiz" class="text-center py-5">
-              <i class="bi bi-question-circle fs-1 text-body-secondary opacity-50"></i>
-              <h5 class="mt-3 fw-bold text-body">Select a Quiz</h5>
-              <p class="text-body-secondary">Choose a quiz question from the list to start</p>
-            </div>
-
-            <div *ngIf="selectedQuiz && !quizSubmitted" class="card border rounded-4 shadow-sm bg-body">
+        <!-- Taking Quiz View -->
+        <div *ngIf="isTakingQuiz && selectedQuiz && currentQuestion" class="row">
+          <div class="col-lg-8 mx-auto">
+            <div class="card border rounded-4 shadow-sm bg-body">
               <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+                <!-- Quiz Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
                   <div>
-                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small mb-2">
-                      {{ selectedQuiz.lectureTitle }}
-                    </span>
-                    <h4 class="fw-bold text-body mb-0">{{ selectedQuiz.question }}</h4>
+                    <h4 class="fw-bold text-body mb-1">{{ selectedQuiz.title }}</h4>
+                    <p class="text-body-secondary small mb-0">{{ selectedQuiz.description }}</p>
                   </div>
-                  <span class="badge bg-info-subtle text-info rounded-pill px-3 py-1">
-                    {{ selectedQuiz.points }} points
-                  </span>
+                  <button class="btn btn-sm btn-outline-secondary rounded-3" (click)="resetQuiz()">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
                 </div>
 
+                <!-- Progress Bar -->
                 <div class="mb-4">
-                  <div *ngFor="let option of selectedQuiz.options; let i = index" 
-                       class="form-check mb-3 p-3 border rounded-3"
-                       [class.bg-primary-subtle]="userAnswers[selectedQuiz.id] === i"
-                       style="cursor: pointer;"
-                       (click)="selectAnswer(selectedQuiz.id, i)">
-                    <input class="form-check-input" 
-                           type="radio" 
-                           [name]="'quiz-' + selectedQuiz.id"
-                           [id]="'option-' + selectedQuiz.id + '-' + i"
-                           [value]="i"
-                           [checked]="userAnswers[selectedQuiz.id] === i"
-                           (change)="selectAnswer(selectedQuiz.id, i)">
-                    <label class="form-check-label text-body fw-medium" 
-                           [for]="'option-' + selectedQuiz.id + '-' + i"
-                           style="cursor: pointer;">
-                      {{ getOptionLetter(i) }}. {{ option }}
-                    </label>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small text-body fw-semibold">Question {{ currentQuestionIndex + 1 }} of {{ selectedQuiz.totalQuestions }}</span>
+                    <span class="small text-body-secondary">{{ getProgress() }}% Complete</span>
+                  </div>
+                  <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-primary" 
+                         role="progressbar" 
+                         [style.width.%]="getProgress()">
+                    </div>
                   </div>
                 </div>
 
-                <div class="d-flex gap-2">
-                  <app-button label="Submit Answer" icon="bi-check-circle" variant="primary" (clicked)="submitQuiz()"></app-button>
-                  <app-button label="Reset" icon="bi-arrow-counterclockwise" variant="secondary" [outline]="true" (clicked)="resetQuiz()"></app-button>
+                <!-- Question -->
+                <div class="mb-4">
+                  <h5 class="fw-bold text-body mb-4">{{ currentQuestion.questionText }}</h5>
+                  
+                  <div class="d-grid gap-3">
+                    <div class="form-check p-3 border rounded-3"
+                         [class.bg-primary-subtle]="isAnswerSelected(currentQuestion.id, 'A')"
+                         [class.border-primary]="isAnswerSelected(currentQuestion.id, 'A')"
+                         style="cursor: pointer;"
+                         (click)="selectAnswer(currentQuestion.id, 'A')">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             [name]="'question-' + currentQuestion.id"
+                             [id]="'option-' + currentQuestion.id + '-A'"
+                             [checked]="isAnswerSelected(currentQuestion.id, 'A')">
+                      <label class="form-check-label text-body fw-medium w-100" 
+                             [for]="'option-' + currentQuestion.id + '-A'"
+                             style="cursor: pointer;">
+                        A. {{ currentQuestion.optionA }}
+                      </label>
+                    </div>
+                    <div class="form-check p-3 border rounded-3"
+                         [class.bg-primary-subtle]="isAnswerSelected(currentQuestion.id, 'B')"
+                         [class.border-primary]="isAnswerSelected(currentQuestion.id, 'B')"
+                         style="cursor: pointer;"
+                         (click)="selectAnswer(currentQuestion.id, 'B')">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             [name]="'question-' + currentQuestion.id"
+                             [id]="'option-' + currentQuestion.id + '-B'"
+                             [checked]="isAnswerSelected(currentQuestion.id, 'B')">
+                      <label class="form-check-label text-body fw-medium w-100" 
+                             [for]="'option-' + currentQuestion.id + '-B'"
+                             style="cursor: pointer;">
+                        B. {{ currentQuestion.optionB }}
+                      </label>
+                    </div>
+                    <div class="form-check p-3 border rounded-3"
+                         [class.bg-primary-subtle]="isAnswerSelected(currentQuestion.id, 'C')"
+                         [class.border-primary]="isAnswerSelected(currentQuestion.id, 'C')"
+                         style="cursor: pointer;"
+                         (click)="selectAnswer(currentQuestion.id, 'C')">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             [name]="'question-' + currentQuestion.id"
+                             [id]="'option-' + currentQuestion.id + '-C'"
+                             [checked]="isAnswerSelected(currentQuestion.id, 'C')">
+                      <label class="form-check-label text-body fw-medium w-100" 
+                             [for]="'option-' + currentQuestion.id + '-C'"
+                             style="cursor: pointer;">
+                        C. {{ currentQuestion.optionC }}
+                      </label>
+                    </div>
+                    <div class="form-check p-3 border rounded-3"
+                         [class.bg-primary-subtle]="isAnswerSelected(currentQuestion.id, 'D')"
+                         [class.border-primary]="isAnswerSelected(currentQuestion.id, 'D')"
+                         style="cursor: pointer;"
+                         (click)="selectAnswer(currentQuestion.id, 'D')">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             [name]="'question-' + currentQuestion.id"
+                             [id]="'option-' + currentQuestion.id + '-D'"
+                             [checked]="isAnswerSelected(currentQuestion.id, 'D')">
+                      <label class="form-check-label text-body fw-medium w-100" 
+                             [for]="'option-' + currentQuestion.id + '-D'"
+                             style="cursor: pointer;">
+                        D. {{ currentQuestion.optionD }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between align-items-center">
+                  <app-button 
+                    *ngIf="currentQuestionIndex > 0"
+                    label="Previous" 
+                    icon="bi-arrow-left" 
+                    variant="secondary"
+                    [outline]="true"
+                    (clicked)="previousQuestion()">
+                  </app-button>
+                  <div *ngIf="currentQuestionIndex === 0"></div>
+
+                  <div class="d-flex gap-2">
+                    <app-button 
+                      *ngIf="currentQuestionIndex < selectedQuiz.questions.length - 1"
+                      label="Next" 
+                      icon="bi-arrow-right" 
+                      variant="primary"
+                      (clicked)="nextQuestion()">
+                    </app-button>
+                    <app-button 
+                      *ngIf="currentQuestionIndex === selectedQuiz.questions.length - 1"
+                      label="Submit Quiz" 
+                      icon="bi-check-circle" 
+                      variant="success"
+                      (clicked)="submitQuiz()">
+                    </app-button>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Quiz Result -->
-            <div *ngIf="selectedQuiz && quizSubmitted && quizResult" class="card border rounded-4 shadow-sm bg-body">
-              <div class="card-body p-4">
+        <!-- Quiz Result View -->
+        <div *ngIf="showResult && quizResult" class="row">
+          <div class="col-lg-8 mx-auto">
+            <div class="card border rounded-4 shadow-sm bg-body">
+              <div class="card-body p-5">
+                <!-- Result Header -->
                 <div class="text-center mb-4">
                   <div class="mb-3">
                     <i class="bi" 
-                       [ngClass]="quizResult.percentage >= 70 ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
-                       style="font-size: 4rem;"></i>
+                       [ngClass]="quizResult.passed ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+                       style="font-size: 5rem;"></i>
                   </div>
-                  <h3 class="fw-bold text-body mb-2">
-                    {{ quizResult.percentage >= 70 ? 'Correct!' : 'Incorrect' }}
-                  </h3>
-                  <p class="text-body-secondary mb-0">
-                    You scored {{ quizResult.score }} out of {{ quizResult.totalPoints }} points
+                  <h2 class="fw-bold text-body mb-2">
+                    {{ quizResult.passed ? 'Congratulations!' : 'Keep Trying!' }}
+                  </h2>
+                  <p class="text-body-secondary fs-5 mb-0">
+                    You scored <strong>{{ quizResult.percentageScore.toFixed(1) }}%</strong>
                   </p>
-                  <div class="mt-3">
-                    <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">
-                      {{ quizResult.percentage.toFixed(0) }}%
-                    </span>
+                </div>
+
+                <!-- Score Details -->
+                <div class="row g-3 mb-4">
+                  <div class="col-6 col-md-3">
+                    <div class="card bg-primary-subtle border-0 text-center p-3">
+                      <div class="fs-4 fw-bold text-primary">{{ quizResult.score }}</div>
+                      <div class="extra-small text-body-secondary">Total Score</div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card bg-success-subtle border-0 text-center p-3">
+                      <div class="fs-4 fw-bold text-success">{{ quizResult.correctAnswers }}</div>
+                      <div class="extra-small text-body-secondary">Correct</div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card bg-danger-subtle border-0 text-center p-3">
+                      <div class="fs-4 fw-bold text-danger">{{ quizResult.wrongAnswers }}</div>
+                      <div class="extra-small text-body-secondary">Wrong</div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card bg-info-subtle border-0 text-center p-3">
+                      <div class="fs-4 fw-bold text-info">{{ quizResult.grade }}</div>
+                      <div class="extra-small text-body-secondary">Grade</div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="alert" 
-                     [ngClass]="quizResult.percentage >= 70 ? 'alert-success' : 'alert-danger'"
-                     role="alert">
+                <!-- Status Badge -->
+                <div class="alert mb-4" [ngClass]="quizResult.passed ? 'alert-success' : 'alert-warning'" role="alert">
                   <div class="d-flex align-items-start gap-2">
-                    <i class="bi" [ngClass]="quizResult.percentage >= 70 ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                    <i class="bi" [ngClass]="quizResult.passed ? 'bi-check-circle-fill' : 'bi-info-circle-fill'"></i>
                     <div>
-                      <strong>{{ quizResult.percentage >= 70 ? 'Well done!' : 'Not quite right.' }}</strong>
+                      <strong>{{ quizResult.passed ? 'You Passed!' : 'Not Quite There Yet' }}</strong>
                       <p class="mb-0 mt-1 small">
-                        The correct answer is: <strong>{{ getOptionLetter(selectedQuiz.correctAnswer) }}. {{ selectedQuiz.options[selectedQuiz.correctAnswer] }}</strong>
+                        {{ quizResult.passed ? 'Great job! You have successfully passed this quiz.' : 'You need ' + (selectedQuiz?.passingScore || 70) + '% to pass. Keep studying and try again!' }}
                       </p>
                     </div>
                   </div>
                 </div>
 
+                <!-- Action Buttons -->
                 <div class="d-flex gap-2 justify-content-center">
-                  <app-button label="Try Another Quiz" icon="bi-arrow-left" variant="secondary" [outline]="true" (clicked)="selectedQuiz = null; quizSubmitted = false; quizResult = null"></app-button>
-                  <app-button label="Reset This Quiz" icon="bi-arrow-counterclockwise" variant="primary" (clicked)="resetQuiz()"></app-button>
+                  <app-button 
+                    label="Back to Quizzes" 
+                    icon="bi-arrow-left" 
+                    variant="secondary"
+                    [outline]="true"
+                    (clicked)="resetQuiz()">
+                  </app-button>
+                  <app-button 
+                    *ngIf="selectedQuiz"
+                    label="Retake Quiz" 
+                    icon="bi-arrow-repeat" 
+                    variant="primary"
+                    (clicked)="selectedQuiz && startQuiz(selectedQuiz)">
+                  </app-button>
                 </div>
               </div>
             </div>
@@ -156,126 +308,131 @@
       <!-- Create Quiz Tab -->
       <div *ngIf="activeTab === 'create'" class="tab-pane fade show active">
         <div class="row">
-          <div class="col-lg-8 mx-auto">
-            <h5 class="fw-bold text-body mb-4">Create Quiz Question</h5>
-            
-            <form class="card border rounded-4 shadow-sm p-4 bg-body">
-              <div class="mb-3">
-                <app-input
-                  label="Lecture Title"
-                  placeholder="e.g., Introduction to Angular"
-                  [(ngModel)]="createQuizForm.lectureTitle"
-                  name="lectureTitle">
-                </app-input>
+          <div class="col-lg-10 mx-auto">
+            <h5 class="fw-bold text-body mb-4">Create New Quiz</h5>
+
+            <!-- Quiz Details Form -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-body mb-4">
+              <h6 class="fw-bold text-body mb-3">Quiz Details</h6>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <app-input label="Quiz Title" placeholder="e.g., Introduction to Angular - Final Assessment"
+                    [(ngModel)]="createQuizForm.title" name="title">
+                  </app-input>
+                </div>
+                <div class="col-md-4">
+                  <app-input label="Video ID (Optional)" type="number" placeholder="Link to video"
+                    [(ngModel)]="createQuizForm.videoId" name="videoId">
+                  </app-input>
+                </div>
+                <div class="col-12">
+                  <label class="form-label text-body fw-semibold small">Description</label>
+                  <textarea class="form-control" rows="2" placeholder="Brief description of this quiz..."
+                    [(ngModel)]="createQuizForm.description" name="description"></textarea>
+                </div>
+                <div class="col-md-4">
+                  <app-input label="Duration (minutes)" type="number" placeholder="30"
+                    [(ngModel)]="createQuizForm.durationMinutes" name="durationMinutes">
+                  </app-input>
+                </div>
+                <div class="col-md-4">
+                  <app-input label="Passing Score (%)" type="number" placeholder="70"
+                    [(ngModel)]="createQuizForm.passingScore" name="passingScore">
+                  </app-input>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-body fw-semibold small">Active</label>
+                  <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" [(ngModel)]="createQuizForm.isActive"
+                      name="isActive">
+                    <label class="form-check-label">Quiz is active</label>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <!-- Add Question Form -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-body mb-4">
+              <h6 class="fw-bold text-body mb-3">Add Question ({{ createQuizForm.questions.length }} added)</h6>
 
               <div class="mb-3">
-                <label class="form-label text-body fw-semibold small">Question *</label>
-                <textarea class="form-control" 
-                          rows="3" 
-                          placeholder="Enter your question here..."
-                          [(ngModel)]="createQuizForm.question"
-                          name="question"
-                          required></textarea>
+                <label class="form-label text-body fw-semibold small">Question Text *</label>
+                <textarea class="form-control" rows="2" placeholder="Enter your question here..."
+                  [(ngModel)]="currentQuestionForm.questionText" name="questionText"></textarea>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label text-body fw-semibold small mb-3">Options *</label>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <app-input
-                      label="Option A"
-                      placeholder="First option"
-                      [(ngModel)]="createQuizForm.option1"
-                      name="option1">
-                    </app-input>
-                  </div>
-                  <div class="col-md-6">
-                    <app-input
-                      label="Option B"
-                      placeholder="Second option"
-                      [(ngModel)]="createQuizForm.option2"
-                      name="option2">
-                    </app-input>
-                  </div>
-                  <div class="col-md-6">
-                    <app-input
-                      label="Option C"
-                      placeholder="Third option"
-                      [(ngModel)]="createQuizForm.option3"
-                      name="option3">
-                    </app-input>
-                  </div>
-                  <div class="col-md-6">
-                    <app-input
-                      label="Option D"
-                      placeholder="Fourth option"
-                      [(ngModel)]="createQuizForm.option4"
-                      name="option4">
-                    </app-input>
-                  </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <app-input label="Option A" placeholder="First option" [(ngModel)]="currentQuestionForm.optionA"
+                    name="optionA"></app-input>
+                </div>
+                <div class="col-md-6">
+                  <app-input label="Option B" placeholder="Second option" [(ngModel)]="currentQuestionForm.optionB"
+                    name="optionB"></app-input>
+                </div>
+                <div class="col-md-6">
+                  <app-input label="Option C" placeholder="Third option" [(ngModel)]="currentQuestionForm.optionC"
+                    name="optionC"></app-input>
+                </div>
+                <div class="col-md-6">
+                  <app-input label="Option D" placeholder="Fourth option" [(ngModel)]="currentQuestionForm.optionD"
+                    name="optionD"></app-input>
                 </div>
               </div>
 
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                  <app-account-type-selector
-                    label="Correct Answer"
-                    placeholder="Select correct answer"
-                    [accountTypes]="correctAnswerOptions"
-                    [(ngModel)]="createQuizForm.correctAnswer"
-                    name="correctAnswer">
+                  <app-account-type-selector label="Correct Answer *" placeholder="Select Correct Answer"
+                    [required]="true" [accountTypes]="correctAnswerOptions"
+                    [(ngModel)]="currentQuestionForm.correctAnswer" name="correctAnswer">
                   </app-account-type-selector>
                 </div>
                 <div class="col-md-6">
-                  <app-input
-                    label="Points"
-                    type="number"
-                    placeholder="10"
-                    [(ngModel)]="createQuizForm.points"
-                    name="points">
-                  </app-input>
+                  <app-input label="Points" type="number" placeholder="10" [(ngModel)]="currentQuestionForm.points"
+                    name="points"></app-input>
                 </div>
               </div>
 
               <div class="d-flex gap-2">
-                <app-button label="Create Quiz" icon="bi-plus-circle" variant="primary" (clicked)="createQuiz()"></app-button>
-                <app-button label="Reset Form" icon="bi-arrow-counterclockwise" variant="secondary" [outline]="true" (clicked)="resetCreateForm()"></app-button>
+                <app-button label="Add Question" icon="bi-plus" variant="primary"
+                  (clicked)="addQuestionToQuiz()"></app-button>
+                <app-button label="Clear" icon="bi-x" variant="secondary" [outline]="true"
+                  (clicked)="resetQuestionForm()"></app-button>
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
 
-        <!-- Created Quizzes List -->
-        <div class="mt-5">
-          <h5 class="fw-bold text-body mb-4">Created Quizzes</h5>
-          <div *ngIf="createdQuizzes.length === 0" class="text-center py-5">
-            <i class="bi bi-inbox fs-1 text-body-secondary opacity-50"></i>
-            <p class="text-body-secondary mt-3">No quizzes created yet</p>
-          </div>
-          <div class="row g-3">
-            <div *ngFor="let quiz of createdQuizzes" class="col-md-6 col-lg-4">
-              <div class="card border rounded-4 shadow-sm h-100 bg-body">
-                <div class="card-body p-3">
+            <!-- Questions List -->
+            <div class="card border rounded-4 shadow-sm p-4 bg-body mb-4" *ngIf="createQuizForm.questions.length > 0">
+              <h6 class="fw-bold text-body mb-3">Questions in Quiz ({{ createQuizForm.questions.length }})</h6>
+              <div class="question-list">
+                <div *ngFor="let question of createQuizForm.questions; let i = index"
+                  class="question-item mb-3 p-3 border rounded-3">
                   <div class="d-flex justify-content-between align-items-start mb-2">
-                    <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 extra-small">
-                      {{ quiz.lectureTitle }}
-                    </span>
-                    <button class="btn btn-sm text-danger" (click)="deleteQuiz(quiz.id)">
+                    <h6 class="fw-bold text-body small mb-0">{{ i + 1 }}. {{ question.questionText }}</h6>
+                    <button class="btn btn-sm text-danger" (click)="removeQuestion(i)">
                       <i class="bi bi-trash"></i>
                     </button>
                   </div>
-                  <h6 class="fw-bold text-body small mb-2">{{ quiz.question }}</h6>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-body-secondary extra-small">
-                      Correct: {{ getOptionLetter(quiz.correctAnswer) }}
-                    </span>
-                    <span class="badge bg-info-subtle text-info rounded-pill px-2 py-1 extra-small">
-                      {{ quiz.points }} pts
-                    </span>
+                  <div class="options-preview mt-2">
+                    <p class="mb-1 extra-small text-body-secondary">A. {{ question.optionA }}</p>
+                    <p class="mb-1 extra-small text-body-secondary">B. {{ question.optionB }}</p>
+                    <p class="mb-1 extra-small text-body-secondary">C. {{ question.optionC }}</p>
+                    <p class="mb-1 extra-small text-body-secondary">D. {{ question.optionD }}</p>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="badge bg-success-subtle text-success extra-small">Correct: {{ question.correctAnswer
+                      }}</span>
+                    <span class="badge bg-info-subtle text-info extra-small">{{ question.points }} pts</span>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Create Quiz Button -->
+            <div class="text-center">
+              <app-button label="Create Quiz" icon="bi-check-circle" variant="success" customClass="px-5"
+                (clicked)="createQuiz()" [disabled]="isCreatingQuiz || createQuizForm.questions.length === 0">
+              </app-button>
             </div>
           </div>
         </div>

@@ -113,4 +113,6 @@ export * from './course.model';
 export * from './skill.model';
 export * from './job-application.model';
 export * from './job-posting.model';
+export * from './quiz.model';
+export * from './learning-path.model';
 export * from './api.models';

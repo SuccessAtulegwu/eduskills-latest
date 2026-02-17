@@ -1,107 +1,204 @@
-import { Component } from '@angular/core';
-import { VideoCard, VideoCardData } from '../../../components/ui/video-card/video-card';
-import { VideoViewerService } from '../../../services/video-viewer.service';
+/**
+ * Learning Path Component
+ * Displays and manages learning paths for students
+ */
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountTypeOption, AccountTypeSelectorComponent } from '../../../components/account-type-selector/account-type-selector.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { PageHeader } from '../../../components/page-header/page-header';
-
+import { AccountTypeOption, AccountTypeSelectorComponent } from '../../../components/account-type-selector/account-type-selector.component';
 import { InputComponent } from '../../../components/ui/input/input';
-import { ButtonComponent } from '../../../components/ui/button/button';
+import { LearningPathService } from '../../../services/learning-path.service';
+import { ToastService } from '../../../services/toast.service';
+import { 
+  LearningPathModel, 
+  ClassLevel, 
+  ExamType 
+} from '../../../models/model';
 
 @Component({
   selector: 'app-learning',
-  imports: [CommonModule, FormsModule, AccountTypeSelectorComponent, PageHeader, VideoCard, InputComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, AccountTypeSelectorComponent, PageHeader, InputComponent],
   templateUrl: './learning.html',
   styleUrl: './learning.scss',
 })
-export class Learning {
+export class Learning implements OnInit, OnDestroy {
+  // Filter properties
   selectedLevel: string = 'all';
   selectedExamType: string = 'all';
   selectedSubject: string = '';
-  eduVideos: VideoCardData[] = [];
+  searchQuery: string = '';
 
+  // Learning path data
+  learningPaths: LearningPathModel[] = [];
+  filteredPaths: LearningPathModel[] = [];
+  isLoading: boolean = true;
+
+  // Subscriptions
+  private subscriptions: Subscription[] = [];
+
+  // Filter options
   levelOptions: AccountTypeOption[] = [
     { title: 'All Levels', value: 'all', description: 'All class levels', icon: 'bi-mortarboard' },
-    { title: 'JSS 1-3', value: 'jss', description: 'Junior Secondary', icon: 'bi-book' },
-    { title: 'SSS 1-3', value: 'sss', description: 'Senior Secondary', icon: 'bi-journal-bookmark' },
+    { title: 'JSS 1', value: ClassLevel.JSS1.toString(), description: 'Junior Secondary 1', icon: 'bi-book' },
+    { title: 'JSS 2', value: ClassLevel.JSS2.toString(), description: 'Junior Secondary 2', icon: 'bi-book' },
+    { title: 'JSS 3', value: ClassLevel.JSS3.toString(), description: 'Junior Secondary 3', icon: 'bi-book' },
+    { title: 'SS 1', value: ClassLevel.SS1.toString(), description: 'Senior Secondary 1', icon: 'bi-journal-bookmark' },
+    { title: 'SS 2', value: ClassLevel.SS2.toString(), description: 'Senior Secondary 2', icon: 'bi-journal-bookmark' },
+    { title: 'SS 3', value: ClassLevel.SS3.toString(), description: 'Senior Secondary 3', icon: 'bi-journal-bookmark' },
   ];
 
   examTypeOptions: AccountTypeOption[] = [
     { title: 'All Exams', value: 'all', description: 'All exam types', icon: 'bi-file-earmark-text' },
-    { title: 'WAEC', value: 'waec', description: 'West African Exams', icon: 'bi-award' },
-    { title: 'NECO', value: 'neco', description: 'National Exams', icon: 'bi-award-fill' },
-    { title: 'JAMB', value: 'jamb', description: 'Tertiary Entrance', icon: 'bi-pencil-square' },
+    { title: 'WAEC', value: ExamType.WAEC.toString(), description: 'West African Exams', icon: 'bi-award' },
+    { title: 'NECO', value: ExamType.NECO.toString(), description: 'National Exams', icon: 'bi-award-fill' },
+    { title: 'JAMB', value: ExamType.JAMB.toString(), description: 'Tertiary Entrance', icon: 'bi-pencil-square' },
+    { title: 'NABTEB', value: ExamType.NABTEB.toString(), description: 'Technical Education', icon: 'bi-tools' },
+    { title: 'GCE', value: ExamType.GCE.toString(), description: 'General Certificate', icon: 'bi-patch-check' },
   ];
 
-  constructor(private router: Router,
-    private videoViewerService: VideoViewerService
-  ) {
-
-  }
+  constructor(
+    private router: Router,
+    private learningPathService: LearningPathService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
-    this.loadEduVideos();
+    this.loadLearningPaths();
   }
 
-  onUploadVideo() {
-    this.router.navigate(['/account/upload'])
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  loadEduVideos(): void {
-    // Sample data - replace with actual API call
-    this.eduVideos = [
-      {
-        id: '1',
-        title: 'Learning How to Prompt AI for Better Results',
-        author: 'Admin User',
-        authorAvatar: 'https://i.pravatar.cc/150?img=1',
-        views: '16',
-        timeAgo: '1mo ago',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500&h=300&fit=crop'
+  /**
+   * Load learning paths from API
+   */
+  loadLearningPaths(): void {
+    this.isLoading = true;
+    const sub = this.learningPathService.learningPaths$.subscribe({
+      next: (paths) => {
+        this.learningPaths = paths;
+        this.applyFilters();
+        this.isLoading = false;
       },
-      {
-        id: '2',
-        title: 'Advanced JavaScript Techniques for Modern Web Development',
-        author: 'Tech Guru',
-        authorAvatar: 'https://i.pravatar.cc/150?img=2',
-        views: '1.2k',
-        timeAgo: '2 days ago',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=500&h=300&fit=crop'
-      },
-      {
-        id: '3',
-        title: 'Complete Python Course - From Beginner to Expert',
-        author: 'Code Master',
-        authorAvatar: 'https://i.pravatar.cc/150?img=3',
-        views: '3.5k',
-        timeAgo: '1 week ago',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=500&h=300&fit=crop'
-      },
-      {
-        id: '4',
-        title: 'UI/UX Design Principles Every Developer Should Know',
-        author: 'Design Pro',
-        authorAvatar: 'https://i.pravatar.cc/150?img=4',
-        views: '890',
-        timeAgo: '3 days ago',
-        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=300&fit=crop'
-      }
-    ];
-  }
-
-  openVideoViewer(videos: VideoCardData[], index: number): void {
-    this.videoViewerService.setVideos(videos, index);
-    this.router.navigate(['/video-viewer'], {
-      state: {
-        videos: videos,
-        index: index
+      error: (error) => {
+        console.error('Error loading learning paths:', error);
+        this.toastService.error('Failed to load learning paths');
+        this.isLoading = false;
       }
     });
+    this.subscriptions.push(sub);
+  }
+
+  /**
+   * Apply filters to learning paths
+   */
+  applyFilters(): void {
+    let filtered = [...this.learningPaths];
+
+    // Filter by class level
+    if (this.selectedLevel !== 'all') {
+      const level = parseInt(this.selectedLevel);
+      filtered = filtered.filter(path => path.classLevelEnum === level);
+    }
+
+    // Filter by exam type
+    if (this.selectedExamType !== 'all') {
+      const examType = parseInt(this.selectedExamType);
+      filtered = filtered.filter(path => path.examTypeEnum === examType);
+    }
+
+    // Filter by subject
+    if (this.selectedSubject.trim()) {
+      const subject = this.selectedSubject.toLowerCase();
+      filtered = filtered.filter(path => 
+        path.subject.toLowerCase().includes(subject)
+      );
+    }
+
+    // Filter by search query
+    if (this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(path =>
+        path.title.toLowerCase().includes(query) ||
+        path.description.toLowerCase().includes(query) ||
+        path.subject.toLowerCase().includes(query)
+      );
+    }
+
+    this.filteredPaths = filtered;
+  }
+
+  /**
+   * Handle search input change
+   */
+  onSearch(): void {
+    this.applyFilters();
+  }
+
+  /**
+   * Handle level filter change
+   */
+  onLevelChange(): void {
+    this.applyFilters();
+  }
+
+  /**
+   * Handle exam type filter change
+   */
+  onExamTypeChange(): void {
+    this.applyFilters();
+  }
+
+  /**
+   * Handle subject filter change
+   */
+  onSubjectChange(): void {
+    this.applyFilters();
+  }
+
+  /**
+   * Clear all filters
+   */
+  clearFilters(): void {
+    this.selectedLevel = 'all';
+    this.selectedExamType = 'all';
+    this.selectedSubject = '';
+    this.searchQuery = '';
+    this.applyFilters();
+  }
+
+  /**
+   * Start a learning path
+   */
+  startLearningPath(path: LearningPathModel): void {
+    if (path.isStarted) {
+      // Navigate to continue
+      this.viewLearningPath(path);
+      return;
+    }
+
+    this.learningPathService.startLearningPath(path.id).subscribe({
+      next: () => {
+        this.toastService.success(`Started learning path: ${path.title}`);
+        // Navigate to the learning path details
+        this.viewLearningPath(path);
+      },
+      error: (error) => {
+        console.error('Error starting learning path:', error);
+        this.toastService.error('Failed to start learning path');
+      }
+    });
+  }
+
+  /**
+   * View learning path details
+   */
+  viewLearningPath(path: LearningPathModel): void {
+    // Navigate to learning path details (you can create this route)
+    this.router.navigate(['/learning-path', path.id]);
   }
 }
